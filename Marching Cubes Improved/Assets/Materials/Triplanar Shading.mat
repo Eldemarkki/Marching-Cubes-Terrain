@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Triplanar Shading
+  m_Shader: {fileID: 4800000, guid: db8c18db5cb480d4c8523e1b745f5af5, type: 3}
+  m_ShaderKeywords: 
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - Tex1:
+        m_Texture: {fileID: 2800000, guid: 2fdf9aa38a68a274cbfa7b62d7a8841b, type: 3}
+        m_Scale: {x: 0.1, y: 0.1}
+        m_Offset: {x: 0, y: 0}
+    - Tex2:
+        m_Texture: {fileID: 2800000, guid: c6bd348a701e4904097c86dc74e1ea0d, type: 3}
+        m_Scale: {x: 0.1, y: 0.1}
+        m_Offset: {x: 0, y: 0}
+    - Tex3:
+        m_Texture: {fileID: 2800000, guid: 2fdf9aa38a68a274cbfa7b62d7a8841b, type: 3}
+        m_Scale: {x: 0.1, y: 0.1}
+        m_Offset: {x: 0, y: 0}
+    - Texture2D_1B8FCD66:
+        m_Texture: {fileID: 2800000, guid: c6bd348a701e4904097c86dc74e1ea0d, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - Texture2D_2C986A40:
+        m_Texture: {fileID: 2800000, guid: 2fdf9aa38a68a274cbfa7b62d7a8841b, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - Texture2D_35130819:
+        m_Texture: {fileID: 2800000, guid: 2fdf9aa38a68a274cbfa7b62d7a8841b, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _XTexture:
+        m_Texture: {fileID: 2800000, guid: 2fdf9aa38a68a274cbfa7b62d7a8841b, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _YTexture:
+        m_Texture: {fileID: 2800000, guid: c6bd348a701e4904097c86dc74e1ea0d, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ZTexture:
+        m_Texture: {fileID: 2800000, guid: 2fdf9aa38a68a274cbfa7b62d7a8841b, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - YColorAmount: 2
+    - _Glossiness: 0
+    - _Metallic: 0
+    m_Colors:
+    - NegativeYColor: {r: 0.2830189, g: 0.19235334, b: 0.10012461, a: 1}
+    - XColor: {r: 0.5849056, g: 0.35697895, b: 0.124154516, a: 1}
+    - YColor: {r: 0.23843002, g: 0.8867924, b: 0.41728872, a: 1}
+    - ZColor: {r: 0.5849056, g: 0.35697892, b: 0.124154486, a: 1}
