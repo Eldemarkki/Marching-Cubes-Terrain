@@ -19,7 +19,7 @@
 
     public float TerrainDensity(int worldPosX, int worldPosY, int worldPosZ, float noiseScale)
     {
-        return worldPosY - Noise.GetPerlin(worldPosX / noiseScale, worldPosZ / noiseScale).Map(-1, 1, 0, 1) * 10 - 50;
+        return worldPosY - Noise.GetPerlin(worldPosX / noiseScale, worldPosZ / noiseScale).Map(-1, 1, 0, 1) * 10 - 10;
     }
 
     public float FlatPlane(int y, float height)
