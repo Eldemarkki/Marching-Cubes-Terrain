@@ -37,6 +37,7 @@ manifest.json
 *.userprefs
 *.pidb
 .DS_Store
+.vscode/
 
 ###
 # OS generated
@@ -49,4 +50,3 @@ manifest.json
 Icon?
 ehthumbs.db
 Thumbs.db
-MarchingCubesTest/Packages/manifest.json
