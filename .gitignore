@@ -5,10 +5,11 @@
 [Bb]uild/
 [Ll]ibrary/
 [Ll]ocal[Cc]ache/
+[Ll]ogs/
 [Oo]bj/
 [Tt]emp/
 [Uu]nityGenerated/
-.vs/
+
 # file on crash reports
 sysinfo.txt
 # Unity3D generated meta files
@@ -37,7 +38,8 @@ manifest.json
 *.userprefs
 *.pidb
 .DS_Store
-.vscode/
+Marching*Cubes*Improved/.vscode/
+Marching*Cubes*Improved/.vs/
 
 ###
 # OS generated
