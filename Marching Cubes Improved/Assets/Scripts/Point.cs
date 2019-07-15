@@ -1,13 +1,16 @@
 ﻿using UnityEngine;
 
-public struct Point
+namespace MarchingCubes
 {
-    public Vector3Int localPosition;
-    public float density;
-
-    public Point(Vector3Int localPosition, float density)
+    public struct Point
     {
-        this.localPosition = localPosition;
-        this.density = density;
+        public Vector3Int localPosition;
+        public float density;
+
+        public Point(Vector3Int localPosition, float density)
+        {
+            this.localPosition = localPosition;
+            this.density = density;
+        }
     }
 }

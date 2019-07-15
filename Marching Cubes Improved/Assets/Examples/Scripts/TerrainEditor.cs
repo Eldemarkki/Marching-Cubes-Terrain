@@ -1,113 +1,115 @@
 ﻿using UnityEngine;
 
-public class TerrainEditor : MonoBehaviour
+namespace MarchingCubes.Examples
 {
-    [SerializeField] private bool addTerrain = true;
-    [SerializeField] private float force = 2f;
-    [SerializeField] private float range = 2f;
-
-    [SerializeField] private float maxReachDistance = 100f;
-
-    [SerializeField] private AnimationCurve forceOverDistance = AnimationCurve.Constant(0, 1, 1);
-
-    [SerializeField] private World world;
-    [SerializeField] private Transform playerCamera;
-
-    Chunk[] _initChunks;
-
-    private void Start()
+    public class TerrainEditor : MonoBehaviour
     {
-        _initChunks = new Chunk[8];
-        Cursor.lockState = CursorLockMode.Locked;
-    }
+        [SerializeField] private bool addTerrain = true;
+        [SerializeField] private float force = 2f;
+        [SerializeField] private float range = 2f;
 
-    private void Update()
-    {
-        TryEditTerrain();
-    }
+        [SerializeField] private float maxReachDistance = 100f;
 
-    private void TryEditTerrain()
-    {
-        if (force <= 0 || range <= 0)
+        [SerializeField] private AnimationCurve forceOverDistance = AnimationCurve.Constant(0, 1, 1);
+
+        [SerializeField] private World world;
+        [SerializeField] private Transform playerCamera;
+
+        Chunk[] _initChunks;
+
+        private void Start()
         {
-            return;
+            _initChunks = new Chunk[8];
+            Cursor.lockState = CursorLockMode.Locked;
         }
 
-        if (Input.GetButton("Fire1"))
+        private void Update()
         {
-            RaycastToTerrain(addTerrain);
+            TryEditTerrain();
         }
-        else if (Input.GetButton("Fire2"))
+
+        private void TryEditTerrain()
         {
-            RaycastToTerrain(!addTerrain);
-        }
-    }
-
-    private void RaycastToTerrain(bool addTerrain)
-    {
-        Vector3 startP = playerCamera.position;
-        Vector3 destP = startP + playerCamera.forward;
-        Vector3 direction = destP - startP;
-
-        Ray ray = new Ray(startP, direction);
-
-        if (Physics.Raycast(ray, out RaycastHit hit, maxReachDistance))
-        {
-            Vector3 hitPoint = hit.point;
-
-            if (addTerrain)
+            if (force <= 0 || range <= 0)
             {
-                Collider[] hits = Physics.OverlapSphere(hitPoint, range / 2f * 0.8f);
-                for (int i = 0; i < hits.Length; i++)
-                {
-                    if (hits[i].CompareTag("Player"))
-                    {
-                        return;
-                    }
-                }
+                return;
             }
 
-            EditTerrain(hitPoint, addTerrain, force, range);
-        }
-    }
-
-    private void EditTerrain(Vector3 point, bool addTerrain, float force, float range)
-    {
-        int buildModifier = addTerrain ? 1 : -1;
-
-        int hitX = point.x.Round();
-        int hitY = point.y.Round();
-        int hitZ = point.z.Round();
-
-        int intRange = range.Ceil();
-
-        for (int x = -intRange; x <= intRange; x++)
-        {
-            for (int y = -intRange; y <= intRange; y++)
+            if (Input.GetButton("Fire1"))
             {
-                for (int z = -intRange; z <= intRange; z++)
+                RaycastToTerrain(addTerrain);
+            }
+            else if (Input.GetButton("Fire2"))
+            {
+                RaycastToTerrain(!addTerrain);
+            }
+        }
+
+        private void RaycastToTerrain(bool addTerrain)
+        {
+            Vector3 startP = playerCamera.position;
+            Vector3 destP = startP + playerCamera.forward;
+            Vector3 direction = destP - startP;
+
+            Ray ray = new Ray(startP, direction);
+
+            if (Physics.Raycast(ray, out RaycastHit hit, maxReachDistance))
+            {
+                Vector3 hitPoint = hit.point;
+
+                if (addTerrain)
                 {
-                    int offsetX = hitX - x;
-                    int offsetY = hitY - y;
-                    int offsetZ = hitZ - z;
+                    Collider[] hits = Physics.OverlapSphere(hitPoint, range / 2f * 0.8f);
+                    for (int i = 0; i < hits.Length; i++)
+                    {
+                        if (hits[i].CompareTag("Player"))
+                        {
+                            return;
+                        }
+                    }
+                }
 
-                    if (!world.IsPointInsideWorld(offsetX, offsetY, offsetZ))
-                        continue;
+                EditTerrain(hitPoint, addTerrain, force, range);
+            }
+        }
 
-                    float distance = Utils.Distance(offsetX, offsetY, offsetZ, point);
-                    if (!(distance <= range)) continue;
-                    
-                    float modificationAmount = force / distance * forceOverDistance.Evaluate(1 - distance.Map(0, force, 0, 1)) * buildModifier;
+        private void EditTerrain(Vector3 point, bool addTerrain, float force, float range)
+        {
+            int buildModifier = addTerrain ? 1 : -1;
 
-                    float oldDensity = world.GetDensity(offsetX, offsetY, offsetZ);
-                    float newDensity = oldDensity - modificationAmount;
+            int hitX = point.x.Round();
+            int hitY = point.y.Round();
+            int hitZ = point.z.Round();
 
-                    newDensity = newDensity.Clamp01();
+            int intRange = range.Ceil();
 
-                    world.SetDensity(newDensity, offsetX, offsetY, offsetZ, true, _initChunks);
+            for (int x = -intRange; x <= intRange; x++)
+            {
+                for (int y = -intRange; y <= intRange; y++)
+                {
+                    for (int z = -intRange; z <= intRange; z++)
+                    {
+                        int offsetX = hitX - x;
+                        int offsetY = hitY - y;
+                        int offsetZ = hitZ - z;
+
+                        if (!world.IsPointInsideWorld(offsetX, offsetY, offsetZ))
+                            continue;
+
+                        float distance = Utils.Distance(offsetX, offsetY, offsetZ, point);
+                        if (!(distance <= range)) continue;
+
+                        float modificationAmount = force / distance * forceOverDistance.Evaluate(1 - distance.Map(0, force, 0, 1)) * buildModifier;
+
+                        float oldDensity = world.GetDensity(offsetX, offsetY, offsetZ);
+                        float newDensity = oldDensity - modificationAmount;
+
+                        newDensity = newDensity.Clamp01();
+
+                        world.SetDensity(newDensity, offsetX, offsetY, offsetZ, true, _initChunks);
+                    }
                 }
             }
         }
     }
 }
-
