@@ -11,13 +11,12 @@ namespace MarchingCubes
         private int _vertexIndex;
 
         private Vector3[] _vertexList;
-        private Point[] _initPoints;
+        private Vector3[] _initCorners;
+        private float[] _initDensities;
         private Mesh _mesh;
         private int[,,] _cubeIndexes;
 
-        private readonly Vector3 zero = Vector3.zero;
-
-        public MarchingCubes(Point[,,] points, float isolevel, int seed)
+        public MarchingCubes(DensityField densityField, float isolevel)
         {
             _isolevel = isolevel;
 
@@ -26,8 +25,9 @@ namespace MarchingCubes
             _vertexIndex = 0;
 
             _vertexList = new Vector3[12];
-            _initPoints = new Point[8];
-            _cubeIndexes = new int[points.GetLength(0)-1, points.GetLength(1)-1, points.GetLength(2)-1];
+            _initCorners = new Vector3[8];
+            _initDensities = new float[8];
+            _cubeIndexes = new int[densityField.Width - 1, densityField.Height - 1, densityField.Depth - 1];
         }
 
         private Vector3 VertexInterpolate(Vector3 p1, Vector3 p2, float v1, float v2)
@@ -52,31 +52,27 @@ namespace MarchingCubes
             return p;
         }
 
-        private void March(Point[] points, int cubeIndex)
+        private void March(Vector3[] vertexList, int cubeIndex)
         {
-            int edgeIndex = LookupTables.EdgeTable[cubeIndex];
-
-            _vertexList = GenerateVertexList(points, edgeIndex);
-
             int[] row = LookupTables.TriangleTable[cubeIndex];
 
             for (int i = 0; i < row.Length; i += 3)
             {
-                _vertices[_vertexIndex] = _vertexList[row[i + 0]];
+                _vertices[_vertexIndex] = vertexList[row[i + 0]];
                 _triangles[_vertexIndex] = _vertexIndex;
                 _vertexIndex++;
 
-                _vertices[_vertexIndex] = _vertexList[row[i + 1]];
+                _vertices[_vertexIndex] = vertexList[row[i + 1]];
                 _triangles[_vertexIndex] = _vertexIndex;
                 _vertexIndex++;
 
-                _vertices[_vertexIndex] = _vertexList[row[i + 2]];
+                _vertices[_vertexIndex] = vertexList[row[i + 2]];
                 _triangles[_vertexIndex] = _vertexIndex;
                 _vertexIndex++;
             }
         }
 
-        private Vector3[] GenerateVertexList(Point[] points, int edgeIndex)
+        private Vector3[] GenerateVertexList(float[] densities, Vector3[] corners, int edgeIndex)
         {
             for (int i = 0; i < 12; i++)
             {
@@ -86,30 +82,33 @@ namespace MarchingCubes
                     int edge1 = edgePair[0];
                     int edge2 = edgePair[1];
 
-                    Point point1 = points[edge1];
-                    Point point2 = points[edge2];
+                    Vector3 corner1 = corners[edge1];
+                    Vector3 corner2 = corners[edge2];
 
-                    _vertexList[i] = VertexInterpolate(point1.localPosition, point2.localPosition, point1.density, point2.density);
+                    float density1 = densities[edge1];
+                    float density2 = densities[edge2];
+
+                    _vertexList[i] = VertexInterpolate(corner1, corner2, density1, density2);
                 }
             }
 
             return _vertexList;
         }
 
-        private int CalculateCubeIndex(Point[] points, float iso)
+        private int CalculateCubeIndex(float[] densities, float iso)
         {
             int cubeIndex = 0;
 
             for (int i = 0; i < 8; i++)
-                if (points[i].density < iso)
+                if (densities[i] < iso)
                     cubeIndex |= 1 << i;
 
             return cubeIndex;
         }
 
-        public Mesh CreateMeshData(Point[,,] points)
+        public Mesh CreateMeshData(DensityField densityField)
         {
-            _cubeIndexes = GenerateCubeIndexes(points);
+            _cubeIndexes = GenerateCubeIndexes(densityField);
             int vertexCount = GenerateVertexCount(_cubeIndexes);
 
             if (vertexCount <= 0)
@@ -120,16 +119,22 @@ namespace MarchingCubes
             _vertices = new Vector3[vertexCount];
             _triangles = new int[vertexCount];
 
-            for (int x = 0; x < points.GetLength(0)-1; x++)
+            for (int x = 0; x < densityField.Width - 1; x++)
             {
-                for (int y = 0; y < points.GetLength(1)-1; y++)
+                for (int y = 0; y < densityField.Height - 1; y++)
                 {
-                    for (int z = 0; z < points.GetLength(2)-1; z++)
+                    for (int z = 0; z < densityField.Depth - 1; z++)
                     {
                         int cubeIndex = _cubeIndexes[x, y, z];
                         if (cubeIndex == 0 || cubeIndex == 255) continue;
 
-                        March(GetPoints(x, y, z, points), cubeIndex);
+                        _initCorners = GetCorners(x,y,z);
+                        _initDensities = GetDensities(x, y, z, densityField);
+
+                        int edgeIndex = LookupTables.EdgeTable[cubeIndex];
+                        _vertexList = GenerateVertexList(_initDensities, _initCorners, edgeIndex);
+
+                        March(_vertexList, cubeIndex);
                     }
                 }
             }
@@ -145,28 +150,37 @@ namespace MarchingCubes
             return _mesh;
         }
 
-        private Point[] GetPoints(int x, int y, int z, Point[,,] points)
+        private Vector3[] GetCorners(int x, int y, int z)
         {
+            Vector3 origin = new Vector3(x, y, z);
             for (int i = 0; i < 8; i++)
             {
-                Point p = points[x + CubePointsX[i], y + CubePointsY[i], z + CubePointsZ[i]];
-                _initPoints[i] = p;
+                _initCorners[i] = origin + CubePoints[i];
             }
 
-            return _initPoints;
+            return _initCorners;
         }
 
-        private int[,,] GenerateCubeIndexes(Point[,,] points)
-        {
-            for (int x = 0; x < points.GetLength(0)-1; x++)
+        private float[] GetDensities(int x, int y, int z, DensityField densityField){
+            for (int i = 0; i < 8; i++)
             {
-                for (int y = 0; y < points.GetLength(1)-1; y++)
-                {
-                    for (int z = 0; z < points.GetLength(2)-1; z++)
-                    {
-                        _initPoints = GetPoints(x, y, z, points);
+                _initDensities[i] = densityField[x + CubePointsX[i], y + CubePointsY[i], z + CubePointsZ[i]];
+            }
 
-                        _cubeIndexes[x, y, z] = CalculateCubeIndex(_initPoints, _isolevel);
+            return _initDensities;
+        }
+
+        private int[,,] GenerateCubeIndexes(DensityField densityField)
+        {
+            for (int x = 0; x < densityField.Width - 1; x++)
+            {
+                for (int y = 0; y < densityField.Height - 1; y++)
+                {
+                    for (int z = 0; z < densityField.Depth - 1; z++)
+                    {
+                        _initDensities = GetDensities(x, y, z, densityField);
+
+                        _cubeIndexes[x, y, z] = CalculateCubeIndex(_initDensities, _isolevel);
                     }
                 }
             }

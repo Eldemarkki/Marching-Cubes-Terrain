@@ -67,30 +67,25 @@ namespace MarchingCubes.Examples
             int newY = Utils.FloorToNearestX(y, chunkSize);
             int newZ = Utils.FloorToNearestX(z, chunkSize);
 
-            return chunks[new Vector3Int(newX, newY, newZ)];
+            Vector3Int key = new Vector3Int(newX, newY, newZ);
+            if(chunks.ContainsKey(key))
+                return chunks[key];
+
+            return null;
         }
 
         public float GetDensity(int x, int y, int z)
         {
-            Point p = GetPoint(x, y, z);
+            Chunk chunk = GetChunk(x, y, z);
+            if (chunk == null)
+                return 0;
 
-            return p.density;
+            return chunk.GetDensity(x, y, z);
         }
 
         public float GetDensity(Vector3Int pos)
         {
             return GetDensity(pos.x, pos.y, pos.z);
-        }
-
-        public Point GetPoint(int x, int y, int z)
-        {
-            Chunk chunk = GetChunk(x, y, z);
-
-            Point p = chunk.GetPoint(x.Mod(chunkSize),
-                                     y.Mod(chunkSize),
-                                     z.Mod(chunkSize));
-
-            return p;
         }
 
         public void SetDensity(float density, int worldPosX, int worldPosY, int worldPosZ, bool setReadyForUpdate, Chunk[] initChunks)
@@ -109,6 +104,8 @@ namespace MarchingCubes.Examples
                 }
 
                 Chunk chunk = GetChunk(chunkPos);
+                if (chunk == null)
+                    continue;
 
                 lastChunkPos = chunk.position;
 

@@ -5,12 +5,11 @@ namespace MarchingCubes.Examples
     public class Chunk : MonoBehaviour
     {
         [HideInInspector] public bool readyForUpdate;
-        [HideInInspector] public Point[,,] points;
+        [HideInInspector] public DensityField densityField;
         [HideInInspector] public int chunkSize;
         [HideInInspector] public Vector3Int position;
 
         private float _isolevel;
-        private int _seed;
 
         private MarchingCubes _marchingCubes;
         private MeshFilter _meshFilter;
@@ -48,42 +47,28 @@ namespace MarchingCubes.Examples
             int worldPosY = position.y;
             int worldPosZ = position.z;
 
-            points = new Point[chunkSize + 1, chunkSize + 1, chunkSize + 1];
+            densityField = new DensityField(chunkSize + 1, chunkSize + 1, chunkSize + 1);
+            densityField.Populate(_densityGenerator.CalculateDensity, position);
 
-            _seed = world.seed;
-            _marchingCubes = new MarchingCubes(points, _isolevel, _seed);
-
-            for (int x = 0; x < points.GetLength(0); x++)
-            {
-                for (int y = 0; y < points.GetLength(1); y++)
-                {
-                    for (int z = 0; z < points.GetLength(2); z++)
-                    {
-                        points[x, y, z] = new Point(
-                            new Vector3Int(x, y, z),
-                            _densityGenerator.CalculateDensity(x + worldPosX, y + worldPosY, z + worldPosZ)
-                        );
-                    }
-                }
-            }
+            _marchingCubes = new MarchingCubes(densityField, _isolevel);
         }
 
         public void Generate()
         {
-            Mesh mesh = _marchingCubes.CreateMeshData(points);
+            Mesh mesh = _marchingCubes.CreateMeshData(densityField);
 
             _meshFilter.sharedMesh = mesh;
             _meshCollider.sharedMesh = mesh;
         }
 
-        public Point GetPoint(int x, int y, int z)
+        public float GetDensity(int x, int y, int z)
         {
-            return points[x, y, z];
+            return densityField[x, y, z];
         }
 
         public void SetDensity(float density, int x, int y, int z)
         {
-            points[x, y, z].density = density;
+            densityField[x, y, z] = density;
         }
 
         public void SetDensity(float density, Vector3Int pos)
