@@ -79,8 +79,11 @@ namespace MarchingCubes.Examples
             Chunk chunk = GetChunk(x, y, z);
             if (chunk == null)
                 return 0;
-
-            return chunk.GetDensity(x, y, z);
+                
+            float density = chunk.GetDensity(x.Mod(chunkSize),
+                                             y.Mod(chunkSize),
+                                             z.Mod(chunkSize));
+            return density;
         }
 
         public float GetDensity(Vector3Int pos)
