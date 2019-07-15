@@ -155,7 +155,7 @@ namespace MarchingCubes
             Vector3 origin = new Vector3(x, y, z);
             for (int i = 0; i < 8; i++)
             {
-                _initCorners[i] = origin + CubePoints[i];
+                _initCorners[i] = origin + LookupTables.CubeCorners[i];
             }
 
             return _initCorners;
@@ -164,7 +164,7 @@ namespace MarchingCubes
         private float[] GetDensities(int x, int y, int z, DensityField densityField){
             for (int i = 0; i < 8; i++)
             {
-                _initDensities[i] = densityField[x + CubePointsX[i], y + CubePointsY[i], z + CubePointsZ[i]];
+                _initDensities[i] = densityField[x + LookupTables.CubeCornersX[i], y + LookupTables.CubeCornersY[i], z + LookupTables.CubeCornersZ[i]];
             }
 
             return _initDensities;
@@ -207,53 +207,5 @@ namespace MarchingCubes
 
             return vertexCount;
         }
-
-        public static readonly Vector3Int[] CubePoints =
-        {
-            new Vector3Int(0, 0, 0),
-            new Vector3Int(1, 0, 0),
-            new Vector3Int(1, 0, 1),
-            new Vector3Int(0, 0, 1),
-            new Vector3Int(0, 1, 0),
-            new Vector3Int(1, 1, 0),
-            new Vector3Int(1, 1, 1),
-            new Vector3Int(0, 1, 1)
-        };
-
-        public static readonly int[] CubePointsX =
-        {
-            0,
-            1,
-            1,
-            0,
-            0,
-            1,
-            1,
-            0
-        };
-
-        public static readonly int[] CubePointsY =
-        {
-            0,
-            0,
-            0,
-            0,
-            1,
-            1,
-            1,
-            1
-        };
-
-        public static readonly int[] CubePointsZ =
-        {
-            0,
-            0,
-            1,
-            1,
-            0,
-            0,
-            1,
-            1
-        };
     }
 }

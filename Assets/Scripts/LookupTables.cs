@@ -1,4 +1,6 @@
-﻿namespace MarchingCubes
+﻿using UnityEngine;
+
+namespace MarchingCubes
 {
     public static class LookupTables
     {
@@ -16,6 +18,54 @@
             new[] {1, 5},
             new[] {2, 6},
             new[] {3, 7}
+        };
+
+        public static readonly Vector3Int[] CubeCorners =
+        {
+            new Vector3Int(0, 0, 0),
+            new Vector3Int(1, 0, 0),
+            new Vector3Int(1, 0, 1),
+            new Vector3Int(0, 0, 1),
+            new Vector3Int(0, 1, 0),
+            new Vector3Int(1, 1, 0),
+            new Vector3Int(1, 1, 1),
+            new Vector3Int(0, 1, 1)
+        };
+
+        public static readonly int[] CubeCornersX =
+        {
+            CubeCorners[0].x,
+            CubeCorners[1].x,
+            CubeCorners[2].x,
+            CubeCorners[3].x,
+            CubeCorners[4].x,
+            CubeCorners[5].x,
+            CubeCorners[6].x,
+            CubeCorners[7].x
+        };
+
+        public static readonly int[] CubeCornersY =
+        {
+            CubeCorners[0].y,
+            CubeCorners[1].y,
+            CubeCorners[2].y,
+            CubeCorners[3].y,
+            CubeCorners[4].y,
+            CubeCorners[5].y,
+            CubeCorners[6].y,
+            CubeCorners[7].y
+        };
+
+        public static readonly int[] CubeCornersZ =
+        {
+            CubeCorners[0].z,
+            CubeCorners[1].z,
+            CubeCorners[2].z,
+            CubeCorners[3].z,
+            CubeCorners[4].z,
+            CubeCorners[5].z,
+            CubeCorners[6].z,
+            CubeCorners[7].z
         };
 
         public static readonly int[] EdgeTable =
