@@ -38,8 +38,8 @@ manifest.json
 *.userprefs
 *.pidb
 .DS_Store
-Marching*Cubes*Improved/.vscode/
-Marching*Cubes*Improved/.vs/
+.vscode/
+.vs/
 
 ###
 # OS generated
