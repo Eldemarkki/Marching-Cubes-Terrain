@@ -11,7 +11,6 @@ namespace MarchingCubes.Examples
 
         private float _isolevel;
 
-        private MarchingCubes _marchingCubes;
         private MeshFilter _meshFilter;
         private MeshCollider _meshCollider;
         private DensityGenerator _densityGenerator;
@@ -49,13 +48,11 @@ namespace MarchingCubes.Examples
 
             densityField = new DensityField(chunkSize + 1, chunkSize + 1, chunkSize + 1);
             densityField.Populate(_densityGenerator.CalculateDensity, position);
-
-            _marchingCubes = new MarchingCubes(densityField, _isolevel);
         }
 
         public void Generate()
         {
-            Mesh mesh = _marchingCubes.CreateMeshData(densityField);
+            Mesh mesh = MarchingCubes.CreateMeshData(densityField, _isolevel);
 
             _meshFilter.sharedMesh = mesh;
             _meshCollider.sharedMesh = mesh;
