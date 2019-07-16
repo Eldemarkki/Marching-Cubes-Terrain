@@ -9,11 +9,11 @@ namespace MarchingCubes.Examples
         [HideInInspector] public int chunkSize;
         [HideInInspector] public Vector3Int position;
 
-        private float _isolevel;
-
         private MeshFilter _meshFilter;
         private MeshCollider _meshCollider;
         private DensityGenerator _densityGenerator;
+
+        private World world;
 
         private void Awake(){
             _meshFilter = GetComponent<MeshFilter>();
@@ -38,7 +38,7 @@ namespace MarchingCubes.Examples
         {
             this.chunkSize = chunkSize;
             this.position = position;
-            _isolevel = world.isolevel;
+            this.world = world;
 
             _densityGenerator = world.densityGenerator;
 
@@ -52,7 +52,7 @@ namespace MarchingCubes.Examples
 
         public void Generate()
         {
-            Mesh mesh = MarchingCubes.CreateMeshData(densityField, _isolevel);
+            Mesh mesh = MarchingCubes.CreateMeshData(densityField, world.isolevel);
 
             _meshFilter.sharedMesh = mesh;
             _meshCollider.sharedMesh = mesh;
