@@ -4,7 +4,7 @@ namespace MarchingCubes.Examples
 {
     public class Chunk : MonoBehaviour
     {
-        [HideInInspector] public bool readyForUpdate;
+        [HideInInspector] public bool isDirty;
         [HideInInspector] public DensityField densityField;
         [HideInInspector] public int chunkSize;
         [HideInInspector] public Vector3Int position;
@@ -27,10 +27,10 @@ namespace MarchingCubes.Examples
 
         private void Update()
         {
-            if (readyForUpdate)
+            if (isDirty)
             {
                 Generate();
-                readyForUpdate = false;
+                isDirty = false;
             }
         }
 

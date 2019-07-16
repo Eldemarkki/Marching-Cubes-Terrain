@@ -116,7 +116,7 @@ namespace MarchingCubes.Examples
 
                 chunk.SetDensity(density, localPos);
                 if (setReadyForUpdate)
-                    chunk.readyForUpdate = true;
+                    chunk.isDirty = true;
             }
         }
 
