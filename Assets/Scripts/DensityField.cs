@@ -4,7 +4,7 @@ using UnityEngine;
 namespace MarchingCubes
 {
     [Serializable]
-    public class DensityField : MonoBehaviour
+    public class DensityField
     {
         private float[] data;
 
