@@ -91,7 +91,7 @@ namespace MarchingCubes.Examples
             return GetDensity(pos.x, pos.y, pos.z);
         }
 
-        public void SetDensity(float density, int worldPosX, int worldPosY, int worldPosZ, bool setReadyForUpdate, Chunk[] initChunks)
+        public void SetDensity(float density, int worldPosX, int worldPosY, int worldPosZ)
         {
             Vector3Int dp = new Vector3Int(worldPosX, worldPosY, worldPosZ);
 
@@ -115,14 +115,13 @@ namespace MarchingCubes.Examples
                 Vector3Int localPos = (dp - chunk.position).Mod(chunkSize + 1);
 
                 chunk.SetDensity(density, localPos);
-                if (setReadyForUpdate)
-                    chunk.isDirty = true;
+                chunk.isDirty = true;
             }
         }
 
-        public void SetDensity(float density, Vector3Int pos, bool setReadyForUpdate, Chunk[] initChunks)
+        public void SetDensity(float density, Vector3Int pos)
         {
-            SetDensity(density, pos.x, pos.y, pos.z, setReadyForUpdate, initChunks);
+            SetDensity(density, pos.x, pos.y, pos.z);
         }
 
         private void UpdateBounds()

@@ -5,8 +5,8 @@ namespace MarchingCubes.Examples
     public class TerrainEditor : MonoBehaviour
     {
         [SerializeField] private bool addTerrain = true;
-        [SerializeField] private float force = 2f;
-        [SerializeField] private float range = 2f;
+        [SerializeField] private float force = 0.1f;
+        [SerializeField] private float range = 3f;
 
         [SerializeField] private float maxReachDistance = 100f;
 
@@ -15,11 +15,8 @@ namespace MarchingCubes.Examples
         [SerializeField] private World world;
         [SerializeField] private Transform playerCamera;
 
-        Chunk[] _initChunks;
-
         private void Start()
         {
-            _initChunks = new Chunk[8];
             Cursor.lockState = CursorLockMode.Locked;
         }
 
@@ -97,7 +94,7 @@ namespace MarchingCubes.Examples
                             continue;
 
                         float distance = Utils.Distance(offsetX, offsetY, offsetZ, point);
-                        if (!(distance <= range)) continue;
+                        if (distance > range) continue;
 
                         float modificationAmount = force / distance * forceOverDistance.Evaluate(1 - distance.Map(0, force, 0, 1)) * buildModifier;
 
@@ -106,7 +103,7 @@ namespace MarchingCubes.Examples
 
                         newDensity = newDensity.Clamp01();
 
-                        world.SetDensity(newDensity, offsetX, offsetY, offsetZ, true, _initChunks);
+                        world.SetDensity(newDensity, offsetX, offsetY, offsetZ);
                     }
                 }
             }
