@@ -43,7 +43,7 @@ namespace MarchingCubes
             }
         }
 
-        private static Vector3[] GenerateVertexList(float[] densities, Vector3[] corners, int edgeIndex, float isolevel)
+        private static Vector3[] GenerateVertexList(VoxelCorners<float> densities, VoxelCorners<Vector3> corners, int edgeIndex, float isolevel)
         {
             Vector3[] vertexList = new Vector3[12];
 
@@ -68,7 +68,7 @@ namespace MarchingCubes
             return vertexList;
         }
 
-        private static int CalculateCubeIndex(float[] densities, float isolevel)
+        private static int CalculateCubeIndex(VoxelCorners<float> densities, float isolevel)
         {
             int cubeIndex = 0;
 
@@ -101,8 +101,8 @@ namespace MarchingCubes
                         int cubeIndex = cubeIndices[x, y, z];
                         if (cubeIndex == 0 || cubeIndex == 255) continue;
 
-                        Vector3[] corners = GetCorners(x,y,z);
-                        float[] densities = GetDensities(x, y, z, densityField);
+                        VoxelCorners<Vector3> corners = GetCorners(x,y,z);
+                        VoxelCorners<float> densities = GetDensities(x, y, z, densityField);
                         int edgeIndex = LookupTables.EdgeTable[cubeIndex];
 
                         Vector3[] vertexList = GenerateVertexList(densities, corners, edgeIndex, isolevel);
@@ -129,9 +129,9 @@ namespace MarchingCubes
             return mesh;
         }
 
-        private static Vector3[] GetCorners(int x, int y, int z)
+        private static VoxelCorners<Vector3> GetCorners(int x, int y, int z)
         {
-            Vector3[] corners = new Vector3[8];
+            VoxelCorners<Vector3> corners = new VoxelCorners<Vector3>();
 
             Vector3 origin = new Vector3(x, y, z);
             for (int i = 0; i < 8; i++)
@@ -142,9 +142,9 @@ namespace MarchingCubes
             return corners;
         }
 
-        private static float[] GetDensities(int x, int y, int z, DensityField densityField)
+        private static VoxelCorners<float> GetDensities(int x, int y, int z, DensityField densityField)
         {
-            float[] densities = new float[8];
+            VoxelCorners<float> densities = new VoxelCorners<float>();
             for (int i = 0; i < 8; i++)
             {
                 densities[i] = densityField[x + LookupTables.CubeCornersX[i], y + LookupTables.CubeCornersY[i], z + LookupTables.CubeCornersZ[i]];
