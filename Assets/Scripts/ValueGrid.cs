@@ -1,12 +1,10 @@
 ﻿using System;
-using UnityEngine;
 
 namespace MarchingCubes
 {
-    [Serializable]
-    public class DensityField
+    public class ValueGrid<T>
     {
-        private float[] data;
+        private T[] data;
 
         private int size;
         public int Size { get => size; }
@@ -20,23 +18,23 @@ namespace MarchingCubes
         private int depth;
         public int Depth { get => depth; }
 
-        public DensityField(int width, int height, int depth)
+        public ValueGrid(int width, int height, int depth)
         {
             this.size = width * height * depth;
-            this.data = new float[size];
+            this.data = new T[size];
 
             this.width = width;
             this.height = height;
             this.depth = depth;
         }
 
-        public float this[int index]
+        public T this[int index]
         {
             get { return data[index]; }
             set { data[index] = value; }
         }
 
-        public float this[int x, int y, int z]
+        public T this[int x, int y, int z]
         {
             get
             {
@@ -55,32 +53,24 @@ namespace MarchingCubes
             return (x * width * height) + (y * width) + z;
         }
 
-        public void Populate(Func<Vector3Int, float> densityFunction, Vector3Int offset)
+        public void Populate(Func<int, int, int, T> fillFunction, int offsetX = 0, int offsetY = 0, int offsetZ = 0)
         {
-            for (int x = 0; x < Width; x++)
+            int i = 0;
+            for (int x = 0; x < width; x++)
             {
-                for (int y = 0; y < Height; y++)
+                for (int y = 0; y < height; y++)
                 {
-                    for (int z = 0; z < Depth; z++)
+                    for (int z = 0; z < depth; z++)
                     {
-                        this[x, y, z] = densityFunction.Invoke(new Vector3Int(x, y, z) + offset);
+                        this[i++] = fillFunction(x + offsetX, y + offsetY, z + offsetZ);
                     }
                 }
             }
         }
 
-        public void Populate(Func<int, int, int, float> densityFunction, Vector3Int offset)
+        public void Populate(Func<int, int, int, T> fillFunction, UnityEngine.Vector3Int offset)
         {
-            for (int x = 0; x < Width; x++)
-            {
-                for (int y = 0; y < Height; y++)
-                {
-                    for (int z = 0; z < Depth; z++)
-                    {
-                        this[x, y, z] = densityFunction.Invoke(x + offset.x, y + offset.y, z + offset.z);
-                    }
-                }
-            }
+            Populate(fillFunction, offset.x, offset.y, offset.z);
         }
     }
 }

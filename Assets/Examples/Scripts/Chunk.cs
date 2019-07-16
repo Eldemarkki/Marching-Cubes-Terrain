@@ -5,7 +5,7 @@ namespace MarchingCubes.Examples
     public class Chunk : MonoBehaviour
     {
         [HideInInspector] public bool isDirty;
-        [HideInInspector] public DensityField densityField;
+        [HideInInspector] public ValueGrid<float> densityField;
         [HideInInspector] public Vector3Int position;
 
         private MeshFilter _meshFilter;
@@ -37,7 +37,7 @@ namespace MarchingCubes.Examples
             this.position = position;
             this.world = world;
 
-            densityField = new DensityField(chunkSize + 1, chunkSize + 1, chunkSize + 1);
+            densityField = new ValueGrid<float>(chunkSize + 1, chunkSize + 1, chunkSize + 1);
             densityField.Populate(world.densityGenerator.CalculateDensity, position);
         }
 

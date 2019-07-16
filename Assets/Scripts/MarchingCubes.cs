@@ -79,9 +79,9 @@ namespace MarchingCubes
             return cubeIndex;
         }
 
-        public static Mesh CreateMeshData(DensityField densityField, float isolevel)
+        public static Mesh CreateMeshData(ValueGrid<float> densityField, float isolevel)
         {
-            int[,,] cubeIndices = GenerateCubeIndices(densityField, isolevel);
+            ValueGrid<int> cubeIndices = GenerateCubeIndices(densityField, isolevel);
             int vertexCount = GenerateVertexCount(cubeIndices);
 
             if (vertexCount <= 0)
@@ -92,13 +92,14 @@ namespace MarchingCubes
             Vector3[] vertices = new Vector3[vertexCount];
             int vertexIndex = 0;
 
+            int i = 0;
             for (int x = 0; x < densityField.Width - 1; x++)
             {
                 for (int y = 0; y < densityField.Height - 1; y++)
                 {
                     for (int z = 0; z < densityField.Depth - 1; z++)
                     {
-                        int cubeIndex = cubeIndices[x, y, z];
+                        int cubeIndex = cubeIndices[i++];
                         if (cubeIndex == 0 || cubeIndex == 255) continue;
 
                         VoxelCorners<Vector3> corners = GetCorners(x,y,z);
@@ -115,9 +116,9 @@ namespace MarchingCubes
             // The Marching Cubes algorithm produces vertices in an order that you can 
             // connect them in the order that they were created.
             int[] triangles = new int[vertexCount];
-            for (int i = 0; i < vertexCount; i++)
+            for (int triangleIndex = 0; triangleIndex < vertexCount; triangleIndex++)
             {
-                triangles[i] = i;
+                triangles[triangleIndex] = triangleIndex;
             }
 
             Mesh mesh = new Mesh();
@@ -142,7 +143,7 @@ namespace MarchingCubes
             return corners;
         }
 
-        private static VoxelCorners<float> GetDensities(int x, int y, int z, DensityField densityField)
+        private static VoxelCorners<float> GetDensities(int x, int y, int z, ValueGrid<float> densityField)
         {
             VoxelCorners<float> densities = new VoxelCorners<float>();
             for (int i = 0; i < 8; i++)
@@ -153,17 +154,18 @@ namespace MarchingCubes
             return densities;
         }
 
-        private static int[,,] GenerateCubeIndices(DensityField densityField, float isolevel)
+        private static ValueGrid<int> GenerateCubeIndices(ValueGrid<float> densityField, float isolevel)
         {
-            int[,,] cubeIndices = new int[densityField.Width - 1, densityField.Height - 1, densityField.Depth - 1];
+            ValueGrid<int> cubeIndices = new ValueGrid<int>(densityField.Width - 1, densityField.Height - 1, densityField.Depth - 1);
 
+            int i = 0;
             for (int x = 0; x < densityField.Width - 1; x++)
             {
                 for (int y = 0; y < densityField.Height - 1; y++)
                 {
                     for (int z = 0; z < densityField.Depth - 1; z++)
                     {
-                        cubeIndices[x, y, z] = CalculateCubeIndex(GetDensities(x, y, z, densityField), isolevel);
+                        cubeIndices[i++] = CalculateCubeIndex(GetDensities(x, y, z, densityField), isolevel);
                     }
                 }
             }
@@ -171,17 +173,18 @@ namespace MarchingCubes
             return cubeIndices;
         }
 
-        private static int GenerateVertexCount(int[,,] cubeIndices)
+        private static int GenerateVertexCount(ValueGrid<int> cubeIndices)
         {
             int vertexCount = 0;
 
-            for (int x = 0; x < cubeIndices.GetLength(0); x++)
+            int i = 0;
+            for (int x = 0; x < cubeIndices.Width; x++)
             {
-                for (int y = 0; y < cubeIndices.GetLength(1); y++)
+                for (int y = 0; y < cubeIndices.Height; y++)
                 {
-                    for (int z = 0; z < cubeIndices.GetLength(2); z++)
+                    for (int z = 0; z < cubeIndices.Depth; z++)
                     {
-                        int cubeIndex = cubeIndices[x, y, z];
+                        int cubeIndex = cubeIndices[i++];
                         int[] row = LookupTables.TriangleTable[cubeIndex];
                         vertexCount += row.Length;
                     }
