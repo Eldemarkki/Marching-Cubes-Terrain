@@ -12,8 +12,8 @@ namespace MarchingCubes.Examples
 
         [SerializeField] private AnimationCurve forceOverDistance = AnimationCurve.Constant(0, 1, 1);
 
-        [SerializeField] private World world;
-        [SerializeField] private Transform playerCamera;
+        [SerializeField] private World world = null;
+        [SerializeField] private Transform playerCamera = null;
 
         private void Start()
         {
@@ -91,10 +91,15 @@ namespace MarchingCubes.Examples
                         int offsetZ = hitZ - z;
 
                         if (!world.IsPointInsideWorld(offsetX, offsetY, offsetZ))
+                        {
                             continue;
+                        }
 
                         float distance = Utils.Distance(offsetX, offsetY, offsetZ, point);
-                        if (distance > range) continue;
+                        if (distance > range)
+                        {
+                            continue;
+                        }
 
                         float modificationAmount = force / distance * forceOverDistance.Evaluate(1 - distance.Map(0, force, 0, 1)) * buildModifier;
 

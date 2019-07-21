@@ -73,8 +73,12 @@ namespace MarchingCubes
             int cubeIndex = 0;
 
             for (int i = 0; i < 8; i++)
+            {
                 if (densities[i] < isolevel)
+                {
                     cubeIndex |= 1 << i;
+                }
+            }
 
             return cubeIndex;
         }
@@ -100,7 +104,10 @@ namespace MarchingCubes
                     for (int z = 0; z < densityField.Depth - 1; z++)
                     {
                         int cubeIndex = cubeIndices[i++];
-                        if (cubeIndex == 0 || cubeIndex == 255) continue;
+                        if (cubeIndex == 0 || cubeIndex == 255) 
+                        {
+                             continue;
+                        }
 
                         VoxelCorners<Vector3> corners = GetCorners(x,y,z);
                         VoxelCorners<float> densities = GetDensities(x, y, z, densityField);

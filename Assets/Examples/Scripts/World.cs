@@ -5,23 +5,23 @@ namespace MarchingCubes.Examples
 {
     public class World : MonoBehaviour
     {
-        public int chunkSize = 8;
+        [SerializeField] private int chunkSize = 8;
 
-        public int worldWidth = 5;
-        public int worldHeight = 5;
-        public int worldDepth = 5;
+        [SerializeField] private int worldWidth = 5;
+        [SerializeField] private int worldHeight = 5;
+        [SerializeField] private int worldDepth = 5;
 
-        public float isolevel;
+        [SerializeField] public float isolevel = 0.5F;
 
-        public int seed;
+        [SerializeField] private int seed = 0;
 
-        public GameObject chunkPrefab;
+        [SerializeField] private GameObject chunkPrefab = null;
 
-        public Dictionary<Vector3Int, Chunk> chunks;
+        private Dictionary<Vector3Int, Chunk> chunks;
 
         private Bounds worldBounds;
 
-        public DensityGenerator densityGenerator;
+        [HideInInspector] public DensityGenerator densityGenerator;
 
         private void Awake()
         {
@@ -38,7 +38,7 @@ namespace MarchingCubes.Examples
             worldBounds = new Bounds();
             UpdateBounds();
 
-            chunks = new Dictionary<Vector3Int, Chunk>(worldWidth*worldHeight*worldDepth);;
+            chunks = new Dictionary<Vector3Int, Chunk>(worldWidth*worldHeight*worldDepth);
             CreateChunks();
         }
 
@@ -56,7 +56,7 @@ namespace MarchingCubes.Examples
             }
         }
 
-        private Chunk GetChunk(Vector3Int pos)
+        public Chunk GetChunk(Vector3Int pos)
         {
             return GetChunk(pos.x, pos.y, pos.z);
         }
@@ -68,8 +68,10 @@ namespace MarchingCubes.Examples
             int newZ = Utils.FloorToNearestX(z, chunkSize);
 
             Vector3Int key = new Vector3Int(newX, newY, newZ);
-            if(chunks.ContainsKey(key))
+            if (chunks.ContainsKey(key))
+            {
                 return chunks[key];
+            }
 
             return null;
         }
@@ -78,8 +80,10 @@ namespace MarchingCubes.Examples
         {
             Chunk chunk = GetChunk(x, y, z);
             if (chunk == null)
+            {
                 return 0;
-                
+            }
+
             float density = chunk.GetDensity(x.Mod(chunkSize),
                                              y.Mod(chunkSize),
                                              z.Mod(chunkSize));
@@ -100,7 +104,6 @@ namespace MarchingCubes.Examples
             for (int i = 0; i < 8; i++)
             {
                 Vector3Int chunkPos = (dp - LookupTables.CubeCorners[i]).FloorToNearestX(chunkSize);
-
                 if (i != 0 && chunkPos == lastChunkPos)
                 {
                     continue;
@@ -108,7 +111,9 @@ namespace MarchingCubes.Examples
 
                 Chunk chunk = GetChunk(chunkPos);
                 if (chunk == null)
+                {
                     continue;
+                }
 
                 lastChunkPos = chunk.position;
 

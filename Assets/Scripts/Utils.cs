@@ -7,9 +7,13 @@ namespace MarchingCubes
         public static float Abs(this float n)
         {
             if (n < 0)
+            {
                 return -n;
+            }
             else
+            {
                 return n;
+            }
         }
 
         public static int Abs(this int n)
@@ -33,9 +37,13 @@ namespace MarchingCubes
 
             float diff = n - floored;
             if (diff < 0.5f)
+            {
                 return floored;
+            }
             else
+            {
                 return floored + 1;
+            }
         }
 
         public static int RoundToNearestX(this float n, int x)
@@ -153,7 +161,9 @@ namespace MarchingCubes
             bool exponentNegative = exponent < 0;
 
             if (exponentNegative)
+            {
                 exponent = -exponent;
+            }
 
             int result = 1;
 
@@ -163,29 +173,45 @@ namespace MarchingCubes
             }
 
             if (exponentNegative)
+            {
                 return 1f / result;
+            }
             else
+            {
                 return result;
+            }
         }
 
         public static int Clamp(this int number, int min, int max)
         {
             if (number < min)
+            {
                 return min;
+            }
             else if (number > max)
+            {
                 return max;
+            }
             else
+            {
                 return number;
+            }
         }
 
         public static float Clamp(this float number, float min, float max)
         {
             if (number < min)
+            {
                 return min;
+            }
             else if (number > max)
+            {
                 return max;
+            }
             else
+            {
                 return number;
+            }
         }
 
         public static float Clamp01(this float number)

@@ -5,7 +5,7 @@ namespace MarchingCubes.Examples
     public class Chunk : MonoBehaviour
     {
         [HideInInspector] public bool isDirty;
-        [HideInInspector] public ValueGrid<float> densityField;
+        [HideInInspector] private ValueGrid<float> densityField;
         [HideInInspector] public Vector3Int position;
 
         private MeshFilter _meshFilter;
