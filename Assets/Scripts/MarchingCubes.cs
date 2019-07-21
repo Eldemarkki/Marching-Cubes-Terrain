@@ -26,7 +26,7 @@ namespace MarchingCubes
             return p;
         }
 
-        private static void March(Vector3[] vertexList, int cubeIndex, ref Vector3[] vertices, ref int vertexIndex)
+        private static void March(VertexList vertexList, int cubeIndex, ref Vector3[] vertices, ref int vertexIndex)
         {
             int[] row = LookupTables.TriangleTable[cubeIndex];
 
@@ -43,9 +43,9 @@ namespace MarchingCubes
             }
         }
 
-        private static Vector3[] GenerateVertexList(VoxelCorners<float> densities, VoxelCorners<Vector3> corners, int edgeIndex, float isolevel)
+        private static VertexList GenerateVertexList(VoxelCorners<float> densities, VoxelCorners<Vector3> corners, int edgeIndex, float isolevel)
         {
-            Vector3[] vertexList = new Vector3[12];
+            VertexList vertexList = new VertexList();
 
             for (int i = 0; i < 12; i++)
             {
@@ -106,7 +106,7 @@ namespace MarchingCubes
                         VoxelCorners<float> densities = GetDensities(x, y, z, densityField);
                         int edgeIndex = LookupTables.EdgeTable[cubeIndex];
 
-                        Vector3[] vertexList = GenerateVertexList(densities, corners, edgeIndex, isolevel);
+                        VertexList vertexList = GenerateVertexList(densities, corners, edgeIndex, isolevel);
 
                         March(vertexList, cubeIndex, ref vertices, ref vertexIndex);
                     }
