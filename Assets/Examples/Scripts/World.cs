@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using MarchingCubes.Examples.DensityFunctions;
 using UnityEngine;
 
 namespace MarchingCubes.Examples
@@ -13,19 +14,20 @@ namespace MarchingCubes.Examples
 
         [SerializeField] public float isolevel = 0.5F;
 
-        [SerializeField] private int seed = 0;
 
         [SerializeField] private GameObject chunkPrefab = null;
+
+        [SerializeField] public DensityFunction densityFunction;
 
         private Dictionary<Vector3Int, Chunk> chunks;
 
         private Bounds worldBounds;
 
-        [HideInInspector] public DensityGenerator densityGenerator;
-
         private void Awake()
         {
-            densityGenerator = new DensityGenerator(seed);
+            if(densityFunction is InitializedDensityFunction initializable){
+                initializable.Initialize();
+            }
         }
 
         private void OnDrawGizmos()

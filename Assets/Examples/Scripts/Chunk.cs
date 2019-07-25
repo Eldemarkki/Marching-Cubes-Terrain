@@ -38,7 +38,7 @@ namespace MarchingCubes.Examples
             this.world = world;
 
             densityField = new ValueGrid<float>(chunkSize + 1, chunkSize + 1, chunkSize + 1);
-            densityField.Populate(world.densityGenerator.CalculateDensity, position);
+            densityField.Populate(world.densityFunction.CalculateDensity, position);
         }
 
         public void Generate()
