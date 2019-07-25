@@ -5,10 +5,10 @@ namespace MarchingCubes.Examples.DensityFunctions
     [CreateAssetMenu(fileName = "New Terrain Density Function", menuName = "Density Functions/Terrain Density Function")]
     public class TerrainDensity : InitializedDensityFunction
     {
-        public float groundLevel;
-        public float heightScale;
-        public float noiseScale;
-        public int seed;
+        [SerializeField] private float groundLevel = 0;
+        [SerializeField] private float heightScale = 0;
+        [SerializeField] private float noiseScale = 0;
+        [SerializeField] private int seed = 0;
 
         private FastNoise noise;
 

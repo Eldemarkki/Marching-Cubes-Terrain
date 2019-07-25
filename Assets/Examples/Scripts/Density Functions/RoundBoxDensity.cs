@@ -7,9 +7,9 @@ namespace MarchingCubes.Examples.DensityFunctions
     [CreateAssetMenu(fileName = "New Round Box Density Function", menuName = "Density Functions/Round Box Density Function")]
     public class RoundBoxDensity : DensityFunction
     {
-        public Vector3 center;
-        public Vector3 size;
-        public float rounding;
+        [SerializeField] private Vector3 center = Vector3.zero;
+        [SerializeField] private Vector3 size = Vector3.zero;
+        [SerializeField] private float rounding = 0;
 
         public override float CalculateDensity(int x, int y, int z)
         {

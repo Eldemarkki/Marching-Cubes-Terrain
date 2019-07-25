@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   groundLevel: 5
   heightScale: 10
-  noiseScale: 8
+  noiseScale: 0.1
   seed: 60

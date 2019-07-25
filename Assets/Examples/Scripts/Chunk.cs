@@ -2,6 +2,7 @@
 
 namespace MarchingCubes.Examples
 {
+    [RequireComponent(typeof(MeshRenderer), typeof(MeshFilter))]
     public class Chunk : MonoBehaviour
     {
         [HideInInspector] public bool isDirty;
@@ -46,7 +47,8 @@ namespace MarchingCubes.Examples
             Mesh mesh = MarchingCubes.CreateMeshData(densityField, world.isolevel);
 
             _meshFilter.sharedMesh = mesh;
-            _meshCollider.sharedMesh = mesh;
+            if(_meshCollider != null)
+                _meshCollider.sharedMesh = mesh;
         }
 
         public float GetDensity(int x, int y, int z)
