@@ -48,7 +48,7 @@ namespace MarchingCubes
             }
         }
 
-        private int GetIndex(int x, int y, int z)
+        public int GetIndex(int x, int y, int z)
         {
             return (x * width * height) + (y * width) + z;
         }

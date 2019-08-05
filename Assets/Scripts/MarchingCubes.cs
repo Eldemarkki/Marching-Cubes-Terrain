@@ -76,13 +76,17 @@ namespace MarchingCubes
 
             List<Vector3> vertices = new List<Vector3>();
 
+            int xAxis = densityField.Width * densityField.Height;
+            int yAxis = densityField.Width;
+            int zAxis = 1;
+
             for (int x = 0; x < densityField.Width - 1; x++)
             {
                 for (int y = 0; y < densityField.Height - 1; y++)
                 {
                     for (int z = 0; z < densityField.Depth - 1; z++)
                     {
-                        VoxelCorners<float> densities = GetDensities(x, y, z, densityField);
+                        VoxelCorners<float> densities = GetDensitiesOptimized(x, y, z, xAxis, yAxis, zAxis, densityField);
                         int cubeIndex = CalculateCubeIndex(densities, isolevel);
                         if (cubeIndex == 0 || cubeIndex == 255) 
                         {
@@ -142,6 +146,24 @@ namespace MarchingCubes
             }
 
             return densities;
+        }
+
+        private static VoxelCorners<float> GetDensitiesOptimized(int x, int y, int z, int xAxis, int yAxis, int zAxis, ValueGrid<float> densityField)
+        {
+            // PLEASE NO ONE EVER LOOK AT THIS FUNCTION! I optimized it to reduce calls to ValueGrid<T>.GetIndex
+            int originIndex = densityField.GetIndex(x, y, z);
+
+            return new VoxelCorners<float>
+            (
+                densityField[originIndex + LookupTables.CubeCornersX[0] * xAxis + LookupTables.CubeCornersY[0] * yAxis + LookupTables.CubeCornersZ[0] * zAxis],
+                densityField[originIndex + LookupTables.CubeCornersX[1] * xAxis + LookupTables.CubeCornersY[1] * yAxis + LookupTables.CubeCornersZ[1] * zAxis],
+                densityField[originIndex + LookupTables.CubeCornersX[2] * xAxis + LookupTables.CubeCornersY[2] * yAxis + LookupTables.CubeCornersZ[2] * zAxis],
+                densityField[originIndex + LookupTables.CubeCornersX[3] * xAxis + LookupTables.CubeCornersY[3] * yAxis + LookupTables.CubeCornersZ[3] * zAxis],
+                densityField[originIndex + LookupTables.CubeCornersX[4] * xAxis + LookupTables.CubeCornersY[4] * yAxis + LookupTables.CubeCornersZ[4] * zAxis],
+                densityField[originIndex + LookupTables.CubeCornersX[5] * xAxis + LookupTables.CubeCornersY[5] * yAxis + LookupTables.CubeCornersZ[5] * zAxis],
+                densityField[originIndex + LookupTables.CubeCornersX[6] * xAxis + LookupTables.CubeCornersY[6] * yAxis + LookupTables.CubeCornersZ[6] * zAxis],
+                densityField[originIndex + LookupTables.CubeCornersX[7] * xAxis + LookupTables.CubeCornersY[7] * yAxis + LookupTables.CubeCornersZ[7] * zAxis]
+            );
         }
     }
 }
