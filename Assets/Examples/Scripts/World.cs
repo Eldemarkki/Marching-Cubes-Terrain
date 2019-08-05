@@ -14,7 +14,6 @@ namespace MarchingCubes.Examples
 
         [SerializeField] public float isolevel = 0.5F;
 
-
         [SerializeField] private GameObject chunkPrefab = null;
 
         [SerializeField] public DensityFunction densityFunction;
@@ -99,36 +98,25 @@ namespace MarchingCubes.Examples
 
         public void SetDensity(float density, int worldPosX, int worldPosY, int worldPosZ)
         {
-            Vector3Int dp = new Vector3Int(worldPosX, worldPosY, worldPosZ);
+            SetDensity(density, new Vector3Int(worldPosX, worldPosY, worldPosZ));
+        }
 
-            Vector3Int lastChunkPos = dp.FloorToNearestX(chunkSize);
-
+        public void SetDensity(float density, Vector3Int pos)
+        {
             for (int i = 0; i < 8; i++)
             {
-                Vector3Int chunkPos = (dp - LookupTables.CubeCorners[i]).FloorToNearestX(chunkSize);
-                if (i != 0 && chunkPos == lastChunkPos)
-                {
-                    continue;
-                }
-
+                Vector3Int chunkPos = (pos - LookupTables.CubeCorners[i]).FloorToNearestX(chunkSize);
                 Chunk chunk = GetChunk(chunkPos);
                 if (chunk == null)
                 {
                     continue;
                 }
 
-                lastChunkPos = chunk.position;
-
-                Vector3Int localPos = (dp - chunk.position).Mod(chunkSize + 1);
+                Vector3Int localPos = (pos - chunk.position).Mod(chunkSize + 1);
 
                 chunk.SetDensity(density, localPos);
                 chunk.isDirty = true;
             }
-        }
-
-        public void SetDensity(float density, Vector3Int pos)
-        {
-            SetDensity(density, pos.x, pos.y, pos.z);
         }
 
         private void UpdateBounds()

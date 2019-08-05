@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System.Linq;
 using UnityEngine;
 
 namespace MarchingCubes
@@ -7,27 +7,11 @@ namespace MarchingCubes
     {
         private static Vector3 VertexInterpolate(Vector3 p1, Vector3 p2, float v1, float v2, float isolevel)
         {
-            if (Utils.Abs(isolevel - v1) < 0.000001f)
-            {
-                return p1;
-            }
-            if (Utils.Abs(isolevel - v2) < 0.000001f)
-            {
-                return p2;
-            }
-            if (Utils.Abs(v1 - v2) < 0.000001f)
-            {
-                return p1;
-            }
-
-            float mu = (isolevel - v1) / (v2 - v1);
-
-            Vector3 p = p1 + mu * (p2 - p1);
-
-            return p;
+            return p1 + (isolevel - v1) * (p2 - p1) / (v2 - v1);
         }
 
-        private static VertexList GenerateVertexList(VoxelCorners<float> densities, VoxelCorners<Vector3> corners, int edgeIndex, float isolevel)
+        private static VertexList GenerateVertexList(VoxelCorners<float> densities, VoxelCorners<Vector3Int> corners,
+            int edgeIndex, float isolevel)
         {
             VertexList vertexList = new VertexList();
 
@@ -39,8 +23,8 @@ namespace MarchingCubes
                     int edge1 = edgePair[0];
                     int edge2 = edgePair[1];
 
-                    Vector3 corner1 = corners[edge1];
-                    Vector3 corner2 = corners[edge2];
+                    Vector3Int corner1 = corners[edge1];
+                    Vector3Int corner2 = corners[edge2];
 
                     float density1 = densities[edge1];
                     float density2 = densities[edge2];
@@ -52,118 +36,77 @@ namespace MarchingCubes
             return vertexList;
         }
 
-        private static int CalculateCubeIndex(VoxelCorners<float> densities, float isolevel)
+        public static Mesh CreateMeshData(ValueGrid<Voxel> voxels, float isolevel)
         {
-            int cubeIndex = 0;
-
-            for (int i = 0; i < 8; i++)
-            {
-                if (densities[i] < isolevel)
-                {
-                    cubeIndex |= 1 << i;
-                }
-            }
-
-            return cubeIndex;
-        }
-
-        public static Mesh CreateMeshData(ValueGrid<float> densityField, float isolevel)
-        {
-            if (densityField == null)
+            ValueGrid<int> cubeIndices = CalculateCubeIndices(voxels, isolevel);
+            int vertexCount = CalculateVertexCount(cubeIndices);
+            if (vertexCount == 0 || voxels == null)
             {
                 return new Mesh();
             }
 
-            List<Vector3> vertices = new List<Vector3>();
+            Vector3[] vertices = new Vector3[vertexCount];
 
-            int xAxis = densityField.Width * densityField.Height;
-            int yAxis = densityField.Width;
-            int zAxis = 1;
-
-            for (int x = 0; x < densityField.Width - 1; x++)
+            int vertexIndex = 0;
+            for (int i = 0; i < voxels.Size; i++)
             {
-                for (int y = 0; y < densityField.Height - 1; y++)
+                Voxel voxel = voxels[i];
+
+                int cubeIndex = cubeIndices[i];
+                if (cubeIndex != 0 && cubeIndex != 255)
                 {
-                    for (int z = 0; z < densityField.Depth - 1; z++)
-                    {
-                        VoxelCorners<float> densities = GetDensitiesOptimized(x, y, z, xAxis, yAxis, zAxis, densityField);
-                        int cubeIndex = CalculateCubeIndex(densities, isolevel);
-                        if (cubeIndex == 0 || cubeIndex == 255) 
-                        {
-                             continue;
-                        }
-
-                        VoxelCorners<Vector3> corners = GetCorners(x,y,z);
-                        int edgeIndex = LookupTables.EdgeTable[cubeIndex];
-
-                        VertexList vertexList = GenerateVertexList(densities, corners, edgeIndex, isolevel);
-
-                        int[] row = LookupTables.TriangleTable[cubeIndex];
-                        for (int i = 0; i < row.Length; i++)
-                        {
-                            vertices.Add(vertexList[row[i]]);
-                        }
-                    }
+                    March(voxel, cubeIndex, isolevel, ref vertices, ref vertexIndex);
                 }
             }
 
             // The Marching Cubes algorithm produces vertices in an order that you can 
             // connect them in the order that they were created.
-            int[] triangles = new int[vertices.Count];
-            for (int triangleIndex = 0; triangleIndex < triangles.Length; triangleIndex++)
-            {
-                triangles[triangleIndex] = triangleIndex;
-            }
+            int[] triangles = Enumerable.Range(0, vertices.Length).ToArray();
 
             Mesh mesh = new Mesh();
 
-            mesh.SetVertices(vertices);
+            mesh.vertices = vertices;
             mesh.SetTriangles(triangles, 0);
             mesh.RecalculateNormals();
 
             return mesh;
         }
 
-        private static VoxelCorners<Vector3> GetCorners(int x, int y, int z)
+        private static int CalculateVertexCount(ValueGrid<int> cubeIndices)
         {
-            VoxelCorners<Vector3> corners = new VoxelCorners<Vector3>();
-
-            Vector3 origin = new Vector3(x, y, z);
-            for (int i = 0; i < 8; i++)
+            int vertexCount = 0;
+            for (int i = 0; i < cubeIndices.Size; i++)
             {
-                corners[i] = origin + LookupTables.CubeCorners[i];
+                vertexCount += LookupTables.TriangleTable[cubeIndices[i]].Length;
             }
 
-            return corners;
+            return vertexCount;
         }
 
-        private static VoxelCorners<float> GetDensities(int x, int y, int z, ValueGrid<float> densityField)
+        private static ValueGrid<int> CalculateCubeIndices(ValueGrid<Voxel> voxels, float isolevel)
         {
-            VoxelCorners<float> densities = new VoxelCorners<float>();
-            for (int i = 0; i < 8; i++)
+            ValueGrid<int> cubeIndices = new ValueGrid<int>(voxels.Width, voxels.Height, voxels.Depth);
+            for (int i = 0; i < voxels.Size; i++)
             {
-                densities[i] = densityField[x + LookupTables.CubeCornersX[i], y + LookupTables.CubeCornersY[i], z + LookupTables.CubeCornersZ[i]];
+                cubeIndices[i] = voxels[i].CalculateCubeIndex(isolevel);
             }
 
-            return densities;
+            return cubeIndices;
         }
 
-        private static VoxelCorners<float> GetDensitiesOptimized(int x, int y, int z, int xAxis, int yAxis, int zAxis, ValueGrid<float> densityField)
+        private static void March(Voxel voxel, int cubeIndex, float isolevel, ref Vector3[] vertices, ref int vertexIndex)
         {
-            // PLEASE NO ONE EVER LOOK AT THIS FUNCTION! I optimized it to reduce calls to ValueGrid<T>.GetIndex
-            int originIndex = densityField.GetIndex(x, y, z);
+            VoxelCorners<Vector3Int> corners = voxel.cornerPositions;
+            VoxelCorners<float> densities = voxel.densities;
+            int edgeIndex = LookupTables.EdgeTable[cubeIndex];
 
-            return new VoxelCorners<float>
-            (
-                densityField[originIndex + LookupTables.CubeCornersX[0] * xAxis + LookupTables.CubeCornersY[0] * yAxis + LookupTables.CubeCornersZ[0] * zAxis],
-                densityField[originIndex + LookupTables.CubeCornersX[1] * xAxis + LookupTables.CubeCornersY[1] * yAxis + LookupTables.CubeCornersZ[1] * zAxis],
-                densityField[originIndex + LookupTables.CubeCornersX[2] * xAxis + LookupTables.CubeCornersY[2] * yAxis + LookupTables.CubeCornersZ[2] * zAxis],
-                densityField[originIndex + LookupTables.CubeCornersX[3] * xAxis + LookupTables.CubeCornersY[3] * yAxis + LookupTables.CubeCornersZ[3] * zAxis],
-                densityField[originIndex + LookupTables.CubeCornersX[4] * xAxis + LookupTables.CubeCornersY[4] * yAxis + LookupTables.CubeCornersZ[4] * zAxis],
-                densityField[originIndex + LookupTables.CubeCornersX[5] * xAxis + LookupTables.CubeCornersY[5] * yAxis + LookupTables.CubeCornersZ[5] * zAxis],
-                densityField[originIndex + LookupTables.CubeCornersX[6] * xAxis + LookupTables.CubeCornersY[6] * yAxis + LookupTables.CubeCornersZ[6] * zAxis],
-                densityField[originIndex + LookupTables.CubeCornersX[7] * xAxis + LookupTables.CubeCornersY[7] * yAxis + LookupTables.CubeCornersZ[7] * zAxis]
-            );
+            VertexList vertexList = GenerateVertexList(densities, corners, edgeIndex, isolevel);
+
+            int[] row = LookupTables.TriangleTable[cubeIndex];
+            for (int i = 0; i < row.Length; i++)
+            {
+                vertices[vertexIndex++] = vertexList[row[i]];
+            }
         }
     }
 }

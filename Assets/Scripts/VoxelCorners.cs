@@ -1,6 +1,6 @@
 ﻿public struct VoxelCorners<T>
 {
-    private T c1, c2, c3, c4, c5, c6, c7, c8;
+    public T c1, c2, c3, c4, c5, c6, c7, c8;
 
     public VoxelCorners(T c1, T c2, T c3, T c4, T c5, T c6, T c7, T c8)
     {
