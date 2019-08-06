@@ -1,20 +1,23 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public struct MeshData
+namespace MarchingCubes
 {
-    public List<Vector3> vertices;
-    public int[] triangles;
-
-    public MeshData(List<Vector3> vertices, int[] triangles)
+    public struct MeshData
     {
-        this.vertices = vertices;
-        this.triangles = triangles;
-    }
+        public List<Vector3> vertices;
+        public int[] triangles;
 
-    public void Deconstruct(out List<Vector3> vertices, out int[] triangles)
-    {
-        vertices = this.vertices;
-        triangles = this.triangles;
+        public MeshData(List<Vector3> vertices, int[] triangles)
+        {
+            this.vertices = vertices;
+            this.triangles = triangles;
+        }
+
+        public void Deconstruct(out List<Vector3> vertices, out int[] triangles)
+        {
+            vertices = this.vertices;
+            triangles = this.triangles;
+        }
     }
 }
