@@ -290,7 +290,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 534669902}
   m_LocalRotation: {x: -0.39341855, y: 0.3637112, z: -0.17314747, w: -0.8264115}
-  m_LocalPosition: {x: 0, y: 35.71491, z: 0}
+  m_LocalPosition: {x: 0, y: 15, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -568,6 +568,8 @@ MonoBehaviour:
   worldHeight: 3
   worldDepth: 5
   isolevel: 0.5
+  renderDistance: 32
+  player: {fileID: 534669905}
   chunkPrefab: {fileID: 7489232383384105734, guid: 58c1dc75b64dbec41a572954c3bcd523,
     type: 3}
   densityFunction: {fileID: 11400000, guid: 1848a3e960cd41f40870af3d6f8b6455, type: 2}

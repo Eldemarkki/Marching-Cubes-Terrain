@@ -15,6 +15,9 @@ namespace MarchingCubes.Examples
 
         private World world;
 
+        private ValueGrid<Vector3Int> corners;
+        private ValueGrid<float> densities;
+
         private void Awake(){
             _meshFilter = GetComponent<MeshFilter>();
             _meshCollider = GetComponent<MeshCollider>();
@@ -41,6 +44,9 @@ namespace MarchingCubes.Examples
             this.chunkSize = chunkSize;
 
             voxels = new ValueGrid<Voxel>(chunkSize, chunkSize, chunkSize);
+            corners = new ValueGrid<Vector3Int>(chunkSize+1, chunkSize+1, chunkSize+1);
+            densities = new ValueGrid<float>(chunkSize+1, chunkSize+1, chunkSize+1);
+            
             InitializeVoxels();
         }
 
@@ -50,10 +56,7 @@ namespace MarchingCubes.Examples
             int chunkPositionY = position.y;
             int chunkPositionZ = position.z;
 
-            ValueGrid<Vector3Int> corners = new ValueGrid<Vector3Int>(chunkSize+1, chunkSize+1, chunkSize+1);
             corners.Populate((x, y, z) => new Vector3Int(x, y, z));
-
-            ValueGrid<float> densities = new ValueGrid<float>(chunkSize+1, chunkSize+1, chunkSize+1);
             densities.Populate(world.densityFunction.CalculateDensity, chunkPositionX, chunkPositionY, chunkPositionZ);
 
             int xAxis = corners.Width * corners.Height;
@@ -112,13 +115,34 @@ namespace MarchingCubes.Examples
             return new Voxel(voxelCorners, voxelDensities);
         }
 
+        public void SetPosition(Vector3Int position)
+        {
+            this.position = position;
+            int chunkPositionX = position.x;
+            int chunkPositionY = position.y;
+            int chunkPositionZ = position.z;
+
+            densities.Populate(world.densityFunction.CalculateDensity, chunkPositionX, chunkPositionY, chunkPositionZ);
+
+            int i = 0;
+            for (int x = 0; x < chunkSize+1; x++)
+            {
+                for (int y = 0; y < chunkSize+1; y++)
+                {
+                    for (int z = 0; z < chunkSize+1; z++)
+                    {
+                        SetDensity(densities[i++], x, y, z);
+                    }
+                }
+            }
+        }
+
         public void Generate()
         {
             Mesh mesh = MarchingCubes.CreateMeshData(voxels, world.isolevel);
 
             _meshFilter.sharedMesh = mesh;
-            if(_meshCollider != null)
-                _meshCollider.sharedMesh = mesh;
+            _meshCollider.sharedMesh = mesh;
         }
 
         public float GetDensity(int x, int y, int z)
