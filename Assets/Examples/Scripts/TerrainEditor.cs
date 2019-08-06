@@ -74,11 +74,11 @@ namespace MarchingCubes.Examples
         {
             int buildModifier = addTerrain ? 1 : -1;
 
-            int hitX = point.x.Round();
-            int hitY = point.y.Round();
-            int hitZ = point.z.Round();
-
-            int intRange = range.Ceil();
+            int hitX = Mathf.RoundToInt(point.x);
+            int hitY = Mathf.RoundToInt(point.y);
+            int hitZ = Mathf.RoundToInt(point.z);
+            
+            int intRange = Mathf.CeilToInt(range);
 
             for (int x = -intRange; x <= intRange; x++)
             {
@@ -89,8 +89,9 @@ namespace MarchingCubes.Examples
                         int offsetX = hitX - x;
                         int offsetY = hitY - y;
                         int offsetZ = hitZ - z;
-
-                        float distance = Utils.Distance(offsetX, offsetY, offsetZ, point);
+                        
+                        Vector3 offsetPoint = new Vector3(offsetX, offsetY, offsetZ);
+                        float distance = Vector3.Distance(offsetPoint, point);
                         if (distance > range)
                         {
                             continue;
@@ -101,7 +102,7 @@ namespace MarchingCubes.Examples
                         float oldDensity = world.GetDensity(offsetX, offsetY, offsetZ);
                         float newDensity = oldDensity - modificationAmount;
 
-                        newDensity = newDensity.Clamp01();
+                        newDensity = Mathf.Clamp01(newDensity);
 
                         world.SetDensity(newDensity, offsetX, offsetY, offsetZ);
                     }

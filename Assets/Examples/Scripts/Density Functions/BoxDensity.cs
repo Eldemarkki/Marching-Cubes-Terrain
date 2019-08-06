@@ -16,7 +16,7 @@ namespace MarchingCubes.Examples.DensityFunctions
             Vector3 d = p.Abs() - size;
             
             return Vector3.Max(d, Vector3.zero).magnitude + 
-                   Utils.Min(Utils.Max(d.x, Utils.Max(d.y, d.z)), 0);
+                   Mathf.Min(Mathf.Max(d.x, Mathf.Max(d.y, d.z)), 0);
         }
     }
 }

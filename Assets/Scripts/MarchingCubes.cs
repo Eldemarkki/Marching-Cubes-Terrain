@@ -95,8 +95,7 @@ namespace MarchingCubes
             // The Marching Cubes algorithm produces vertices in an order that you can 
             // connect them in the order that they were created.
             int[] triangles = Enumerable.Range(0, vertices.Count).ToArray();
-
-
+            
             return new MeshData(vertices, triangles);
         }
 
