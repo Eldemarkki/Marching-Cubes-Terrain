@@ -62,7 +62,7 @@ namespace MarchingCubes
                 {
                     for (int z = 0; z < depth; z++)
                     {
-                        this[i++] = fillFunction(x + offsetX, y + offsetY, z + offsetZ);
+                        data[i++] = fillFunction(x + offsetX, y + offsetY, z + offsetZ);
                     }
                 }
             }
