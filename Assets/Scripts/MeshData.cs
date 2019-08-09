@@ -34,10 +34,7 @@ namespace MarchingCubes
 
         public override int GetHashCode()
         {
-            unchecked
-            {
-                return ((_vertices != null ? _vertices.GetHashCode() : 0) * 397) ^ (_triangles != null ? _triangles.GetHashCode() : 0);
-            }
+            return ((_vertices != null ? _vertices.GetHashCode() : 0) * 397) ^ (_triangles != null ? _triangles.GetHashCode() : 0);
         }
     }
 }

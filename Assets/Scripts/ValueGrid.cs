@@ -2,7 +2,7 @@
 {
     public class ValueGrid<T>
     {
-        private T[] _data;
+        private readonly T[] _data;
 
         public int Width { get; }
         public int Height { get; }
