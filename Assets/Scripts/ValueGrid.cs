@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace MarchingCubes
+﻿namespace MarchingCubes
 {
     public class ValueGrid<T>
     {
@@ -19,7 +17,11 @@ namespace MarchingCubes
             Depth = depth;
         }
 
-        public T this[int index] => _data[index];
+        public T this[int index]
+        {
+            get => _data[index];
+            set => _data[index] = value;
+        }
 
         public T this[int x, int y, int z]
         {
@@ -30,21 +32,6 @@ namespace MarchingCubes
         public int GetIndex(int x, int y, int z)
         {
             return x * Width * Height + y * Width + z;
-        }
-
-        public void Populate(Func<int, int, int, T> fillFunction, int offsetX = 0, int offsetY = 0, int offsetZ = 0)
-        {
-            var i = 0;
-            for (var x = 0; x < Width; x++)
-            {
-                for (var y = 0; y < Height; y++)
-                {
-                    for (var z = 0; z < Depth; z++)
-                    {
-                        _data[i++] = fillFunction(x + offsetX, y + offsetY, z + offsetZ);
-                    }
-                }
-            }
         }
     }
 }
