@@ -7,91 +7,85 @@ namespace MarchingCubes.Examples
     [RequireComponent(typeof(MeshRenderer), typeof(MeshFilter))]
     public class Chunk : MonoBehaviour
     {
-        [HideInInspector] public bool isDirty;
-        [HideInInspector] private ValueGrid<float> densityField;
-        [HideInInspector] public Vector3Int position;
-        [HideInInspector] private int chunkSize;
+        private Vector3Int _position;
+        private bool _isDirty;
 
         private MeshFilter _meshFilter;
         private MeshCollider _meshCollider;
-        private Mesh mesh;
+        private Mesh _mesh;
+        
+        private ValueGrid<float> _densityField;
 
-        private Func<MeshData> meshDataDelegate;
-        private World world;
+        private Func<MeshData> _meshDataDelegate;
+        private World _world;
         
         private void Awake(){
             _meshFilter = GetComponent<MeshFilter>();
             _meshCollider = GetComponent<MeshCollider>();
-            mesh = new Mesh();
+            _mesh = new Mesh();
         }
 
         private void Update()
         {
-            if (isDirty)
-            {
-                Generate();
-                isDirty = false;
-            }
+            if (!_isDirty) { return; }
+            Generate();
         }
 
-        public void Initialize(World world, int chunkSize, Vector3Int position)
+        public void Initialize(World world, int chunkSize, float isolevel, Vector3Int position)
         {
-            this.world = world;
-            this.chunkSize = chunkSize;
+            _world = world;
             
-            densityField = new ValueGrid<float>(chunkSize + 1, chunkSize + 1, chunkSize + 1);
-            meshDataDelegate = () => MarchingCubes.CreateMeshData(densityField, world.isolevel);
+            _densityField = new ValueGrid<float>(chunkSize + 1, chunkSize + 1, chunkSize + 1);
+            _meshDataDelegate = () => MarchingCubes.CreateMeshData(_densityField, isolevel);
             
             SetPosition(position);
         }
 
         public void SetPosition(Vector3Int position)
         {
-            this.position = position;
-            name = GenerateChunkName(position);
+            _position = position;
+            name = $"Chunk_{position.x.ToString()}_{position.y.ToString()}_{position.z.ToString()}";
 
             PopulateDensities();
             
-            isDirty = true;
+            _isDirty = true;
         }
 
         private void PopulateDensities()
         {
-            Task populateTask = Task.Factory.StartNew(() => densityField.Populate(world.densityFunction.CalculateDensity, position.x, position.y, position.z));
+            var populateTask = Task.Factory.StartNew(() => _densityField.Populate(_world.DensityFunction.CalculateDensity, _position.x, _position.y, _position.z));
             populateTask.Wait();
-        }
-
-        public string GenerateChunkName(Vector3Int position)
-        {
-            return $"Chunk_{position.x.ToString()}_{position.y.ToString()}_{position.z.ToString()}";
         }
 
         public void Generate()
         {
-            var meshTask = new Task<MeshData>(meshDataDelegate);
+            var meshTask = new Task<MeshData>(_meshDataDelegate);
 
             meshTask.Start();
             meshTask.Wait();
 
             var (vertices, triangles) = meshTask.Result;
             
-            mesh.Clear();
-            mesh.SetVertices(vertices);
-            mesh.SetTriangles(triangles, 0);
-            mesh.RecalculateNormals();
+            _mesh.Clear();
+            _mesh.SetVertices(vertices);
+            _mesh.SetTriangles(triangles, 0);
+            _mesh.RecalculateNormals();
             
-            _meshFilter.sharedMesh = mesh;
-            _meshCollider.sharedMesh = mesh;
+            _meshFilter.sharedMesh = _mesh;
+            _meshCollider.sharedMesh = _mesh;
+
+            _isDirty = false;
         }
 
         public float GetDensity(int x, int y, int z)
         {
-            return densityField[x, y, z];
+            return _densityField[x, y, z];
         }
 
-        public void SetDensity(float density, int x, int y, int z)
+        private void SetDensity(float density, int x, int y, int z)
         {
-            densityField[x, y, z] = density;
+            _densityField[x, y, z] = density;
+            _isDirty = true;
         }
 
         public void SetDensity(float density, Vector3Int pos)

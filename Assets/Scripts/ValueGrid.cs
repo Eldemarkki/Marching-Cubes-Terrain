@@ -4,73 +4,47 @@ namespace MarchingCubes
 {
     public class ValueGrid<T>
     {
-        private T[] data;
+        private T[] _data;
 
-        private int size;
-        public int Size { get => size; }
-
-        private int width;
-        public int Width { get => width; }
-
-        private int height;
-        public int Height { get => height; }
-
-        private int depth;
-        public int Depth { get => depth; }
+        public int Width { get; }
+        public int Height { get; }
+        public int Depth { get; }
 
         public ValueGrid(int width, int height, int depth)
         {
-            this.size = width * height * depth;
-            this.data = new T[size];
+            _data = new T[width * height * depth];
 
-            this.width = width;
-            this.height = height;
-            this.depth = depth;
+            Width = width;
+            Height = height;
+            Depth = depth;
         }
 
-        public T this[int index]
-        {
-            get { return data[index]; }
-            set { data[index] = value; }
-        }
+        public T this[int index] => _data[index];
 
         public T this[int x, int y, int z]
         {
-            get
-            {
-                int index = GetIndex(x, y, z);
-                return data[index];
-            }
-            set
-            {
-                int index = GetIndex(x, y, z);
-                data[index] = value;
-            }
+            get => _data[GetIndex(x, y, z)];
+            set => _data[GetIndex(x, y, z)] = value;
         }
 
         public int GetIndex(int x, int y, int z)
         {
-            return (x * width * height) + (y * width) + z;
+            return x * Width * Height + y * Width + z;
         }
 
         public void Populate(Func<int, int, int, T> fillFunction, int offsetX = 0, int offsetY = 0, int offsetZ = 0)
         {
-            int i = 0;
-            for (int x = 0; x < width; x++)
+            var i = 0;
+            for (var x = 0; x < Width; x++)
             {
-                for (int y = 0; y < height; y++)
+                for (var y = 0; y < Height; y++)
                 {
-                    for (int z = 0; z < depth; z++)
+                    for (var z = 0; z < Depth; z++)
                     {
-                        data[i++] = fillFunction(x + offsetX, y + offsetY, z + offsetZ);
+                        _data[i++] = fillFunction(x + offsetX, y + offsetY, z + offsetZ);
                     }
                 }
             }
-        }
-
-        public void Populate(Func<int, int, int, T> fillFunction, UnityEngine.Vector3Int offset)
-        {
-            Populate(fillFunction, offset.x, offset.y, offset.z);
         }
     }
 }

@@ -1,21 +1,22 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using UnityEngine;
 
 namespace MarchingCubes.Examples
 {
     public class TerrainEditor : MonoBehaviour
     {
-        [SerializeField] private bool addTerrain = true;
-        [SerializeField] private float force = 0.1f;
-        [SerializeField] private float range = 3f;
-
+        [Header("Terrain Modification Settings")]
+        [SerializeField] private bool increaseTerrain = true;
+        [SerializeField] private float modificationForce = 0.1f;
+        [SerializeField] private float modificationRange = 3f;
         [SerializeField] private float maxReachDistance = 100f;
-
         [SerializeField] private AnimationCurve forceOverDistance = AnimationCurve.Constant(0, 1, 1);
 
-        [SerializeField] private World world = null;
-        [SerializeField] private Transform playerCamera = null;
+        [Header("Player Settings")]
+        [SerializeField] private World world;
+        [SerializeField] private Transform playerCamera;
 
-        private void Start()
+        private void Awake()
         {
             Cursor.lockState = CursorLockMode.Locked;
         }
@@ -27,18 +28,18 @@ namespace MarchingCubes.Examples
 
         private void TryEditTerrain()
         {
-            if (force <= 0 || range <= 0)
+            if (modificationForce <= 0 || modificationRange <= 0)
             {
                 return;
             }
 
             if (Input.GetButton("Fire1"))
             {
-                RaycastToTerrain(addTerrain);
+                RaycastToTerrain(increaseTerrain);
             }
             else if (Input.GetButton("Fire2"))
             {
-                RaycastToTerrain(!addTerrain);
+                RaycastToTerrain(!increaseTerrain);
             }
         }
 
@@ -48,26 +49,18 @@ namespace MarchingCubes.Examples
             Vector3 destP = startP + playerCamera.forward;
             Vector3 direction = destP - startP;
 
-            Ray ray = new Ray(startP, direction);
+            var ray = new Ray(startP, direction);
 
-            if (Physics.Raycast(ray, out RaycastHit hit, maxReachDistance))
+            if (!Physics.Raycast(ray, out RaycastHit hit, maxReachDistance)) { return; }
+            Vector3 hitPoint = hit.point;
+
+            if (addTerrain)
             {
-                Vector3 hitPoint = hit.point;
-
-                if (addTerrain)
-                {
-                    Collider[] hits = Physics.OverlapSphere(hitPoint, range / 2f * 0.8f);
-                    for (int i = 0; i < hits.Length; i++)
-                    {
-                        if (hits[i].CompareTag("Player"))
-                        {
-                            return;
-                        }
-                    }
-                }
-
-                EditTerrain(hitPoint, addTerrain, force, range);
+                Collider[] hits = Physics.OverlapSphere(hitPoint, modificationRange / 2f * 0.8f);
+                if (hits.Any(h => h.CompareTag("Player"))) { return; }
             }
+
+            EditTerrain(hitPoint, addTerrain, modificationForce, modificationRange);
         }
 
         private void EditTerrain(Vector3 point, bool addTerrain, float force, float range)
@@ -90,7 +83,7 @@ namespace MarchingCubes.Examples
                         int offsetY = hitY - y;
                         int offsetZ = hitZ - z;
                         
-                        Vector3 offsetPoint = new Vector3(offsetX, offsetY, offsetZ);
+                        var offsetPoint = new Vector3Int(offsetX, offsetY, offsetZ);
                         float distance = Vector3.Distance(offsetPoint, point);
                         if (distance > range)
                         {
@@ -100,11 +93,10 @@ namespace MarchingCubes.Examples
                         float modificationAmount = force / distance * forceOverDistance.Evaluate(1 - distance.Map(0, force, 0, 1)) * buildModifier;
 
                         float oldDensity = world.GetDensity(offsetX, offsetY, offsetZ);
-                        float newDensity = oldDensity - modificationAmount;
+                        float newDensity = Mathf.Clamp01(oldDensity - modificationAmount);
 
-                        newDensity = Mathf.Clamp01(newDensity);
 
-                        world.SetDensity(newDensity, offsetX, offsetY, offsetZ);
+                        world.SetDensity(newDensity, offsetPoint);
                     }
                 }
             }

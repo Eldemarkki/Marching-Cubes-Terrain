@@ -5,7 +5,7 @@ namespace MarchingCubes.Examples.DensityFunctions
     [CreateAssetMenu(fileName = "New Flat Plane Density Function", menuName = "Density Functions/Flat Plane Density Function")]
     public class FlatPlaneDensity : DensityFunction
     {
-        [SerializeField] private float groundLevel = 0;
+        [SerializeField] private float groundLevel;
         
         public override float CalculateDensity(int x, int y, int z)
         {

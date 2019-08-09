@@ -7,8 +7,8 @@ namespace MarchingCubes.Examples.DensityFunctions
     [CreateAssetMenu(fileName = "New Box Density Function", menuName = "Density Functions/Box Density Function")]
     public class BoxDensity : DensityFunction
     {
-        [SerializeField] private Vector3 center = Vector3.zero;
-        [SerializeField] private Vector3 size = Vector3.zero;
+        [SerializeField] protected Vector3 center;
+        [SerializeField] protected Vector3 size;
 
         public override float CalculateDensity(int x, int y, int z)
         {

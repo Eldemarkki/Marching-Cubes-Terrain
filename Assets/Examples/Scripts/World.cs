@@ -7,43 +7,35 @@ namespace MarchingCubes.Examples
 {
     public class World : MonoBehaviour
     {
+        [Header("Chunk settings")]
         [SerializeField] private int chunkSize = 8;
+        [SerializeField] private GameObject chunkPrefab;
 
-        [SerializeField] private int worldWidth = 5;
-        [SerializeField] private int worldHeight = 5;
-        [SerializeField] private int worldDepth = 5;
+        [Header("Marching Cubes settings")]
+        [SerializeField] private float isolevel = 0.5F;
+        [SerializeField] private DensityFunction densityFunction;
 
-        [SerializeField] public float isolevel = 0.5F;
-
+        [Header("Player settings")]
         [SerializeField] private int renderDistance = 40;
         [SerializeField] private Transform player;
 
-        [SerializeField] private GameObject chunkPrefab = null;
+        private Dictionary<Vector3Int, Chunk> _chunks;
+        private Vector3 _startPos;
+        private Queue<Chunk> _availableChunks;
+        private int _renderDistanceChunkCount;
 
-        [SerializeField] public DensityFunction densityFunction;
-
-        private Dictionary<Vector3Int, Chunk> chunks;
-
-        private Vector3 startPos;
-        private Queue<Chunk> availableChunks;
+        public DensityFunction DensityFunction { get; private set; }
 
         private void Awake()
         {
-            startPos = player.position;
-            availableChunks = new Queue<Chunk>();
-            chunks = new Dictionary<Vector3Int, Chunk>(worldWidth*worldHeight*worldDepth);
-            if(densityFunction is InitializedDensityFunction initializable){
-                initializable.Initialize();
-            }
-        }
+            _renderDistanceChunkCount = Mathf.CeilToInt(renderDistance / (float)chunkSize);
 
-        private void Update()
-        {
-            if (Mathf.Abs(player.position.x - startPos.x) >= chunkSize ||
-                Mathf.Abs(player.position.y - startPos.y) >= chunkSize ||
-                Mathf.Abs(player.position.z - startPos.z) >= chunkSize)
+            DensityFunction = densityFunction;
+            _availableChunks = new Queue<Chunk>();
+            _chunks = new Dictionary<Vector3Int, Chunk>();
+            if(densityFunction is InitializedDensityFunction initializable)
             {
-                GenerateNewTerrain(player.position);
+                initializable.Initialize();
             }
         }
         
@@ -52,24 +44,35 @@ namespace MarchingCubes.Examples
             GenerateNewTerrain(player.position);
         }
 
-        public void GenerateNewTerrain(Vector3 playerPos)
-        {;
-            Vector3Int playerChunkPosition = playerPos.FloorToNearestX(chunkSize);
-            int renderDistanceChunkCount = Mathf.CeilToInt(renderDistance / (float)chunkSize);
-            var newTerrain = new Dictionary<Vector3Int, Chunk>((int)Mathf.Pow(renderDistanceChunkCount * 2 + 1, 3));
-
-            for (int x = -renderDistanceChunkCount; x <= renderDistanceChunkCount; x++)
+        private void Update()
+        {
+            if (Mathf.Abs(player.position.x - _startPos.x) >= chunkSize ||
+                Mathf.Abs(player.position.y - _startPos.y) >= chunkSize ||
+                Mathf.Abs(player.position.z - _startPos.z) >= chunkSize)
             {
-                for (int y = -renderDistanceChunkCount; y < renderDistanceChunkCount; y++)
+                GenerateNewTerrain(player.position);
+            }
+        }
+
+        private void GenerateNewTerrain(Vector3 playerPos)
+        {
+            Vector3Int playerChunkPosition = playerPos.FloorToNearestX(chunkSize);
+            
+            // TODO: Initialize this only once
+            var newTerrain = new Dictionary<Vector3Int, Chunk>((int)Mathf.Pow(_renderDistanceChunkCount * 2 + 1, 3));
+
+            for (int x = -_renderDistanceChunkCount; x <= _renderDistanceChunkCount; x++)
+            {
+                for (int y = -_renderDistanceChunkCount; y < _renderDistanceChunkCount; y++)
                 {
-                    for (int z = -renderDistanceChunkCount; z < renderDistanceChunkCount; z++)
+                    for (int z = -_renderDistanceChunkCount; z < _renderDistanceChunkCount; z++)
                     {
-                        Vector3Int chunkPosition = playerChunkPosition + new Vector3Int(x * chunkSize, y * chunkSize, z * chunkSize);
-                        if (!chunks.TryGetValue(chunkPosition, out Chunk chunk))
+                        var chunkPosition = playerChunkPosition + new Vector3Int(x * chunkSize, y * chunkSize, z * chunkSize);
+                        if (!_chunks.TryGetValue(chunkPosition, out Chunk chunk))
                         {
-                            if (availableChunks.Count > 0)
+                            if (_availableChunks.Count > 0)
                             {
-                                chunk = availableChunks.Dequeue();
+                                chunk = _availableChunks.Dequeue();
                                 chunk.gameObject.SetActive(true);
                                 chunk.transform.position = chunkPosition;
                                 chunk.SetPosition(chunkPosition);
@@ -85,43 +88,36 @@ namespace MarchingCubes.Examples
                 }
             }
 
-            var oldKeys = chunks.Keys.ToList();
+            var oldKeys = _chunks.Keys.ToList();
             foreach (var key in oldKeys)
             {
-                if (!newTerrain.ContainsKey(key))
-                {
-                    Chunk chunk = chunks[key];
-                    if (!availableChunks.Contains(chunk))
-                    {
-                        availableChunks.Enqueue(chunk);
-                        chunk.gameObject.SetActive(false);
-                    }
-                }
+                if (newTerrain.ContainsKey(key)) { continue; }
+                
+                Chunk chunk = _chunks[key];
+                if (_availableChunks.Contains(chunk)) { continue; }
+                
+                _availableChunks.Enqueue(chunk);
+                chunk.gameObject.SetActive(false);
             }
 
-            chunks = newTerrain;
+            _chunks = newTerrain;
 
-            startPos = playerPos;
+            _startPos = playerPos;
         }
 
-        public Chunk GetChunk(Vector3Int pos)
+        private Chunk GetChunk(Vector3Int pos)
         {
             return GetChunk(pos.x, pos.y, pos.z);
         }
 
-        public Chunk GetChunk(int x, int y, int z)
+        private Chunk GetChunk(int x, int y, int z)
         {
             int newX = Utils.FloorToNearestX(x, chunkSize);
             int newY = Utils.FloorToNearestX(y, chunkSize);
             int newZ = Utils.FloorToNearestX(z, chunkSize);
 
             Vector3Int key = new Vector3Int(newX, newY, newZ);
-            if (chunks.ContainsKey(key))
-            {
-                return chunks[key];
-            }
-
-            return null;
+            return _chunks.TryGetValue(key, out Chunk chunk) ? chunk : null;
         }
 
         public float GetDensity(int x, int y, int z)
@@ -138,45 +134,23 @@ namespace MarchingCubes.Examples
             return density;
         }
 
-        public float GetDensity(Vector3Int pos)
-        {
-            return GetDensity(pos.x, pos.y, pos.z);
-        }
-
-        public void SetDensity(float density, int worldPosX, int worldPosY, int worldPosZ)
-        {
-            SetDensity(density, new Vector3Int(worldPosX, worldPosY, worldPosZ));
-        }
-
         public void SetDensity(float density, Vector3Int pos)
         {
             for (int i = 0; i < 8; i++)
             {
                 Vector3Int chunkPos = (pos - LookupTables.CubeCorners[i]).FloorToNearestX(chunkSize);
                 Chunk chunk = GetChunk(chunkPos);
-                if (chunk == null)
-                {
-                    continue;
-                }
-
-                Vector3Int localPos = (pos - chunk.position).Mod(chunkSize + 1);
+                Vector3Int localPos = (pos - chunkPos).Mod(chunkSize + 1);
 
                 chunk.SetDensity(density, localPos);
-                chunk.isDirty = true;
             }
-        }
-
-        private void CreateChunk(int x, int y, int z)
-        {
-            CreateChunk(new Vector3Int(x, y, z));
         }
 
         private Chunk CreateChunk(Vector3Int chunkPosition)
         {
-            Chunk chunk = Instantiate(chunkPrefab, chunkPosition, Quaternion.identity).GetComponent<Chunk>();
-            chunk.Initialize(this, chunkSize, chunkPosition);
-            chunk.isDirty = false;
-            chunks.Add(chunkPosition, chunk);
+            var chunk = Instantiate(chunkPrefab, chunkPosition, Quaternion.identity).GetComponent<Chunk>();
+            chunk.Initialize(this, chunkSize, isolevel, chunkPosition);
+            _chunks.Add(chunkPosition, chunk);
             chunk.Generate();
 
             return chunk;

@@ -7,8 +7,8 @@ namespace MarchingCubes.Examples.DensityFunctions
     [CreateAssetMenu(fileName = "New Torus Density Function", menuName = "Density Functions/Torus Density Function")]
     public class TorusDensityFunction : DensityFunction
     {
-        [SerializeField] private Vector3 center = Vector3.zero;
-        [SerializeField] private Vector2 size = Vector2.zero;
+        [SerializeField] private Vector3 center;
+        [SerializeField] private Vector2 size;
 
         public override float CalculateDensity(int x, int y, int z)
         {
