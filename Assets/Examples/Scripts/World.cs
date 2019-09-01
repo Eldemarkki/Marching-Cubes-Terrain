@@ -19,12 +19,16 @@ namespace MarchingCubes.Examples
         [SerializeField] private int renderDistance = 40;
         [SerializeField] private Transform player;
 
+        [Header("Other settings")]
+        [SerializeField] private bool useThreading;
+
         private Dictionary<Vector3Int, Chunk> _chunks;
         private Vector3 _startPos;
         private Queue<Chunk> _availableChunks;
         private int _renderDistanceChunkCount;
 
         public DensityFunction DensityFunction { get; private set; }
+        public bool UseThreading { get => useThreading; private set => useThreading = value; }
 
         private void Awake()
         {

@@ -9,6 +9,7 @@ namespace MarchingCubes.Examples
     {
         private Vector3Int _position;
         private bool _isDirty;
+        private float _isolevel;
 
         private MeshFilter _meshFilter;
         private MeshCollider _meshCollider;
@@ -34,7 +35,8 @@ namespace MarchingCubes.Examples
         public void Initialize(World world, int chunkSize, float isolevel, Vector3Int position)
         {
             _world = world;
-            
+            _isolevel = isolevel;
+
             _densityField = new ValueGrid<float>(chunkSize + 1, chunkSize + 1, chunkSize + 1);
             _meshDataDelegate = () => MarchingCubes.CreateMeshData(_densityField, isolevel);
             
@@ -53,19 +55,36 @@ namespace MarchingCubes.Examples
 
         private void PopulateDensities()
         {
-            var populateTask = Task.Factory.StartNew(() => _densityField.Populate(_world.DensityFunction.CalculateDensity, _position.x, _position.y, _position.z));
-            populateTask.Wait();
+            if (_world.UseThreading)
+            {
+                var populateTask = Task.Factory.StartNew(() => _densityField.Populate(_world.DensityFunction.CalculateDensity, _position.x, _position.y, _position.z));
+                populateTask.Wait();
+            }
+            else
+            {
+                _densityField.Populate(_world.DensityFunction.CalculateDensity, _position.x, _position.y, _position.z);
+            }
         }
 
         public void Generate()
         {
-            var meshTask = new Task<MeshData>(_meshDataDelegate);
+            MeshData meshData;
 
-            meshTask.Start();
-            meshTask.Wait();
+            if (_world.UseThreading)
+            {
+                Task<MeshData> meshTask = Task.Factory.StartNew(_meshDataDelegate);
 
-            var (vertices, triangles) = meshTask.Result;
-            
+                meshTask.Wait();
+
+                meshData = meshTask.Result;
+            }
+            else
+            {
+                meshData = MarchingCubes.CreateMeshData(_densityField, _isolevel);
+            }
+
+            var (vertices, triangles) = meshData;
+
             _mesh.Clear();
             _mesh.SetVertices(vertices);
             _mesh.SetTriangles(triangles, 0);

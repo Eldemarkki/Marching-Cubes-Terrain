@@ -10,14 +10,14 @@ namespace MarchingCubes
             int height = valueGrid.Height;
             int depth = valueGrid.Depth;
             var i = 0;
-            
+
             for (var x = 0; x < width; x++)
             {
                 for (var y = 0; y < height; y++)
                 {
                     for (var z = 0; z < depth; z++)
                     {
-                        valueGrid[i++] = fillFunction(x + offsetX, y + offsetY, z + offsetZ);
+                        valueGrid.data[i++] = fillFunction(x + offsetX, y + offsetY, z + offsetZ);
                     }
                 }
             }

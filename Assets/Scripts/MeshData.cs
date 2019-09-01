@@ -6,8 +6,8 @@ namespace MarchingCubes
 {
     public struct MeshData : IEquatable<MeshData>
     {
-        private readonly List<Vector3> _vertices;
-        private readonly int[] _triangles;
+        public readonly List<Vector3> _vertices;
+        public readonly int[] _triangles;
 
         public MeshData(List<Vector3> vertices, int[] triangles)
         {
