@@ -36,6 +36,11 @@ namespace MarchingCubes.Examples
             _mesh = new Mesh();
         }
 
+        private void OnDestroy()
+        {
+            densities.Dispose();
+        }
+
         private void Update()
         {
             if (!_isDirty) { return; }
@@ -49,6 +54,8 @@ namespace MarchingCubes.Examples
             _chunkSize = chunkSize;
 
             _densityField = new ValueGrid<float>(chunkSize + 1, chunkSize + 1, chunkSize + 1);
+            densities = new NativeArray<float>((_chunkSize + 1) * (_chunkSize + 1) * (_chunkSize + 1), Allocator.Persistent);
+
             _meshDataDelegate = () => MarchingCubes.CreateMeshData(_densityField, isolevel);
 
             SetPosition(position);
@@ -68,8 +75,6 @@ namespace MarchingCubes.Examples
         {
             if (_world.UseThreading)
             {
-                densities = new NativeArray<float>((_chunkSize + 1) * (_chunkSize + 1) * (_chunkSize + 1), Allocator.TempJob);
-
                 densityCalculationJob = new DensityCalculationJob()
                 {
                     densities = densities,
@@ -99,7 +104,6 @@ namespace MarchingCubes.Examples
                 {
                     densityJobHandle.Complete();
                     densities.CopyTo(_densityField.data);
-                    densities.Dispose();
                     densitiesChanged = false;
                 }
 
