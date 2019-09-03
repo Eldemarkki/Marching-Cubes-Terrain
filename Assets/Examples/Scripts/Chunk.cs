@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
+using MarchingCubes.Examples.DensityFunctions;
+using Unity.Collections;
+using Unity.Jobs;
 using UnityEngine;
 
 namespace MarchingCubes.Examples
@@ -10,17 +13,24 @@ namespace MarchingCubes.Examples
         private Vector3Int _position;
         private bool _isDirty;
         private float _isolevel;
+        private int _chunkSize;
 
         private MeshFilter _meshFilter;
         private MeshCollider _meshCollider;
         private Mesh _mesh;
-        
+
         private ValueGrid<float> _densityField;
 
         private Func<MeshData> _meshDataDelegate;
         private World _world;
-        
-        private void Awake(){
+
+        private NativeArray<float> densities;
+        private JobHandle densityJobHandle;
+        private DensityCalculationJob densityCalculationJob;
+        private bool densitiesChanged;
+
+        private void Awake()
+        {
             _meshFilter = GetComponent<MeshFilter>();
             _meshCollider = GetComponent<MeshCollider>();
             _mesh = new Mesh();
@@ -36,10 +46,11 @@ namespace MarchingCubes.Examples
         {
             _world = world;
             _isolevel = isolevel;
+            _chunkSize = chunkSize;
 
             _densityField = new ValueGrid<float>(chunkSize + 1, chunkSize + 1, chunkSize + 1);
             _meshDataDelegate = () => MarchingCubes.CreateMeshData(_densityField, isolevel);
-            
+
             SetPosition(position);
         }
 
@@ -49,7 +60,7 @@ namespace MarchingCubes.Examples
             name = $"Chunk_{position.x.ToString()}_{position.y.ToString()}_{position.z.ToString()}";
 
             PopulateDensities();
-            
+
             _isDirty = true;
         }
 
@@ -57,8 +68,20 @@ namespace MarchingCubes.Examples
         {
             if (_world.UseThreading)
             {
-                var populateTask = Task.Factory.StartNew(() => _densityField.Populate(_world.DensityFunction.CalculateDensity, _position.x, _position.y, _position.z));
-                populateTask.Wait();
+                densities = new NativeArray<float>((_chunkSize + 1) * (_chunkSize + 1) * (_chunkSize + 1), Allocator.TempJob);
+
+                densityCalculationJob = new DensityCalculationJob()
+                {
+                    densities = densities,
+                    offsetX = _position.x,
+                    offsetY = _position.y,
+                    offsetZ = _position.z,
+                    chunkSize = _chunkSize + 1, // +1 because chunkSize is the amount of "voxels", and that +1 is the amount of density points
+                };
+
+                densityJobHandle = densityCalculationJob.Schedule(densities.Length, 256);
+
+                densitiesChanged = true;
             }
             else
             {
@@ -72,6 +95,14 @@ namespace MarchingCubes.Examples
 
             if (_world.UseThreading)
             {
+                if (densitiesChanged)
+                {
+                    densityJobHandle.Complete();
+                    densities.CopyTo(_densityField.data);
+                    densities.Dispose();
+                    densitiesChanged = false;
+                }
+
                 Task<MeshData> meshTask = Task.Factory.StartNew(_meshDataDelegate);
 
                 meshTask.Wait();
@@ -89,7 +120,7 @@ namespace MarchingCubes.Examples
             _mesh.SetVertices(vertices);
             _mesh.SetTriangles(triangles, 0);
             _mesh.RecalculateNormals();
-            
+
             _meshFilter.sharedMesh = _mesh;
             _meshCollider.sharedMesh = _mesh;
 

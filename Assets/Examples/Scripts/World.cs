@@ -31,7 +31,7 @@ namespace MarchingCubes.Examples
         public bool UseThreading { get => useThreading; private set => useThreading = value; }
 
         private void Awake()
-        {
+        {            
             _renderDistanceChunkCount = Mathf.CeilToInt(renderDistance / (float)chunkSize);
 
             DensityFunction = densityFunction;
@@ -155,7 +155,6 @@ namespace MarchingCubes.Examples
             var chunk = Instantiate(chunkPrefab, chunkPosition, Quaternion.identity).GetComponent<Chunk>();
             chunk.Initialize(this, chunkSize, isolevel, chunkPosition);
             _chunks.Add(chunkPosition, chunk);
-            chunk.Generate();
 
             return chunk;
         }
