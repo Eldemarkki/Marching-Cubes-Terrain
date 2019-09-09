@@ -4,6 +4,6 @@ namespace MarchingCubes.Examples.DensityFunctions
 {
     public abstract class DensityFunction : ScriptableObject
     {
-        public abstract float CalculateDensity(int x, int y, int z);
+        public abstract float CalculateDensity(float x, float y, float z);
     }
 }

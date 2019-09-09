@@ -10,7 +10,7 @@ namespace MarchingCubes.Examples.DensityFunctions
         [SerializeField] protected Vector3 center;
         [SerializeField] protected Vector3 size;
 
-        public override float CalculateDensity(int x, int y, int z)
+        public override float CalculateDensity(float x, float y, float z)
         {
             Vector3 p = new Vector3(x, y, z) - center;
             Vector3 d = p.Abs() - size;

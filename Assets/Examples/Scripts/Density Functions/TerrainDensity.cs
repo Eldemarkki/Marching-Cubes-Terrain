@@ -17,7 +17,7 @@ namespace MarchingCubes.Examples.DensityFunctions
             _noise = new FastNoise(seed);
         }
 
-        public override float CalculateDensity(int x, int y, int z)
+        public override float CalculateDensity(float x, float y, float z)
         {
             return y - _noise.GetPerlin(x / noiseScale, z / noiseScale).Map(-1, 1, 0, 1) * heightScale - groundLevel + 0.5f;
         }

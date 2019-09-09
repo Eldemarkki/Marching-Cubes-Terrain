@@ -9,7 +9,7 @@ namespace MarchingCubes.Examples.DensityFunctions
     {
         [SerializeField] private float rounding;
 
-        public override float CalculateDensity(int x, int y, int z)
+        public override float CalculateDensity(float x, float y, float z)
         {
             return base.CalculateDensity(x, y, z) - rounding;
         }

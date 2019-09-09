@@ -4,7 +4,7 @@ namespace MarchingCubes
 {
     public static class ValueGridExtensions
     {
-        public static void Populate<T>(this ValueGrid<T> valueGrid, Func<int, int, int, T> fillFunction, int offsetX = 0, int offsetY = 0, int offsetZ = 0)
+        public static void Populate<T>(this ValueGrid<T> valueGrid, Func<float, float, float, T> fillFunction, int offsetX = 0, int offsetY = 0, int offsetZ = 0)
         {
             int width = valueGrid.Width;
             int height = valueGrid.Height;

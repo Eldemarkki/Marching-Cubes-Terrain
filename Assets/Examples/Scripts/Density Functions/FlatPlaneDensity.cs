@@ -7,7 +7,7 @@ namespace MarchingCubes.Examples.DensityFunctions
     {
         [SerializeField] private float groundLevel;
         
-        public override float CalculateDensity(int x, int y, int z)
+        public override float CalculateDensity(float x, float y, float z)
         {
             return y - groundLevel + 0.5f;
         }
