@@ -109,11 +109,6 @@ namespace MarchingCubes.Examples
             _startPos = playerPos;
         }
 
-        private Chunk GetChunk(Vector3Int pos)
-        {
-            return GetChunk(pos.x, pos.y, pos.z);
-        }
-
         private Chunk GetChunk(int x, int y, int z)
         {
             int newX = Utils.FloorToNearestX(x, chunkSize);
@@ -121,7 +116,7 @@ namespace MarchingCubes.Examples
             int newZ = Utils.FloorToNearestX(z, chunkSize);
 
             Vector3Int key = new Vector3Int(newX, newY, newZ);
-            return _chunks.TryGetValue(key, out Chunk chunk) ? chunk : null;
+            return _chunks[key];
         }
 
         public float GetDensity(int x, int y, int z)
@@ -143,10 +138,10 @@ namespace MarchingCubes.Examples
             for (int i = 0; i < 8; i++)
             {
                 Vector3Int chunkPos = (pos - LookupTables.CubeCorners[i]).FloorToNearestX(chunkSize);
-                Chunk chunk = GetChunk(chunkPos);
+                Chunk chunk = GetChunk(chunkPos.x, chunkPos.y, chunkPos.z);
                 Vector3Int localPos = (pos - chunkPos).Mod(chunkSize + 1);
 
-                chunk.SetDensity(density, localPos);
+                chunk.SetDensity(density, localPos.x, localPos.y, localPos.z);
             }
         }
 

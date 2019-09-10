@@ -136,15 +136,10 @@ namespace MarchingCubes.Examples
             return _densityField[x, y, z];
         }
 
-        private void SetDensity(float density, int x, int y, int z)
+        public void SetDensity(float density, int x, int y, int z)
         {
             _densityField[x, y, z] = density;
             _isDirty = true;
-        }
-
-        public void SetDensity(float density, Vector3Int pos)
-        {
-            SetDensity(density, pos.x, pos.y, pos.z);
         }
     }
 }
