@@ -75,7 +75,7 @@ namespace MarchingCubes.Examples
         {
             if (_world.UseThreading)
             {
-                densityCalculationJob = new DensityCalculationJob()
+                densityCalculationJob = new DensityCalculationJob
                 {
                     densities = densities,
                     offsetX = _position.x,

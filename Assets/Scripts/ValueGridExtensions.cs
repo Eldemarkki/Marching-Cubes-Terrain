@@ -4,18 +4,18 @@ namespace MarchingCubes
 {
     public static class ValueGridExtensions
     {
-        public static void Populate<T>(this ValueGrid<T> valueGrid, Func<float, float, float, T> fillFunction, int offsetX = 0, int offsetY = 0, int offsetZ = 0)
+        public static void Populate<T>(this ValueGrid<T> valueGrid, Func<float, float, float, T> fillFunction, int offsetX, int offsetY, int offsetZ)
         {
             int width = valueGrid.Width;
             int height = valueGrid.Height;
             int depth = valueGrid.Depth;
-            var i = 0;
+            int i = 0;
 
-            for (var x = 0; x < width; x++)
+            for (int x = 0; x < width; x++)
             {
-                for (var y = 0; y < height; y++)
+                for (int y = 0; y < height; y++)
                 {
-                    for (var z = 0; z < depth; z++)
+                    for (int z = 0; z < depth; z++)
                     {
                         valueGrid.data[i++] = fillFunction(x + offsetX, y + offsetY, z + offsetZ);
                     }
