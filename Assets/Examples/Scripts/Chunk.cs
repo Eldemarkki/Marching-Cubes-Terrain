@@ -10,7 +10,7 @@ namespace MarchingCubes.Examples
     [RequireComponent(typeof(MeshRenderer), typeof(MeshFilter))]
     public class Chunk : MonoBehaviour
     {
-        private Vector3Int _position;
+        private Vector3Int _coordinate;
         private bool _isDirty;
         private float _isolevel;
         private int _chunkSize;
@@ -47,7 +47,7 @@ namespace MarchingCubes.Examples
             Generate();
         }
 
-        public void Initialize(World world, int chunkSize, float isolevel, Vector3Int position)
+        public void Initialize(World world, int chunkSize, float isolevel, Vector3Int coordinate)
         {
             _world = world;
             _isolevel = isolevel;
@@ -58,13 +58,14 @@ namespace MarchingCubes.Examples
 
             _meshDataDelegate = () => MarchingCubes.CreateMeshData(_densityField, isolevel);
 
-            SetPosition(position);
+            SetCoordinate(coordinate);
         }
 
-        public void SetPosition(Vector3Int position)
+        public void SetCoordinate(Vector3Int coordinate)
         {
-            _position = position;
-            name = $"Chunk_{position.x.ToString()}_{position.y.ToString()}_{position.z.ToString()}";
+            _coordinate = coordinate;
+            transform.position = coordinate * _chunkSize;
+            name = $"Chunk_{coordinate.x.ToString()}_{coordinate.y.ToString()}_{coordinate.z.ToString()}";
 
             PopulateDensities();
 
@@ -73,14 +74,16 @@ namespace MarchingCubes.Examples
 
         private void PopulateDensities()
         {
+            Vector3Int offset = _coordinate * _chunkSize;
+
             if (_world.UseThreading)
             {
                 densityCalculationJob = new DensityCalculationJob
                 {
                     densities = densities,
-                    offsetX = _position.x,
-                    offsetY = _position.y,
-                    offsetZ = _position.z,
+                    offsetX = offset.x,
+                    offsetY = offset.y,
+                    offsetZ = offset.z,
                     chunkSize = _chunkSize + 1, // +1 because chunkSize is the amount of "voxels", and that +1 is the amount of density points
                 };
 
@@ -90,7 +93,7 @@ namespace MarchingCubes.Examples
             }
             else
             {
-                _densityField.Populate(_world.DensityFunction.CalculateDensity, _position.x, _position.y, _position.z);
+                _densityField.Populate(_world.DensityFunction.CalculateDensity, offset.x, offset.y, offset.z);
             }
         }
 

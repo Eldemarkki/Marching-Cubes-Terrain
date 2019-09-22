@@ -59,7 +59,8 @@ namespace MarchingCubes.Examples
         private void GenerateNewTerrain(Vector3 playerPos)
         {
             Vector3Int playerChunkPosition = playerPos.FloorToNearestX(chunkSize);
-            
+            Vector3Int playerCoordinate = ((Vector3)playerChunkPosition / chunkSize).Floor();
+
             // TODO: Initialize this only once
             var newTerrain = new Dictionary<Vector3Int, Chunk>((int)Mathf.Pow(renderDistance * 2 + 1, 3));
 
@@ -69,23 +70,23 @@ namespace MarchingCubes.Examples
                 {
                     for (int z = -renderDistance; z < renderDistance; z++)
                     {
-                        var chunkPosition = playerChunkPosition + new Vector3Int(x * chunkSize, y * chunkSize, z * chunkSize);
-                        if (!_chunks.TryGetValue(chunkPosition, out Chunk chunk))
+                        Vector3Int chunkCoordinate = playerCoordinate + new Vector3Int(x, y, z);
+
+                        if (!_chunks.TryGetValue(chunkCoordinate, out Chunk chunk))
                         {
                             if (_availableChunks.Count > 0)
                             {
                                 chunk = _availableChunks.Dequeue();
                                 chunk.gameObject.SetActive(true);
-                                chunk.transform.position = chunkPosition;
-                                chunk.SetPosition(chunkPosition);
+                                chunk.SetCoordinate(chunkCoordinate);
                             }
                             else
                             {
-                                chunk = CreateChunk(chunkPosition);
+                                chunk = CreateChunk(chunkCoordinate);
                             }
                         }
 
-                        newTerrain.Add(chunkPosition, chunk);
+                        newTerrain.Add(chunkCoordinate, chunk);
                     }
                 }
             }
@@ -109,9 +110,9 @@ namespace MarchingCubes.Examples
 
         private Chunk GetChunk(int x, int y, int z)
         {
-            int newX = Utils.FloorToNearestX(x, chunkSize);
-            int newY = Utils.FloorToNearestX(y, chunkSize);
-            int newZ = Utils.FloorToNearestX(z, chunkSize);
+            int newX = Utils.FloorToNearestX(x, chunkSize) / chunkSize;
+            int newY = Utils.FloorToNearestX(y, chunkSize) / chunkSize;
+            int newZ = Utils.FloorToNearestX(z, chunkSize) / chunkSize;
 
             Vector3Int key = new Vector3Int(newX, newY, newZ);
             return _chunks[key];
@@ -143,11 +144,11 @@ namespace MarchingCubes.Examples
             }
         }
 
-        private Chunk CreateChunk(Vector3Int chunkPosition)
+        private Chunk CreateChunk(Vector3Int chunkCoordinate)
         {
-            var chunk = Instantiate(chunkPrefab, chunkPosition, Quaternion.identity).GetComponent<Chunk>();
-            chunk.Initialize(this, chunkSize, isolevel, chunkPosition);
-            _chunks.Add(chunkPosition, chunk);
+            var chunk = Instantiate(chunkPrefab, chunkCoordinate * chunkSize, Quaternion.identity).GetComponent<Chunk>();
+            chunk.Initialize(this, chunkSize, isolevel, chunkCoordinate);
+            _chunks.Add(chunkCoordinate, chunk);
 
             return chunk;
         }

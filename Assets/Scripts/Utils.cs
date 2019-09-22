@@ -32,6 +32,11 @@ namespace MarchingCubes
             return FloorToNearestX(new Vector3(n.x, n.y, n.z), x);
         }
 
+        public static Vector3Int Floor(this Vector3 n)
+        {
+            return new Vector3Int(Mathf.FloorToInt(n.x), Mathf.FloorToInt(n.y), Mathf.FloorToInt(n.z));
+        }
+
         public static Vector3Int Mod(this Vector3Int n, int x)
         {
             var modX = Mod(n.x, x);
