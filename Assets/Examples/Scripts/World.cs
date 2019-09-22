@@ -16,7 +16,7 @@ namespace MarchingCubes.Examples
         [SerializeField] private DensityFunction densityFunction;
 
         [Header("Player settings")]
-        [SerializeField] private int renderDistance = 40;
+        [SerializeField] private int renderDistance = 4;
         [SerializeField] private Transform player;
 
         [Header("Other settings")]
@@ -25,14 +25,12 @@ namespace MarchingCubes.Examples
         private Dictionary<Vector3Int, Chunk> _chunks;
         private Vector3 _startPos;
         private Queue<Chunk> _availableChunks;
-        private int _renderDistanceChunkCount;
 
         public DensityFunction DensityFunction { get; private set; }
         public bool UseThreading { get => useThreading; private set => useThreading = value; }
 
         private void Awake()
         {            
-            _renderDistanceChunkCount = Mathf.CeilToInt(renderDistance / (float)chunkSize);
 
             DensityFunction = densityFunction;
             _availableChunks = new Queue<Chunk>();
@@ -63,13 +61,13 @@ namespace MarchingCubes.Examples
             Vector3Int playerChunkPosition = playerPos.FloorToNearestX(chunkSize);
             
             // TODO: Initialize this only once
-            var newTerrain = new Dictionary<Vector3Int, Chunk>((int)Mathf.Pow(_renderDistanceChunkCount * 2 + 1, 3));
+            var newTerrain = new Dictionary<Vector3Int, Chunk>((int)Mathf.Pow(renderDistance * 2 + 1, 3));
 
-            for (int x = -_renderDistanceChunkCount; x <= _renderDistanceChunkCount; x++)
+            for (int x = -renderDistance; x <= renderDistance; x++)
             {
-                for (int y = -_renderDistanceChunkCount; y < _renderDistanceChunkCount; y++)
+                for (int y = -renderDistance; y < renderDistance; y++)
                 {
-                    for (int z = -_renderDistanceChunkCount; z < _renderDistanceChunkCount; z++)
+                    for (int z = -renderDistance; z < renderDistance; z++)
                     {
                         var chunkPosition = playerChunkPosition + new Vector3Int(x * chunkSize, y * chunkSize, z * chunkSize);
                         if (!_chunks.TryGetValue(chunkPosition, out Chunk chunk))

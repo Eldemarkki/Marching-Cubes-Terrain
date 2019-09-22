@@ -642,6 +642,6 @@ MonoBehaviour:
     type: 3}
   isolevel: 0.5
   densityFunction: {fileID: 11400000, guid: 1848a3e960cd41f40870af3d6f8b6455, type: 2}
-  renderDistance: 32
+  renderDistance: 4
   player: {fileID: 534669905}
   useThreading: 1
