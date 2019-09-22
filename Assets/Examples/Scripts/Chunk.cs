@@ -76,7 +76,7 @@ namespace MarchingCubes.Examples
         {
             Vector3Int offset = _coordinate * _chunkSize;
 
-            if (_world.UseThreading)
+            if (_world.UseJobSystem)
             {
                 densityCalculationJob = new DensityCalculationJob
                 {
@@ -101,7 +101,7 @@ namespace MarchingCubes.Examples
         {
             MeshData meshData;
 
-            if (_world.UseThreading)
+            if (_world.UseJobSystem)
             {
                 if (densitiesChanged)
                 {

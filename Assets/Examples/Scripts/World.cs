@@ -20,14 +20,14 @@ namespace MarchingCubes.Examples
         [SerializeField] private Transform player;
 
         [Header("Other settings")]
-        [SerializeField] private bool useThreading;
+        [SerializeField] private bool useJobSystem;
 
         private Dictionary<Vector3Int, Chunk> _chunks;
         private Vector3 _startPos;
         private Queue<Chunk> _availableChunks;
 
         public DensityFunction DensityFunction { get; private set; }
-        public bool UseThreading { get => useThreading; private set => useThreading = value; }
+        public bool UseJobSystem { get => useJobSystem; private set => useJobSystem = value; }
 
         private void Awake()
         {            
