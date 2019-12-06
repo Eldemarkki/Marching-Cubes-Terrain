@@ -21,7 +21,7 @@ namespace MarchingCubes.Examples.DensityFunctions
             int y = (index / chunkSize % chunkSize) + yOffset;
             int z = (index % chunkSize) + zOffset;
 
-            float density = y - OctaveNoise(x, z, terrainSettings.noiseFrequency, terrainSettings.noiseOctaveCount) * terrainSettings.amplitude - terrainSettings.heightOffset;
+            float density = y - OctaveNoise(x, z, terrainSettings.NoiseFrequency, terrainSettings.NoiseOctaveCount) * terrainSettings.Amplitude - terrainSettings.HeightOffset;
 
             densities[index] = density;
         }

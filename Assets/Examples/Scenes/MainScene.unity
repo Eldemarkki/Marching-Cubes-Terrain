@@ -646,7 +646,7 @@ MonoBehaviour:
     noiseFrequency: 0.001
     noiseOctaveCount: 16
     amplitude: 30
-    heightOffset: 5
+    heightOffset: 0
   renderDistance: 3
   player: {fileID: 534669905}
   useJobSystem: 1
