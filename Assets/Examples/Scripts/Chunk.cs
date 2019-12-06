@@ -20,7 +20,6 @@ namespace MarchingCubes.Examples
 
         private ValueGrid<float> _densityField;
 
-        private Func<MeshData> _meshDataDelegate;
         private World _world;
 
         private NativeArray<float> densities;
@@ -56,8 +55,6 @@ namespace MarchingCubes.Examples
 
             _densityField = new ValueGrid<float>(chunkSize + 1, chunkSize + 1, chunkSize + 1);
             densities = new NativeArray<float>((_chunkSize + 1) * (_chunkSize + 1) * (_chunkSize + 1), Allocator.Persistent);
-
-            _meshDataDelegate = () => MarchingCubes.CreateMeshData(_densityField, isolevel);
 
             SetCoordinate(coordinate);
         }
