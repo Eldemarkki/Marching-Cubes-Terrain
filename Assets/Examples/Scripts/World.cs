@@ -32,7 +32,7 @@ namespace MarchingCubes.Examples
             this.DensityFunction = densityFunction;
                
         }
-        public DensityFunction DensityFunction { get; private set; }
+        public DensityFunction DensityFunction { get => densityFunction; private set => densityFunction = value; }
         public TerrainSettings TerrainSettings { get => terrainSettings; private set => terrainSettings = value; }
         public bool UseJobSystem { get => useJobSystem; private set => useJobSystem = value; }
 
