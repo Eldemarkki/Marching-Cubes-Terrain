@@ -3,9 +3,9 @@
     public class ValueGrid<T>
     {
         public readonly T[] data;
-        private int width;
-        private int height;
-        private int depth;
+        private readonly int width;
+        private readonly int height;
+        private readonly int depth;
 
         public int Width { get => width; }
         public int Height { get => height; }
@@ -28,6 +28,10 @@
         
         public void Set(int x, int y, int z, T value){
             data[x * width * height + y * width + z] = value;
+        }
+
+        public void Set(int index, T value){
+            data[index] = value;
         }
     }
 }

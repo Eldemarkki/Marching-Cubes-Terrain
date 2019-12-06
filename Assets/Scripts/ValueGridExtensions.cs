@@ -17,7 +17,8 @@ namespace MarchingCubes
                 {
                     for (int z = 0; z < depth; z++)
                     {
-                        valueGrid.data[i++] = fillFunction(x + offsetX, y + offsetY, z + offsetZ);
+                        valueGrid.Set(i, fillFunction(x + offsetX, y + offsetY, z + offsetZ));
+                        i++;
                     }
                 }
             }
