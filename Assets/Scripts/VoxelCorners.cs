@@ -5,7 +5,23 @@ namespace MarchingCubes
 {
     public struct VoxelCorners<T> : IEquatable<VoxelCorners<T>>
     {
-        public T c1, c2, c3, c4, c5, c6, c7, c8;
+        private T c8;
+        private T c1;
+        private T c2;
+        private T c3;
+        private T c4;
+        private T c5;
+        private T c6;
+        private T c7;
+
+        public T Corner1 { get => c1; set => c1 = value; }
+        public T Corner2 { get => c2; set => c2 = value; }
+        public T Corner3 { get => c3; set => c3 = value; }
+        public T Corner4 { get => c4; set => c4 = value; }
+        public T Corner5 { get => c5; set => c5 = value; }
+        public T Corner6 { get => c6; set => c6 = value; }
+        public T Corner7 { get => c7; set => c7 = value; }
+        public T Corner8 { get => c8; set => c8 = value; }
 
         public VoxelCorners(T c1, T c2, T c3, T c4, T c5, T c6, T c7, T c8)
         {
