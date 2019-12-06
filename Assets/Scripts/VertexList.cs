@@ -12,8 +12,7 @@ namespace MarchingCubes
             get
             {
                 switch (index)
-                {
-                    default: 
+                { 
                     case 0: return _c1;
                     case 1: return _c2;
                     case 2: return _c3;
@@ -26,13 +25,13 @@ namespace MarchingCubes
                     case 9: return _c10;
                     case 10: return _c11;
                     case 11: return _c12;
+                    default: throw new System.IndexOutOfRangeException();
                 }
             }
             set
             {
                 switch (index)
                 {
-                    default:
                     case 0:
                         _c1 = value;
                         break;
@@ -69,6 +68,8 @@ namespace MarchingCubes
                     case 11:
                         _c12 = value;
                         break;
+                    default:
+                        throw new System.IndexOutOfRangeException();
                 }
             }
         }

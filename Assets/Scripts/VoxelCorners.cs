@@ -41,7 +41,7 @@ namespace MarchingCubes
             {
                 switch (index)
                 {
-                    default: return c1;
+                    case 0: return c1;
                     case 1: return c2;
                     case 2: return c3;
                     case 3: return c4;
@@ -49,13 +49,14 @@ namespace MarchingCubes
                     case 5: return c6;
                     case 6: return c7;
                     case 7: return c8;
+                    default: throw new System.IndexOutOfRangeException();
                 }
             }
             set
             {
                 switch (index)
                 {
-                    default:
+                    case 0:
                         c1 = value;
                         break;
                     case 1:
@@ -79,6 +80,7 @@ namespace MarchingCubes
                     case 7:
                         c8 = value;
                         break;
+                    default: throw new System.IndexOutOfRangeException();
                 }
             }
         }
