@@ -13,7 +13,8 @@ namespace MarchingCubes
             {
                 switch (index)
                 {
-                    default: return _c1;
+                    default: 
+                    case 0: return _c1;
                     case 1: return _c2;
                     case 2: return _c3;
                     case 3: return _c4;
@@ -32,6 +33,7 @@ namespace MarchingCubes
                 switch (index)
                 {
                     default:
+                    case 0:
                         _c1 = value;
                         break;
                     case 1:

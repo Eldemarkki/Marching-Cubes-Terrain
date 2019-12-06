@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using MarchingCubes.Examples.DensityFunctions;
 using UnityEngine;
 
@@ -8,12 +7,15 @@ namespace MarchingCubes.Examples
     public class World : MonoBehaviour
     {
         [Header("Chunk settings")]
-        [SerializeField] private int chunkSize = 8;
+        [SerializeField] private int chunkSize = 16;
         [SerializeField] private GameObject chunkPrefab;
 
         [Header("Marching Cubes settings")]
         [SerializeField] private float isolevel = 0.5F;
         [SerializeField] private DensityFunction densityFunction;
+
+        [Header("Terrain Settings")]
+        [SerializeField] private TerrainSettings terrainSettings = new TerrainSettings(0.001f, 16, 10, 5);
 
         [Header("Player settings")]
         [SerializeField] private int renderDistance = 4;
@@ -24,16 +26,19 @@ namespace MarchingCubes.Examples
 
         private Dictionary<Vector3Int, Chunk> _chunks;
         private Vector3 _startPos;
-        private Queue<Chunk> _availableChunks;
 
+        public World(DensityFunction densityFunction) 
+        {
+            this.DensityFunction = densityFunction;
+               
+        }
         public DensityFunction DensityFunction { get; private set; }
+        public TerrainSettings TerrainSettings { get => terrainSettings; private set => terrainSettings = value; }
         public bool UseJobSystem { get => useJobSystem; private set => useJobSystem = value; }
 
         private void Awake()
-        {            
-
+        {
             DensityFunction = densityFunction;
-            _availableChunks = new Queue<Chunk>();
             _chunks = new Dictionary<Vector3Int, Chunk>();
             if(densityFunction is InitializedDensityFunction initializable)
             {
@@ -62,22 +67,41 @@ namespace MarchingCubes.Examples
             Vector3Int playerCoordinate = ((Vector3)playerChunkPosition / chunkSize).Floor();
 
             // TODO: Initialize this only once
-            var newTerrain = new Dictionary<Vector3Int, Chunk>((int)Mathf.Pow(renderDistance * 2 + 1, 3));
+            var newTerrainChunks = new Dictionary<Vector3Int, Chunk>((renderDistance * 2 + 1) * (renderDistance * 2 + 1) * (renderDistance * 2 + 1));
+
+            Queue<Chunk> availableChunks = new Queue<Chunk>();
+            foreach (var chunk in _chunks.Values)
+            {
+                int xOffset = Mathf.Abs(chunk.Coordinate.x - playerCoordinate.x);
+                int yOffset = Mathf.Abs(chunk.Coordinate.y - playerCoordinate.y);
+                int zOffset = Mathf.Abs(chunk.Coordinate.z - playerCoordinate.z);
+
+                if(xOffset > renderDistance || yOffset > renderDistance || zOffset > renderDistance)
+                {
+                    availableChunks.Enqueue(chunk);
+                }
+            }
 
             for (int x = -renderDistance; x <= renderDistance; x++)
             {
-                for (int y = -renderDistance; y < renderDistance; y++)
+                for (int y = -renderDistance; y <= renderDistance; y++)
                 {
-                    for (int z = -renderDistance; z < renderDistance; z++)
+                    for (int z = -renderDistance; z <= renderDistance; z++)
                     {
                         Vector3Int chunkCoordinate = playerCoordinate + new Vector3Int(x, y, z);
 
-                        if (!_chunks.TryGetValue(chunkCoordinate, out Chunk chunk))
+                        Chunk chunk;
+                        bool chunkExistsAtCoordinate = _chunks.ContainsKey(chunkCoordinate);
+                        if (chunkExistsAtCoordinate)
                         {
-                            if (_availableChunks.Count > 0)
+                            chunk = _chunks[chunkCoordinate];
+                        }
+                        else
+                        {
+                            // There is not a chunk at that coordinate, so move (or create) one there
+                            if (availableChunks.Count > 0)
                             {
-                                chunk = _availableChunks.Dequeue();
-                                chunk.gameObject.SetActive(true);
+                                chunk = availableChunks.Dequeue();
                                 chunk.SetCoordinate(chunkCoordinate);
                             }
                             else
@@ -86,25 +110,12 @@ namespace MarchingCubes.Examples
                             }
                         }
 
-                        newTerrain.Add(chunkCoordinate, chunk);
+                        newTerrainChunks.Add(chunkCoordinate, chunk);
                     }
                 }
             }
 
-            var oldKeys = _chunks.Keys.ToList();
-            foreach (var key in oldKeys)
-            {
-                if (newTerrain.ContainsKey(key)) { continue; }
-                
-                Chunk chunk = _chunks[key];
-                if (_availableChunks.Contains(chunk)) { continue; }
-                
-                _availableChunks.Enqueue(chunk);
-                chunk.gameObject.SetActive(false);
-            }
-
-            _chunks = newTerrain;
-
+            _chunks = newTerrainChunks;
             _startPos = playerPos;
         }
 
@@ -115,16 +126,13 @@ namespace MarchingCubes.Examples
             int newZ = Utils.FloorToNearestX(z, chunkSize) / chunkSize;
 
             Vector3Int key = new Vector3Int(newX, newY, newZ);
-            return _chunks[key];
+            return _chunks[key];  
         }
 
         public float GetDensity(int x, int y, int z)
         {
             Chunk chunk = GetChunk(x, y, z);
-            if (chunk == null)
-            {
-                return 0;
-            }
+            if (chunk == null) { return 0; }
 
             float density = chunk.GetDensity(x.Mod(chunkSize),
                                              y.Mod(chunkSize),

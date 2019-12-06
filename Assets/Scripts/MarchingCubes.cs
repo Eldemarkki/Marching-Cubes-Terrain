@@ -11,7 +11,7 @@ namespace MarchingCubes
             return p1 + (isolevel - v1) * (p2 - p1) / (v2 - v1);
         }
 
-        private static VertexList GenerateVertexList(VoxelCorners<float> densities, VoxelCorners<Vector3Int> corners,
+        private static VertexList GenerateVertexList(VoxelCorners<float> densities, VoxelCorners<Vector3Int> corners, 
             int edgeIndex, float isolevel)
         {
             var vertexList = new VertexList();
@@ -56,18 +56,13 @@ namespace MarchingCubes
         {
             var vertices = new List<Vector3>();
 
-            int xAxis = densityField.Width * densityField.Height;
-            int yAxis = densityField.Width;
-
-            int originIndex = 0;
             for (int x = 0; x < densityField.Width-1; x++)
             {
                 for (int y = 0; y < densityField.Height-1; y++)
                 {
                     for (int z = 0; z < densityField.Depth-1; z++)
                     {
-                        VoxelCorners<float> densities = GetDensities(originIndex, xAxis, yAxis, 1, densityField);
-                        originIndex++;
+                        VoxelCorners<float> densities = GetDensities(x, y, z, densityField);
 
                         int cubeIndex = CalculateCubeIndex(densities, isolevel);
                         if (cubeIndex == 0 || cubeIndex == 255) 
@@ -86,9 +81,7 @@ namespace MarchingCubes
                             vertices.Add(vertexList[row[i]]);
                         }
                     }
-                    originIndex++;
                 }
-                originIndex += densityField.Height;
             }
 
             // The Marching Cubes algorithm produces vertices in an order that you can 
@@ -100,33 +93,33 @@ namespace MarchingCubes
 
         private static VoxelCorners<Vector3Int> GetCorners(int x, int y, int z)
         {
-            var corners = new VoxelCorners<Vector3Int>();
             var origin = new Vector3Int(x, y, z);
 
-            corners.c1 = origin + LookupTables.CubeCorners[0];
-            corners.c2 = origin + LookupTables.CubeCorners[1];
-            corners.c3 = origin + LookupTables.CubeCorners[2];
-            corners.c4 = origin + LookupTables.CubeCorners[3];
-            corners.c5 = origin + LookupTables.CubeCorners[4];
-            corners.c6 = origin + LookupTables.CubeCorners[5];
-            corners.c7 = origin + LookupTables.CubeCorners[6];
-            corners.c8 = origin + LookupTables.CubeCorners[7];
+            VoxelCorners<Vector3Int> corners = new VoxelCorners<Vector3Int>(
+                origin + LookupTables.CubeCorners[0],
+                origin + LookupTables.CubeCorners[1],
+                origin + LookupTables.CubeCorners[2],
+                origin + LookupTables.CubeCorners[3],
+                origin + LookupTables.CubeCorners[4],
+                origin + LookupTables.CubeCorners[5],
+                origin + LookupTables.CubeCorners[6],
+                origin + LookupTables.CubeCorners[7]
+            );
 
             return corners;
         }
 
-        private static VoxelCorners<float> GetDensities(int originIndex, int xAxis, int yAxis, int zAxis, ValueGrid<float> densityField)
+        private static VoxelCorners<float> GetDensities(int x, int y, int z, ValueGrid<float> densityField)
         {
-            return new VoxelCorners<float>
-            (
-                densityField.data[originIndex + LookupTables.CubeCornersX[0] * xAxis + LookupTables.CubeCornersY[0] * yAxis + LookupTables.CubeCornersZ[0] * zAxis],
-                densityField.data[originIndex + LookupTables.CubeCornersX[1] * xAxis + LookupTables.CubeCornersY[1] * yAxis + LookupTables.CubeCornersZ[1] * zAxis],
-                densityField.data[originIndex + LookupTables.CubeCornersX[2] * xAxis + LookupTables.CubeCornersY[2] * yAxis + LookupTables.CubeCornersZ[2] * zAxis],
-                densityField.data[originIndex + LookupTables.CubeCornersX[3] * xAxis + LookupTables.CubeCornersY[3] * yAxis + LookupTables.CubeCornersZ[3] * zAxis],
-                densityField.data[originIndex + LookupTables.CubeCornersX[4] * xAxis + LookupTables.CubeCornersY[4] * yAxis + LookupTables.CubeCornersZ[4] * zAxis],
-                densityField.data[originIndex + LookupTables.CubeCornersX[5] * xAxis + LookupTables.CubeCornersY[5] * yAxis + LookupTables.CubeCornersZ[5] * zAxis],
-                densityField.data[originIndex + LookupTables.CubeCornersX[6] * xAxis + LookupTables.CubeCornersY[6] * yAxis + LookupTables.CubeCornersZ[6] * zAxis],
-                densityField.data[originIndex + LookupTables.CubeCornersX[7] * xAxis + LookupTables.CubeCornersY[7] * yAxis + LookupTables.CubeCornersZ[7] * zAxis]
+            return new VoxelCorners<float>(
+                densityField.Get(x + LookupTables.CubeCornersX[0], y + LookupTables.CubeCornersY[0], z + LookupTables.CubeCornersZ[0]),
+                densityField.Get(x + LookupTables.CubeCornersX[1], y + LookupTables.CubeCornersY[1], z + LookupTables.CubeCornersZ[1]),
+                densityField.Get(x + LookupTables.CubeCornersX[2], y + LookupTables.CubeCornersY[2], z + LookupTables.CubeCornersZ[2]),
+                densityField.Get(x + LookupTables.CubeCornersX[3], y + LookupTables.CubeCornersY[3], z + LookupTables.CubeCornersZ[3]),
+                densityField.Get(x + LookupTables.CubeCornersX[4], y + LookupTables.CubeCornersY[4], z + LookupTables.CubeCornersZ[4]),
+                densityField.Get(x + LookupTables.CubeCornersX[5], y + LookupTables.CubeCornersY[5], z + LookupTables.CubeCornersZ[5]),
+                densityField.Get(x + LookupTables.CubeCornersX[6], y + LookupTables.CubeCornersY[6], z + LookupTables.CubeCornersZ[6]),
+                densityField.Get(x + LookupTables.CubeCornersX[7], y + LookupTables.CubeCornersY[7], z + LookupTables.CubeCornersZ[7])
             );
         }
     }

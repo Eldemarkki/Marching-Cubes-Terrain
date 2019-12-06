@@ -3,10 +3,13 @@
     public class ValueGrid<T>
     {
         public readonly T[] data;
+        private int width;
+        private int height;
+        private int depth;
 
-        public int Width { get; }
-        public int Height { get; }
-        public int Depth { get; }
+        public int Width { get => width; }
+        public int Height { get => height; }
+        public int Depth { get => depth; }
 
         public int Size { get => Width * Height * Depth; }
 
@@ -14,26 +17,17 @@
         {
             data = new T[width * height * depth];
 
-            Width = width;
-            Height = height;
-            Depth = depth;
+            this.width = width;
+            this.height = height;
+            this.depth = depth;
         }
 
-        public T this[int index]
-        {
-            get => data[index];
-            set => data[index] = value;
+        public T Get(int x, int y, int z){
+            return data[x * width * height + y * width + z];
         }
-
-        public T this[int x, int y, int z]
-        {
-            get => data[GetIndex(x, y, z)];
-            set => data[GetIndex(x, y, z)] = value;
-        }
-
-        public int GetIndex(int x, int y, int z)
-        {
-            return x * Width * Height + y * Width + z;
+        
+        public void Set(int x, int y, int z, T value){
+            data[x * width * height + y * width + z] = value;
         }
     }
 }

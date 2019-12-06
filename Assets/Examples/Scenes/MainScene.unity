@@ -321,18 +321,18 @@ Light:
   serializedVersion: 9
   m_Type: 1
   m_Color: {r: 1, g: 0.95686275, b: 0.8392157, a: 1}
-  m_Intensity: 0.5
+  m_Intensity: 1
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
     m_Bias: 0.05
-    m_NormalBias: 0.4
+    m_NormalBias: 0
     m_NearPlane: 0.2
     m_CullingMatrixOverride:
       e00: 1
@@ -360,7 +360,7 @@ Light:
     serializedVersion: 2
     m_Bits: 4294967295
   m_RenderingLayerMask: 1
-  m_Lightmapping: 1
+  m_Lightmapping: 4
   m_LightShadowCasterMode: 0
   m_AreaSize: {x: 1, y: 1}
   m_BounceIntensity: 1
@@ -642,6 +642,11 @@ MonoBehaviour:
     type: 3}
   isolevel: 0.5
   densityFunction: {fileID: 11400000, guid: 1848a3e960cd41f40870af3d6f8b6455, type: 2}
-  renderDistance: 4
+  terrainSettings:
+    noiseFrequency: 0.001
+    noiseOctaveCount: 16
+    amplitude: 30
+    heightOffset: 5
+  renderDistance: 3
   player: {fileID: 534669905}
   useJobSystem: 1

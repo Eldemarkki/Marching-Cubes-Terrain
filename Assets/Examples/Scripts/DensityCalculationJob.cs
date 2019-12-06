@@ -10,16 +10,32 @@ namespace MarchingCubes.Examples.DensityFunctions
     {
         [WriteOnly] public NativeArray<float> densities;
 
-        public int offsetX, offsetY, offsetZ;
-        public int chunkSize;
+        [ReadOnly] public int xOffset, yOffset, zOffset;
+        [ReadOnly] public int chunkSize;
+
+        [ReadOnly] public TerrainSettings terrainSettings;
 
         public void Execute(int index)
         {
-            int x = (index / (chunkSize * chunkSize)) + offsetX;
-            int y = (index / chunkSize % chunkSize) + offsetY;
-            int z = (index % chunkSize) + offsetZ;
-            
-            densities[index] = y - noise.snoise(new float2(x, z)/10f) - 5 + 0.5f;
+            int x = (index / (chunkSize * chunkSize)) + xOffset;
+            int y = (index / chunkSize % chunkSize) + yOffset;
+            int z = (index % chunkSize) + zOffset;
+
+            float density = y - OctaveNoise(x, z, terrainSettings.noiseFrequency, terrainSettings.noiseOctaveCount) * terrainSettings.amplitude - terrainSettings.heightOffset;
+
+            densities[index] = density;
+        }
+
+        private float OctaveNoise(float x, float y, float frequency, int octaveCount){
+            float value = 0;
+
+            for (int i = 0; i < octaveCount; i++)
+            {
+                int octaveModifier = (int)math.pow(2, i);
+                value += noise.snoise(new float2(octaveModifier * x * frequency, octaveModifier * y * frequency)) / octaveModifier;
+            }
+
+            return value;
         }
     }
 }

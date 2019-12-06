@@ -95,7 +95,6 @@ namespace MarchingCubes.Examples
                         float oldDensity = world.GetDensity(offsetX, offsetY, offsetZ);
                         float newDensity = Mathf.Clamp01(oldDensity - modificationAmount);
 
-
                         world.SetDensity(newDensity, offsetPoint);
                     }
                 }

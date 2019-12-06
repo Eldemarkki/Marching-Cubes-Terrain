@@ -6,8 +6,11 @@ namespace MarchingCubes
 {
     public struct MeshData : IEquatable<MeshData>
     {
-        public readonly List<Vector3> _vertices;
-        public readonly int[] _triangles;
+        private readonly List<Vector3> _vertices;
+        private readonly int[] _triangles;
+
+        public List<Vector3> Vertices => _vertices;
+        public int[] Triangles => _triangles;
 
         public MeshData(List<Vector3> vertices, int[] triangles)
         {
@@ -15,16 +18,9 @@ namespace MarchingCubes
             _triangles = triangles;
         }
 
-        public void Deconstruct(out List<Vector3> vertices, out int[] triangles)
-        {
-            vertices = _vertices;
-            triangles = _triangles;
-        }
-
         public bool Equals(MeshData other)
         {
-            var (vertices, triangles) = other;
-            return Equals(_vertices, vertices) && Equals(_triangles, triangles);
+            return other.Vertices == Vertices && other.Triangles == Triangles;
         }
 
         public override bool Equals(object obj)

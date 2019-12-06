@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 using MarchingCubes.Examples.DensityFunctions;
 using Unity.Collections;
 using Unity.Jobs;
@@ -28,6 +27,8 @@ namespace MarchingCubes.Examples
         private JobHandle densityJobHandle;
         private DensityCalculationJob densityCalculationJob;
         private bool densitiesChanged;
+
+        public Vector3Int Coordinate => _coordinate;
 
         private void Awake()
         {
@@ -81,10 +82,11 @@ namespace MarchingCubes.Examples
                 densityCalculationJob = new DensityCalculationJob
                 {
                     densities = densities,
-                    offsetX = offset.x,
-                    offsetY = offset.y,
-                    offsetZ = offset.z,
+                    xOffset = offset.x,
+                    yOffset = offset.y,
+                    zOffset = offset.z,
                     chunkSize = _chunkSize + 1, // +1 because chunkSize is the amount of "voxels", and that +1 is the amount of density points
+                    terrainSettings = _world.TerrainSettings,
                 };
 
                 densityJobHandle = densityCalculationJob.Schedule(densities.Length, 256);
@@ -101,27 +103,17 @@ namespace MarchingCubes.Examples
         {
             MeshData meshData;
 
-            if (_world.UseJobSystem)
+            if (_world.UseJobSystem && densitiesChanged)
             {
-                if (densitiesChanged)
-                {
-                    densityJobHandle.Complete();
-                    densities.CopyTo(_densityField.data);
-                    densitiesChanged = false;
-                }
-
-                Task<MeshData> meshTask = Task.Factory.StartNew(_meshDataDelegate);
-
-                meshTask.Wait();
-
-                meshData = meshTask.Result;
-            }
-            else
-            {
-                meshData = MarchingCubes.CreateMeshData(_densityField, _isolevel);
+                densityJobHandle.Complete();
+                densities.CopyTo(_densityField.data);
+                densitiesChanged = false;
             }
 
-            var (vertices, triangles) = meshData;
+            meshData = MarchingCubes.CreateMeshData(_densityField, _isolevel);
+
+            var vertices = meshData.Vertices;
+            var triangles = meshData.Triangles;
 
             _mesh.Clear();
             _mesh.SetVertices(vertices);
@@ -136,12 +128,12 @@ namespace MarchingCubes.Examples
 
         public float GetDensity(int x, int y, int z)
         {
-            return _densityField[x, y, z];
+            return _densityField.Get(x, y, z);
         }
 
         public void SetDensity(float density, int x, int y, int z)
         {
-            _densityField[x, y, z] = density;
+            _densityField.Set(x, y, z, density);
             _isDirty = true;
         }
     }
