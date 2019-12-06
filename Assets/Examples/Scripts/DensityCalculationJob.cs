@@ -1,4 +1,5 @@
-﻿using Unity.Burst;
+﻿using System;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -6,7 +7,7 @@ using Unity.Mathematics;
 namespace MarchingCubes.Examples.DensityFunctions
 {
     [BurstCompile]
-    struct DensityCalculationJob : IJobParallelFor
+    struct DensityCalculationJob : IJobParallelFor, IEquatable<DensityCalculationJob>
     {
         [WriteOnly] public NativeArray<float> densities;
 
@@ -36,6 +37,11 @@ namespace MarchingCubes.Examples.DensityFunctions
             }
 
             return value;
+        }
+
+        public bool Equals(DensityCalculationJob other)
+        {
+            return densities == other.densities && xOffset == other.xOffset && yOffset == other.yOffset && zOffset == other.zOffset && chunkSize == other.chunkSize && terrainSettings.Equals(other.terrainSettings);
         }
     }
 }
