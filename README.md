@@ -1,4 +1,4 @@
-# Marching-Cubes-Improved
+# Marching-Cubes-Terrain
 This is my implementation of the Marching Cubes algorithm using Unity.
 
 ## Features
@@ -10,7 +10,7 @@ This is my implementation of the Marching Cubes algorithm using Unity.
   - Unity3D (I'm developing this project with version **2019.2.2f1**, but any newer version should also work)
 
 ## Setup
-  1. Clone the repository with `git clone https://github.com/Eldemarkki/Marching-Cubes-Improved.git`
+  1. Clone the repository with `git clone https://github.com/Eldemarkki/Marching-Cubes-Terrain.git`
   2. Open the project with Unity
  
 ## Credits:
