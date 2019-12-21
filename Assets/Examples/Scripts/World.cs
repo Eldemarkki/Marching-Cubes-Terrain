@@ -29,7 +29,7 @@ namespace MarchingCubes.Examples
         {
             _chunks = new Dictionary<int3, Chunk>();
         }
-        
+
         private void Start()
         {
             GenerateNewTerrain(player.position);
@@ -110,7 +110,12 @@ namespace MarchingCubes.Examples
             int newZ = Utils.FloorToNearestX((float)z, chunkSize) / chunkSize;
 
             int3 key = new int3(newX, newY, newZ);
-            return _chunks[key];  
+            if (_chunks.TryGetValue(key, out Chunk chunk))
+            {
+                return chunk;
+            }
+
+            return null;
         }
 
         public float GetDensity(int x, int y, int z)
@@ -130,9 +135,11 @@ namespace MarchingCubes.Examples
             {
                 int3 chunkPos = (pos - LookupTables.CubeCorners[i]).FloorToNearestX(chunkSize);
                 Chunk chunk = GetChunk(chunkPos.x, chunkPos.y, chunkPos.z);
-                int3 localPos = (pos - chunkPos).Mod(chunkSize + 1);
-
-                chunk.SetDensity(density, localPos.x, localPos.y, localPos.z);
+                if (chunk != null)
+                {
+                    int3 localPos = (pos - chunkPos).Mod(chunkSize + 1);
+                    chunk.SetDensity(density, localPos.x, localPos.y, localPos.z);
+                }
             }
         }
 

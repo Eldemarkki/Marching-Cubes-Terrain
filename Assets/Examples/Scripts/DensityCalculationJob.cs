@@ -25,7 +25,7 @@ namespace MarchingCubes.Examples
 
             float density = CalculateDensity(worldPositionX, worldPositionY, worldPositionZ);
 
-            densities[index] = density;
+            densities[index] = math.clamp(density, -1, 1);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

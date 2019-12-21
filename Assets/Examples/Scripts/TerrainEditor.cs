@@ -94,7 +94,7 @@ namespace MarchingCubes.Examples
                         float modificationAmount = force / distance * forceOverDistance.Evaluate(1 - distance.Map(0, force, 0, 1)) * buildModifier;
 
                         float oldDensity = world.GetDensity(offsetX, offsetY, offsetZ);
-                        float newDensity = Mathf.Clamp01(oldDensity - modificationAmount);
+                        float newDensity = Mathf.Clamp(oldDensity - modificationAmount, -1, 1);
 
                         world.SetDensity(newDensity, offsetPoint);
                     }

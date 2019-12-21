@@ -641,7 +641,7 @@ MonoBehaviour:
   chunkSize: 16
   chunkPrefab: {fileID: 7489232383384105734, guid: 58c1dc75b64dbec41a572954c3bcd523,
     type: 3}
-  isolevel: 0.5
+  isolevel: 0
   terrainSettings:
     noiseFrequency: 1
     noiseOctaveCount: 16
