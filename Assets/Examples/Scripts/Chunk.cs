@@ -54,7 +54,10 @@ namespace MarchingCubes.Examples
         {
             if (!_marchingCubesJobHandle.IsCompleted)
                 _marchingCubesJobHandle.Complete();
+
             _densities.Dispose();
+            _outputVertices.Dispose();
+            _outputTriangles.Dispose();
         }
 
         private void Update()
@@ -77,6 +80,9 @@ namespace MarchingCubes.Examples
             _chunkSize = chunkSize;
 
             _densities = new NativeArray<float>((_chunkSize + 1) * (_chunkSize + 1) * (_chunkSize + 1), Allocator.Persistent);
+            _outputVertices = new NativeArray<Vector3>(15 * _chunkSize * _chunkSize * _chunkSize, Allocator.Persistent);
+            _outputTriangles = new NativeArray<int>(15 * _chunkSize * _chunkSize * _chunkSize, Allocator.Persistent);
+
             SetCoordinate(coordinate);
         }
 
@@ -109,8 +115,6 @@ namespace MarchingCubes.Examples
 
         private void StartMeshGeneration()
         {
-            _outputVertices = new NativeArray<Vector3>(15 * _chunkSize * _chunkSize * _chunkSize, Allocator.TempJob);
-            _outputTriangles = new NativeArray<int>(15 * _chunkSize * _chunkSize * _chunkSize, Allocator.TempJob);
             _counter = new Counter(Allocator.Persistent);
 
             for (int i = 0; i < _densityModifications.Count; i++)
@@ -143,8 +147,6 @@ namespace MarchingCubes.Examples
 
             Vector3[] vertices = _outputVertices.Slice(0, _counter.Count * 3).ToArray();
             int[] triangles = _outputTriangles.Slice(0, _counter.Count * 3).ToArray();
-            _outputVertices.Dispose();
-            _outputTriangles.Dispose();
 
             _counter.Dispose();
 
