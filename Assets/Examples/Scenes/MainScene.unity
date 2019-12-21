@@ -647,5 +647,5 @@ MonoBehaviour:
     noiseOctaveCount: 16
     amplitude: 60
     heightOffset: -60
-  renderDistance: 1
+  renderDistance: 4
   player: {fileID: 534669905}
