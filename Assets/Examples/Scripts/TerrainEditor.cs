@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace MarchingCubes.Examples
@@ -83,8 +84,8 @@ namespace MarchingCubes.Examples
                         int offsetY = hitY - y;
                         int offsetZ = hitZ - z;
                         
-                        var offsetPoint = new Vector3Int(offsetX, offsetY, offsetZ);
-                        float distance = Vector3.Distance(offsetPoint, point);
+                        var offsetPoint = new int3(offsetX, offsetY, offsetZ);
+                        float distance = math.distance(offsetPoint, point);
                         if (distance > range)
                         {
                             continue;

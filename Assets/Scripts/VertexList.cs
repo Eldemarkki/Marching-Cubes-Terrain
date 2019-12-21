@@ -1,13 +1,13 @@
 using System;
-using UnityEngine;
+using Unity.Mathematics;
 
 namespace MarchingCubes
 {
     public struct VertexList : IEquatable<VertexList>
     {
-        private Vector3 _c1, _c2, _c3, _c4, _c5, _c6, _c7, _c8, _c9, _c10, _c11, _c12;
+        private float3 _c1, _c2, _c3, _c4, _c5, _c6, _c7, _c8, _c9, _c10, _c11, _c12;
 
-        public Vector3 this[int index]
+        public float3 this[int index]
         {
             get
             {

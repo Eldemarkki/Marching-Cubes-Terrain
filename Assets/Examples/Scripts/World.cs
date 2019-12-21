@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using MarchingCubes.Examples.DensityFunctions;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace MarchingCubes.Examples
@@ -12,7 +12,6 @@ namespace MarchingCubes.Examples
 
         [Header("Marching Cubes settings")]
         [SerializeField] private float isolevel = 0.5F;
-        [SerializeField] private DensityFunction densityFunction;
 
         [Header("Terrain Settings")]
         [SerializeField] private TerrainSettings terrainSettings = new TerrainSettings(0.001f, 16, 10, 5);
@@ -21,29 +20,14 @@ namespace MarchingCubes.Examples
         [SerializeField] private int renderDistance = 4;
         [SerializeField] private Transform player;
 
-        [Header("Other settings")]
-        [SerializeField] private bool useJobSystem;
-
-        private Dictionary<Vector3Int, Chunk> _chunks;
+        private Dictionary<int3, Chunk> _chunks;
         private Vector3 _startPos;
 
-        public World(DensityFunction densityFunction) 
-        {
-            this.DensityFunction = densityFunction;
-               
-        }
-        public DensityFunction DensityFunction { get => densityFunction; private set => densityFunction = value; }
         public TerrainSettings TerrainSettings { get => terrainSettings; private set => terrainSettings = value; }
-        public bool UseJobSystem { get => useJobSystem; private set => useJobSystem = value; }
 
         private void Awake()
         {
-            DensityFunction = densityFunction;
-            _chunks = new Dictionary<Vector3Int, Chunk>();
-            if(densityFunction is InitializedDensityFunction initializable)
-            {
-                initializable.Initialize();
-            }
+            _chunks = new Dictionary<int3, Chunk>();
         }
         
         private void Start()
@@ -63,11 +47,11 @@ namespace MarchingCubes.Examples
 
         private void GenerateNewTerrain(Vector3 playerPos)
         {
-            Vector3Int playerChunkPosition = playerPos.FloorToNearestX(chunkSize);
-            Vector3Int playerCoordinate = ((Vector3)playerChunkPosition / chunkSize).Floor();
+            int3 playerChunkPosition = playerPos.ToMathematicsFloat().FloorToNearestX(chunkSize);
+            int3 playerCoordinate = ((float3)playerChunkPosition / chunkSize).Floor();
 
             // TODO: Initialize this only once
-            var newTerrainChunks = new Dictionary<Vector3Int, Chunk>((renderDistance * 2 + 1) * (renderDistance * 2 + 1) * (renderDistance * 2 + 1));
+            var newTerrainChunks = new Dictionary<int3, Chunk>((renderDistance * 2 + 1) * (renderDistance * 2 + 1) * (renderDistance * 2 + 1));
 
             Queue<Chunk> availableChunks = new Queue<Chunk>();
             foreach (var chunk in _chunks.Values)
@@ -88,7 +72,7 @@ namespace MarchingCubes.Examples
                 {
                     for (int z = -renderDistance; z <= renderDistance; z++)
                     {
-                        Vector3Int chunkCoordinate = playerCoordinate + new Vector3Int(x, y, z);
+                        int3 chunkCoordinate = playerCoordinate + new int3(x, y, z);
 
                         Chunk chunk;
                         bool chunkExistsAtCoordinate = _chunks.ContainsKey(chunkCoordinate);
@@ -121,11 +105,11 @@ namespace MarchingCubes.Examples
 
         private Chunk GetChunk(int x, int y, int z)
         {
-            int newX = Utils.FloorToNearestX(x, chunkSize) / chunkSize;
-            int newY = Utils.FloorToNearestX(y, chunkSize) / chunkSize;
-            int newZ = Utils.FloorToNearestX(z, chunkSize) / chunkSize;
+            int newX = Utils.FloorToNearestX((float)x, chunkSize) / chunkSize;
+            int newY = Utils.FloorToNearestX((float)y, chunkSize) / chunkSize;
+            int newZ = Utils.FloorToNearestX((float)z, chunkSize) / chunkSize;
 
-            Vector3Int key = new Vector3Int(newX, newY, newZ);
+            int3 key = new int3(newX, newY, newZ);
             return _chunks[key];  
         }
 
@@ -140,21 +124,21 @@ namespace MarchingCubes.Examples
             return density;
         }
 
-        public void SetDensity(float density, Vector3Int pos)
+        public void SetDensity(float density, int3 pos)
         {
             for (int i = 0; i < 8; i++)
             {
-                Vector3Int chunkPos = (pos - LookupTables.CubeCorners[i]).FloorToNearestX(chunkSize);
+                int3 chunkPos = (pos - LookupTables.CubeCorners[i]).FloorToNearestX(chunkSize);
                 Chunk chunk = GetChunk(chunkPos.x, chunkPos.y, chunkPos.z);
-                Vector3Int localPos = (pos - chunkPos).Mod(chunkSize + 1);
+                int3 localPos = (pos - chunkPos).Mod(chunkSize + 1);
 
                 chunk.SetDensity(density, localPos.x, localPos.y, localPos.z);
             }
         }
 
-        private Chunk CreateChunk(Vector3Int chunkCoordinate)
+        private Chunk CreateChunk(int3 chunkCoordinate)
         {
-            var chunk = Instantiate(chunkPrefab, chunkCoordinate * chunkSize, Quaternion.identity).GetComponent<Chunk>();
+            var chunk = Instantiate(chunkPrefab, (chunkCoordinate * chunkSize).ToVectorInt(), Quaternion.identity).GetComponent<Chunk>();
             chunk.Initialize(this, chunkSize, isolevel, chunkCoordinate);
             _chunks.Add(chunkCoordinate, chunk);
 
