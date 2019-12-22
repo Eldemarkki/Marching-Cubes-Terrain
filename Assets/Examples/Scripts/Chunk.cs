@@ -22,7 +22,7 @@ namespace MarchingCubes.Examples
         private NativeArray<float> _densities;
 
         private JobHandle _densityJobHandle;
-        private DensityCalculationJob _densityCalculationJob;
+        private IDensityCalculationJob _densityCalculationJob;
         private MarchingCubesJob _marchingCubesJob;
         private JobHandle _marchingCubesJobHandle;
 
@@ -100,17 +100,37 @@ namespace MarchingCubes.Examples
         {
             int3 worldPosition = _coordinate * _chunkSize;
 
-            _densityCalculationJob = new DensityCalculationJob
+            if (_world.TerrainType == TerrainType.Procedural)
             {
-                densities = _densities,
-                xOffset = worldPosition.x,
-                yOffset = worldPosition.y,
-                zOffset = worldPosition.z,
-                chunkSize = _chunkSize + 1, // +1 because chunkSize is the amount of "voxels", and that +1 is the amount of density points
-                terrainSettings = _world.TerrainSettings,
-            };
+                var job = new ProceduralTerrainDensityCalculationJob
+                {
+                    Densities = _densities,
+                    offset = worldPosition,
+                    chunkSize = _chunkSize + 1, // +1 because chunkSize is the amount of "voxels", and that +1 is the amount of density points
+                    proceduralTerrainSettings = _world.ProceduralTerrainSettings,
+                };
 
-            _densityJobHandle = _densityCalculationJob.Schedule(_densities.Length, 256);
+                _densityCalculationJob = job;
+
+                _densityJobHandle = IJobParallelForExtensions.Schedule<ProceduralTerrainDensityCalculationJob>(job, _densities.Length, 256);
+            }
+            else if (_world.TerrainType == TerrainType.Heightmap)
+            {
+                var job = new HeightmapTerrainDensityCalculationJob
+                {
+                    Densities = _densities,
+                    heightmapData = _world.HeightmapTerrainSettings.HeightmapData,
+                    offset = worldPosition,
+                    heightmapWidth = _world.HeightmapTerrainSettings.Width,
+                    heightmapHeight = _world.HeightmapTerrainSettings.Height,
+                    amplitude = _world.HeightmapTerrainSettings.Amplitude,
+                    heightOffset = _world.HeightmapTerrainSettings.HeightOffset
+                };
+
+                _densityCalculationJob = job;
+
+                _densityJobHandle = IJobParallelForExtensions.Schedule<HeightmapTerrainDensityCalculationJob>(job, _densities.Length, 256);
+            }
         }
 
         private void StartMeshGeneration()

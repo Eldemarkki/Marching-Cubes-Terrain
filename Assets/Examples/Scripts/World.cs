@@ -6,28 +6,29 @@ namespace MarchingCubes.Examples
 {
     public class World : MonoBehaviour
     {
-        [Header("Chunk settings")]
         [SerializeField] private int chunkSize = 16;
         [SerializeField] private GameObject chunkPrefab;
 
-        [Header("Marching Cubes settings")]
-        [SerializeField] private float isolevel = 0.5F;
+        [SerializeField] private float isolevel = 0f;
 
-        [Header("Terrain Settings")]
-        [SerializeField] private TerrainSettings terrainSettings = new TerrainSettings(0.001f, 16, 10, 5);
+        [SerializeField] private TerrainType terrainType = TerrainType.Procedural;
+        [SerializeField] private ProceduralTerrainSettings proceduralTerrainSettings = new ProceduralTerrainSettings(1, 16, 50, -40);
+        [SerializeField] private HeightmapTerrainSettings heightmapTerrainSettings;
 
-        [Header("Player settings")]
-        [SerializeField] private int renderDistance = 4;
+        [SerializeField] private int renderDistance = 1;
         [SerializeField] private Transform player;
 
         private Dictionary<int3, Chunk> _chunks;
         private Vector3 _startPos;
 
-        public TerrainSettings TerrainSettings { get => terrainSettings; private set => terrainSettings = value; }
+        public ProceduralTerrainSettings ProceduralTerrainSettings { get => proceduralTerrainSettings; set => proceduralTerrainSettings = value; }
+        public TerrainType TerrainType { get => terrainType; set => terrainType = value; }
+        public HeightmapTerrainSettings HeightmapTerrainSettings { get => heightmapTerrainSettings; set => heightmapTerrainSettings = value; }
 
         private void Awake()
         {
             _chunks = new Dictionary<int3, Chunk>();
+            heightmapTerrainSettings = new HeightmapTerrainSettings(heightmapTerrainSettings.Heightmap, heightmapTerrainSettings.Amplitude, heightmapTerrainSettings.HeightOffset);
         }
 
         private void Start()
@@ -45,6 +46,11 @@ namespace MarchingCubes.Examples
             }
         }
 
+        private void OnDestroy()
+        {
+            HeightmapTerrainSettings.Dispose();
+        }
+
         private void GenerateNewTerrain(Vector3 playerPos)
         {
             int3 playerChunkPosition = playerPos.ToMathematicsFloat().FloorToNearestX(chunkSize);
@@ -60,7 +66,7 @@ namespace MarchingCubes.Examples
                 int yOffset = Mathf.Abs(chunk.Coordinate.y - playerCoordinate.y);
                 int zOffset = Mathf.Abs(chunk.Coordinate.z - playerCoordinate.z);
 
-                if(xOffset > renderDistance || yOffset > renderDistance || zOffset > renderDistance)
+                if (xOffset > renderDistance || yOffset > renderDistance || zOffset > renderDistance)
                 {
                     availableChunks.Enqueue(chunk);
                 }
