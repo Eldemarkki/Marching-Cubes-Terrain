@@ -121,6 +121,7 @@ namespace MarchingCubes.Examples
                     Densities = _densities,
                     heightmapData = _world.HeightmapTerrainSettings.HeightmapData,
                     offset = worldPosition,
+                    chunkSize = _chunkSize + 1, // +1 because chunkSize is the amount of "voxels", and that +1 is the amount of density points
                     heightmapWidth = _world.HeightmapTerrainSettings.Width,
                     heightmapHeight = _world.HeightmapTerrainSettings.Height,
                     amplitude = _world.HeightmapTerrainSettings.Amplitude,

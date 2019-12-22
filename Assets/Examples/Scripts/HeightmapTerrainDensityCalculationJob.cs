@@ -14,6 +14,7 @@ namespace MarchingCubes.Examples
 
         [ReadOnly] public NativeArray<float> heightmapData;
         [ReadOnly] public int3 offset;
+        [ReadOnly] public int chunkSize;
         [ReadOnly] public int heightmapWidth;
         [ReadOnly] public int heightmapHeight;
         [ReadOnly] public float amplitude;
@@ -23,9 +24,9 @@ namespace MarchingCubes.Examples
 
         public void Execute(int index)
         {
-            int worldPositionX = (index / (17 * 17)) + offset.x;
-            int worldPositionY = (index / 17 % 17) + offset.y;
-            int worldPositionZ = (index % 17) + offset.z;
+            int worldPositionX = (index / (chunkSize * chunkSize)) + offset.x;
+            int worldPositionY = (index / chunkSize % chunkSize) + offset.y;
+            int worldPositionZ = (index % chunkSize) + offset.z;
 
             float density = CalculateDensity(worldPositionX, worldPositionY, worldPositionZ);
             densities[index] = math.clamp(density, -1, 1);

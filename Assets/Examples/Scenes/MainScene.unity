@@ -649,8 +649,8 @@ MonoBehaviour:
     amplitude: 50
     heightOffset: -40
   heightmapTerrainSettings:
-    heightmap: {fileID: 2800000, guid: e3469a0256ba8a3438639d216de60975, type: 3}
+    heightmap: {fileID: 2800000, guid: c592a59b98b6d2149bd5cdf21483ecd0, type: 3}
     amplitude: 30
     heightOffset: -30
-  renderDistance: 5
+  renderDistance: 4
   player: {fileID: 534669905}
