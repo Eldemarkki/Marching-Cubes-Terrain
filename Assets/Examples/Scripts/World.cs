@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -33,22 +34,50 @@ namespace MarchingCubes.Examples
 
         private void Start()
         {
-            GenerateNewTerrain(player.position);
+            if (terrainType == TerrainType.Procedural)
+            {
+                GenerateNewTerrain(player.position);
+            }
+            else if (terrainType == TerrainType.Heightmap)
+            {
+                CreateHeightmapTerrain();
+            }
         }
 
         private void Update()
         {
-            if (Mathf.Abs(player.position.x - _startPos.x) >= chunkSize ||
-                Mathf.Abs(player.position.y - _startPos.y) >= chunkSize ||
-                Mathf.Abs(player.position.z - _startPos.z) >= chunkSize)
+            if (terrainType == TerrainType.Procedural)
             {
-                GenerateNewTerrain(player.position);
+                if (Mathf.Abs(player.position.x - _startPos.x) >= chunkSize ||
+                    Mathf.Abs(player.position.y - _startPos.y) >= chunkSize ||
+                    Mathf.Abs(player.position.z - _startPos.z) >= chunkSize)
+                {
+                    GenerateNewTerrain(player.position);
+                }
             }
         }
 
         private void OnDestroy()
         {
             HeightmapTerrainSettings.Dispose();
+        }
+
+        private void CreateHeightmapTerrain()
+        {
+            int chunkCountX = Mathf.CeilToInt((float)(heightmapTerrainSettings.Width - 1) / chunkSize);
+            int chunkCountZ = Mathf.CeilToInt((float)(heightmapTerrainSettings.Height - 1) / chunkSize);
+            int chunkCountY = Mathf.CeilToInt((float)heightmapTerrainSettings.Amplitude / chunkSize);
+
+            for (int x = 0; x < chunkCountX; x++)
+            {
+                for (int y = 0; y < chunkCountY; y++)
+                {
+                    for (int z = 0; z < chunkCountZ; z++)
+                    {
+                        CreateChunk(new int3(x, y, z));
+                    }
+                }
+            }
         }
 
         private void GenerateNewTerrain(Vector3 playerPos)

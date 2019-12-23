@@ -59,11 +59,13 @@ namespace MarchingCubes.Examples
                     break;
             }
 
-            EditorGUILayout.Separator();
-            EditorGUILayout.LabelField("Player Settings", EditorStyles.boldLabel);
-            EditorGUILayout.PropertyField(renderDistance, new GUIContent("Render Distance"));
-            EditorGUILayout.PropertyField(player, new GUIContent("Player"));
-
+            if (type == TerrainType.Procedural)
+            {
+                EditorGUILayout.Separator();
+                EditorGUILayout.LabelField("Player Settings", EditorStyles.boldLabel);
+                EditorGUILayout.PropertyField(renderDistance, new GUIContent("Render Distance"));
+                EditorGUILayout.PropertyField(player, new GUIContent("Player"));
+            }
             serializedObject.ApplyModifiedProperties();
         }
     }

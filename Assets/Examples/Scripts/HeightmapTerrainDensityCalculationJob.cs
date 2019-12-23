@@ -28,14 +28,17 @@ namespace MarchingCubes.Examples
             int worldPositionY = (index / chunkSize % chunkSize) + offset.y;
             int worldPositionZ = (index % chunkSize) + offset.z;
 
-            float density = CalculateDensity(worldPositionX, worldPositionY, worldPositionZ);
+            float density = 0;
+            if(worldPositionX < heightmapWidth && worldPositionZ < heightmapHeight)
+                density = CalculateDensity(worldPositionX, worldPositionY, worldPositionZ);
+
             densities[index] = math.clamp(density, -1, 1);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public float CalculateDensity(int worldPositionX, int worldPositionY, int worldPositionZ)
         {
-            float heightmapValue = heightmapData[((worldPositionX + heightmapWidth) % heightmapWidth) + ((worldPositionZ + heightmapHeight) % heightmapHeight) * heightmapWidth];
+            float heightmapValue = heightmapData[worldPositionX + worldPositionZ * heightmapWidth];
             float h = amplitude * heightmapValue;
             return worldPositionY - h - heightOffset;
         }
