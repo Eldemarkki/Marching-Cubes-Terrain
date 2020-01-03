@@ -71,7 +71,7 @@ namespace MarchingCubes.Examples
             int hitX = Mathf.RoundToInt(point.x);
             int hitY = Mathf.RoundToInt(point.y);
             int hitZ = Mathf.RoundToInt(point.z);
-            
+
             int intRange = Mathf.CeilToInt(range);
 
             for (int x = -intRange; x <= intRange; x++)
@@ -93,7 +93,7 @@ namespace MarchingCubes.Examples
 
                         float modificationAmount = force / distance * forceOverDistance.Evaluate(1 - distance.Map(0, force, 0, 1)) * buildModifier;
 
-                        float oldDensity = world.GetDensity(offsetX, offsetY, offsetZ);
+                        float oldDensity = world.GetDensity(offsetPoint);
                         float newDensity = Mathf.Clamp(oldDensity - modificationAmount, -1, 1);
 
                         world.SetDensity(newDensity, offsetPoint);

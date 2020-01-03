@@ -1,9 +1,8 @@
-using System;
 using Unity.Mathematics;
 
 namespace MarchingCubes
 {
-    public struct VertexList : IEquatable<VertexList>
+    public struct VertexList
     {
         private float3 _c1, _c2, _c3, _c4, _c5, _c6, _c7, _c8, _c9, _c10, _c11, _c12;
 
@@ -72,11 +71,6 @@ namespace MarchingCubes
                         throw new System.IndexOutOfRangeException();
                 }
             }
-        }
-
-        public bool Equals(VertexList other)
-        {
-            return _c1.Equals(other._c1) && _c2.Equals(other._c2) && _c3.Equals(other._c3) && _c4.Equals(other._c4) && _c5.Equals(other._c5) && _c6.Equals(other._c6) && _c7.Equals(other._c7) && _c8.Equals(other._c8) && _c9.Equals(other._c9) && _c10.Equals(other._c10) && _c11.Equals(other._c11) && _c12.Equals(other._c12);
         }
     }
 }

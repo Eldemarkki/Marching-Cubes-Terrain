@@ -4,7 +4,7 @@ using UnityEngine;
 namespace MarchingCubes.Examples
 {
     [Serializable]
-    public struct ProceduralTerrainSettings : IEquatable<ProceduralTerrainSettings>
+    public struct ProceduralTerrainSettings
     {
         [SerializeField] private float noiseFrequency;
         [SerializeField] private int noiseOctaveCount;
@@ -22,11 +22,6 @@ namespace MarchingCubes.Examples
             this.noiseOctaveCount = noiseOctaveCount;
             this.amplitude = amplitude;
             this.heightOffset = heightOffset;
-        }
-
-        public bool Equals(ProceduralTerrainSettings other)
-        {
-            return noiseFrequency == other.noiseFrequency && noiseOctaveCount == other.noiseOctaveCount && amplitude == other.amplitude && heightOffset == other.heightOffset;
         }
     }
 }

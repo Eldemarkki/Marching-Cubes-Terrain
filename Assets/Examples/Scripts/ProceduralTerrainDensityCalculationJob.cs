@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -7,7 +6,7 @@ using Unity.Mathematics;
 namespace MarchingCubes.Examples
 {
     [BurstCompile]
-    struct ProceduralTerrainDensityCalculationJob : IEquatable<ProceduralTerrainDensityCalculationJob>, IDensityCalculationJob
+    struct ProceduralTerrainDensityCalculationJob : IDensityCalculationJob
     {
         [WriteOnly] private NativeArray<float> densities;
 
@@ -48,11 +47,6 @@ namespace MarchingCubes.Examples
             }
 
             return value;
-        }
-
-        public bool Equals(ProceduralTerrainDensityCalculationJob other)
-        {
-            return densities == other.densities && offset.x == other.offset.x && offset.y == other.offset.y && offset.z == other.offset.z && chunkSize == other.chunkSize && proceduralTerrainSettings.Equals(other.proceduralTerrainSettings);
         }
     }
 }

@@ -5,23 +5,20 @@ using UnityEngine;
 namespace MarchingCubes.Examples
 {
     [Serializable]
-    public struct HeightmapTerrainSettings : IEquatable<HeightmapTerrainSettings>
+    public struct HeightmapTerrainSettings
     {
         [SerializeField] private Texture2D heightmap;
-        [SerializeField] private NativeArray<float> heightmapData;
+        [SerializeField, NonSerialized] private NativeArray<float> heightmapData;
         [SerializeField] private float amplitude;
         [SerializeField] private float heightOffset;
 
-        private int width;
-        private int height;
+        public int Width { get; private set; }
+        public int Height { get; private set; }
 
-        public int Width { get => width; }
-        public int Height { get => height; }
-
+        public Texture2D Heightmap { get => heightmap; set => heightmap = value; }
+        public NativeArray<float> HeightmapData { get => heightmapData; set => heightmapData = value; }
         public float Amplitude { get => amplitude; set => amplitude = value; }
         public float HeightOffset { get => heightOffset; set => heightOffset = value; }
-        public NativeArray<float> HeightmapData { get => heightmapData; set => heightmapData = value; }
-        public Texture2D Heightmap { get => heightmap; set => heightmap = value; }
 
         public HeightmapTerrainSettings(Texture2D heightmap, float amplitude, float heightOffset)
         {
@@ -29,32 +26,27 @@ namespace MarchingCubes.Examples
             this.heightOffset = heightOffset;
 
             this.heightmap = heightmap;
-            width = heightmap.width;
-            height = heightmap.height;
+            Width = heightmap.width;
+            Height = heightmap.height;
 
-            heightmapData = new NativeArray<float>(width * height, Allocator.Persistent);
+            heightmapData = new NativeArray<float>(Width * Height, Allocator.Persistent);
             SetHeightmap(heightmap);
         }
 
-        public void Dispose()
+        private void SetHeightmap(Texture2D heightmap)
         {
-            this.HeightmapData.Dispose();
-        }
-
-        public void SetHeightmap(Texture2D heightmap)
-        {
-            for (int x = 0; x < width; x++)
+            for (int x = 0; x < Width; x++)
             {
-                for (int y = 0; y < height; y++)
+                for (int y = 0; y < Height; y++)
                 {
-                    heightmapData[x + width * y] = heightmap.GetPixel(x, y).grayscale;
+                    heightmapData[x + Width * y] = heightmap.GetPixel(x, y).grayscale;
                 }
             }
         }
 
-        public bool Equals(HeightmapTerrainSettings other)
+        public void Dispose()
         {
-            return Heightmap == other.Heightmap && amplitude == other.amplitude && heightOffset == other.heightOffset;
+            heightmapData.Dispose();
         }
     }
 }

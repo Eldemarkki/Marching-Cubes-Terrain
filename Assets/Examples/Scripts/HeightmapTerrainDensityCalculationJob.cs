@@ -1,14 +1,12 @@
-﻿using System;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
-using UnityEngine;
 
 namespace MarchingCubes.Examples
 {
     [BurstCompile]
-    struct HeightmapTerrainDensityCalculationJob : IEquatable<HeightmapTerrainDensityCalculationJob>, IDensityCalculationJob
+    struct HeightmapTerrainDensityCalculationJob : IDensityCalculationJob
     {
         [WriteOnly] private NativeArray<float> densities;
 
@@ -41,11 +39,6 @@ namespace MarchingCubes.Examples
             float heightmapValue = heightmapData[worldPositionX + worldPositionZ * heightmapWidth];
             float h = amplitude * heightmapValue;
             return worldPositionY - h - heightOffset;
-        }
-
-        public bool Equals(HeightmapTerrainDensityCalculationJob other)
-        {
-            return heightmapData == other.heightmapData && heightmapWidth == other.heightmapWidth && heightmapHeight == other.heightmapHeight && amplitude == other.amplitude && heightOffset == other.heightOffset;
         }
     }
 }
