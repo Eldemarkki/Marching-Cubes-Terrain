@@ -81,6 +81,9 @@ namespace MarchingCubes.Examples
             Densities = new NativeArray<float>((ChunkSize + 1) * (ChunkSize + 1) * (ChunkSize + 1), Allocator.Persistent);
             _outputVertices = new NativeArray<Vector3>(15 * ChunkSize * ChunkSize * ChunkSize, Allocator.Persistent);
             _outputTriangles = new NativeArray<int>(15 * ChunkSize * ChunkSize * ChunkSize, Allocator.Persistent);
+
+            StartDensityCalculation();
+            StartMeshGeneration();
         }
 
         public abstract void StartDensityCalculation();

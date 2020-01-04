@@ -59,6 +59,7 @@ namespace MarchingCubes.Examples
         private HeightmapChunk CreateChunk(int3 chunkCoordinate)
         {
             HeightmapChunk chunk = Instantiate(ChunkPrefab, (chunkCoordinate * ChunkSize).ToVectorInt(), Quaternion.identity).GetComponent<HeightmapChunk>();
+            chunk.name = $"Chunk_{chunkCoordinate.x}_{chunkCoordinate.y}_{chunkCoordinate.z}";
             chunk.World = this;
             chunk.Initialize(ChunkSize, Isolevel, chunkCoordinate);
             _chunks.Add(chunkCoordinate, chunk);

@@ -106,6 +106,7 @@ namespace MarchingCubes.Examples
         private ProceduralChunk CreateChunk(int3 chunkCoordinate)
         {
             ProceduralChunk chunk = Instantiate(ChunkPrefab, (chunkCoordinate * ChunkSize).ToVectorInt(), Quaternion.identity).GetComponent<ProceduralChunk>();
+            chunk.name = $"Chunk_{chunkCoordinate.x}_{chunkCoordinate.y}_{chunkCoordinate.z}";
             chunk.World = this;
             chunk.Initialize(ChunkSize, Isolevel, chunkCoordinate);
             _chunks.Add(chunkCoordinate, chunk);
