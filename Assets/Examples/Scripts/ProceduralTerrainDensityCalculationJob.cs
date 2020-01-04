@@ -19,9 +19,9 @@ namespace MarchingCubes.Examples
 
         public void Execute(int index)
         {
-            int worldPositionX = (index / (chunkSize * chunkSize)) + offset.x;
-            int worldPositionY = (index / chunkSize % chunkSize) + offset.y;
-            int worldPositionZ = (index % chunkSize) + offset.z;
+            int worldPositionX = index / (chunkSize * chunkSize) + offset.x;
+            int worldPositionY = index / chunkSize % chunkSize + offset.y;
+            int worldPositionZ = index % chunkSize + offset.z;
 
             float density = CalculateDensity(worldPositionX, worldPositionY, worldPositionZ);
             densities[index] = math.clamp(density, -1, 1);

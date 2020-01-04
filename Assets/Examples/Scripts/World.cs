@@ -9,9 +9,9 @@ namespace MarchingCubes.Examples
         [SerializeField] private GameObject chunkPrefab;
         [SerializeField] private float isolevel;
 
-        public int ChunkSize { get => chunkSize; set => chunkSize = value; }
-        public GameObject ChunkPrefab { get => chunkPrefab; set => chunkPrefab = value; }
-        public float Isolevel { get => isolevel; set => isolevel = value; }
+        public int ChunkSize => chunkSize;
+        public GameObject ChunkPrefab => chunkPrefab;
+        public float Isolevel => isolevel;
 
         public abstract Chunk GetChunk(int3 worldPosition);
 

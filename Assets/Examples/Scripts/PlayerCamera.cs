@@ -16,17 +16,17 @@ namespace MarchingCubes.Examples
         [SerializeField] private float maximumFieldOfView = 170;
         [SerializeField] private float zoomSpeed = 3f;
 
-        private Camera cam;
+        private Camera _cam;
 
-        private float rotationX;
-        private float rotationY;
+        private float _rotationX;
+        private float _rotationY;
 
         private void Awake()
         {
-            cam = GetComponent<Camera>();
+            _cam = GetComponent<Camera>();
         }
 
-        void Update()
+        private void Update()
         {
             Move();
             LookAround();
@@ -47,23 +47,23 @@ namespace MarchingCubes.Examples
             }
             movement.z += Input.GetAxisRaw("Vertical");
 
-            cam.transform.Translate(movement.normalized * movementSpeed * Time.deltaTime, Space.Self);
+            _cam.transform.Translate(movementSpeed * Time.deltaTime * movement.normalized, Space.Self);
         }
 
         private void LookAround()
         {
-            float rotationSpeed = sensitivity * cam.fieldOfView * 0.015f; // 0.015 is roughly 1/60, and 60 is the default field of view so this scales the sensitivity with different field of views
-            rotationX += Input.GetAxis("Mouse Y") * rotationSpeed;
-            rotationY += Input.GetAxis("Mouse X") * rotationSpeed;
+            float rotationSpeed = sensitivity * _cam.fieldOfView * 0.015f; // 0.015 is roughly 1/60, and 60 is the default field of view so this scales the sensitivity with different field of views
+            _rotationX += Input.GetAxis("Mouse Y") * rotationSpeed;
+            _rotationY += Input.GetAxis("Mouse X") * rotationSpeed;
 
-            rotationX = Mathf.Clamp(rotationX, -90, 90);
+            _rotationX = Mathf.Clamp(_rotationX, -90, 90);
 
-            transform.eulerAngles = new Vector3(-rotationX, rotationY, 0);
+            transform.eulerAngles = new Vector3(-_rotationX, _rotationY, 0);
         }
 
         private void Zoom()
         {
-            cam.fieldOfView = Mathf.Clamp(cam.fieldOfView - Input.mouseScrollDelta.y * zoomSpeed, minimumFieldOfView, maximumFieldOfView);
+            _cam.fieldOfView = Mathf.Clamp(_cam.fieldOfView - Input.mouseScrollDelta.y * zoomSpeed, minimumFieldOfView, maximumFieldOfView);
         }
     }
 }

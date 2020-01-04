@@ -8,7 +8,7 @@ namespace MarchingCubes.Examples
     public struct HeightmapTerrainSettings
     {
         [SerializeField] private Texture2D heightmap;
-        [SerializeField, NonSerialized] private NativeArray<float> heightmapData;
+        [SerializeField] private NativeArray<float> heightmapData;
         [SerializeField] private float amplitude;
         [SerializeField] private float heightOffset;
 

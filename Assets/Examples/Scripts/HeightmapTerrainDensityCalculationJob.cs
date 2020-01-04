@@ -22,9 +22,9 @@ namespace MarchingCubes.Examples
 
         public void Execute(int index)
         {
-            int worldPositionX = (index / (chunkSize * chunkSize)) + offset.x;
-            int worldPositionY = (index / chunkSize % chunkSize) + offset.y;
-            int worldPositionZ = (index % chunkSize) + offset.z;
+            int worldPositionX = index / (chunkSize * chunkSize) + offset.x;
+            int worldPositionY = index / chunkSize % chunkSize + offset.y;
+            int worldPositionZ = index % chunkSize + offset.z;
 
             float density = 0;
             if(worldPositionX < heightmapWidth && worldPositionZ < heightmapHeight)

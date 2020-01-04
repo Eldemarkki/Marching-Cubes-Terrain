@@ -7,19 +7,9 @@ namespace MarchingCubes
     public static class Utils
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float3 Abs(this float3 n)
-        {
-            float x = math.abs(n.x);
-            float y = math.abs(n.y);
-            float z = math.abs(n.z);
-
-            return new float3(x, y, z);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int FloorToNearestX(this float n, int x)
         {
-            return ((int)math.floor(n / x)) * x;
+            return (int)math.floor(n / x) * x;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -45,24 +35,6 @@ namespace MarchingCubes
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int3 ToMathematicsInt(this Vector3Int n)
-        {
-            return new int3(n.x, n.y, n.z);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int3 ToMathematicsInt(this Vector3 n)
-        {
-            return new int3((int)n.x, (int)n.y, (int)n.z);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float3 ToMathematicsFloat(this Vector3Int n)
-        {
-            return new float3(n.x, n.y, n.z);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float3 ToMathematicsFloat(this Vector3 n)
         {
             return new float3(n.x, n.y, n.z);
@@ -72,24 +44,6 @@ namespace MarchingCubes
         public static Vector3Int ToVectorInt(this int3 n)
         {
             return new Vector3Int(n.x, n.y, n.z);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3Int ToVectorInt(this float3 n)
-        {
-            return new Vector3Int((int)n.x, (int)n.y, (int)n.z);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 ToVectorFloat(this int3 n)
-        {
-            return new Vector3(n.x, n.y, n.z);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 ToVectorFloat(this float3 n)
-        {
-            return new Vector3(n.x, n.y, n.z);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

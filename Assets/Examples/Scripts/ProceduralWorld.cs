@@ -100,15 +100,10 @@ namespace MarchingCubes.Examples
             int newZ = Utils.FloorToNearestX((float)worldPosition.z, ChunkSize) / ChunkSize;
 
             int3 key = new int3(newX, newY, newZ);
-            if (_chunks.TryGetValue(key, out ProceduralChunk chunk))
-            {
-                return chunk;
-            }
-
-            return null;
+            return _chunks.TryGetValue(key, out ProceduralChunk chunk) ? chunk : null;
         }
 
-        public ProceduralChunk CreateChunk(int3 chunkCoordinate)
+        private ProceduralChunk CreateChunk(int3 chunkCoordinate)
         {
             ProceduralChunk chunk = Instantiate(ChunkPrefab, (chunkCoordinate * ChunkSize).ToVectorInt(), Quaternion.identity).GetComponent<ProceduralChunk>();
             chunk.World = this;

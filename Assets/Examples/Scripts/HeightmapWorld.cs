@@ -10,7 +10,7 @@ namespace MarchingCubes.Examples
 
         private Dictionary<int3, HeightmapChunk> _chunks;
 
-        public HeightmapTerrainSettings HeightmapTerrainSettings { get => heightmapTerrainSettings; set => heightmapTerrainSettings = value; }
+        public HeightmapTerrainSettings HeightmapTerrainSettings => heightmapTerrainSettings;
 
         private void Awake()
         {
@@ -32,7 +32,7 @@ namespace MarchingCubes.Examples
         {
             int chunkCountX = Mathf.CeilToInt((float)(heightmapTerrainSettings.Width - 1) / ChunkSize);
             int chunkCountZ = Mathf.CeilToInt((float)(heightmapTerrainSettings.Height - 1) / ChunkSize);
-            int chunkCountY = Mathf.CeilToInt((float)heightmapTerrainSettings.Amplitude / ChunkSize);
+            int chunkCountY = Mathf.CeilToInt(heightmapTerrainSettings.Amplitude / ChunkSize);
 
             for (int x = 0; x < chunkCountX; x++)
             {
@@ -53,15 +53,10 @@ namespace MarchingCubes.Examples
             int newZ = Utils.FloorToNearestX((float)worldPosition.z, ChunkSize) / ChunkSize;
 
             int3 key = new int3(newX, newY, newZ);
-            if (_chunks.TryGetValue(key, out HeightmapChunk chunk))
-            {
-                return chunk;
-            }
-
-            return null;
+            return _chunks.TryGetValue(key, out HeightmapChunk chunk) ? chunk : null;
         }
 
-        public HeightmapChunk CreateChunk(int3 chunkCoordinate)
+        private HeightmapChunk CreateChunk(int3 chunkCoordinate)
         {
             HeightmapChunk chunk = Instantiate(ChunkPrefab, (chunkCoordinate * ChunkSize).ToVectorInt(), Quaternion.identity).GetComponent<HeightmapChunk>();
             chunk.World = this;
@@ -88,11 +83,10 @@ namespace MarchingCubes.Examples
             {
                 int3 chunkPos = (pos - LookupTables.CubeCorners[i]).FloorToNearestX(ChunkSize);
                 Chunk chunk = GetChunk(chunkPos);
-                if (chunk != null)
-                {
-                    int3 localPos = (pos - chunkPos).Mod(ChunkSize + 1);
-                    chunk.SetDensity(density, localPos.x, localPos.y, localPos.z);
-                }
+                if (chunk == null) continue;
+               
+                int3 localPos = (pos - chunkPos).Mod(ChunkSize + 1);
+                chunk.SetDensity(density, localPos.x, localPos.y, localPos.z);
             }
         }
     }

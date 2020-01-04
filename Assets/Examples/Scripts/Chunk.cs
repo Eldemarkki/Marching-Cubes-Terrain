@@ -16,12 +16,6 @@ namespace MarchingCubes.Examples
         private Mesh _mesh;
 
         private NativeArray<float> _densities;
-
-        private JobHandle _densityJobHandle;
-        private IDensityCalculationJob _densityCalculationJob;
-        private MarchingCubesJob _marchingCubesJob;
-        private JobHandle _marchingCubesJobHandle;
-
         private NativeArray<Vector3> _outputVertices;
         private NativeArray<int> _outputTriangles;
 
@@ -32,15 +26,17 @@ namespace MarchingCubes.Examples
         // can not modify a shared integer because of race conditions.
         private Counter _counter;
 
-        private bool AreDensitiesDirty => _densityModifications.Count >= 1;
-
         private bool _creatingMesh;
 
-        public int3 Coordinate { get; private set; }
+        public int3 Coordinate { get; set; }
         public int ChunkSize { get; private set; }
-        public NativeArray<float> Densities { get => _densities; set => _densities = value; }
-        public JobHandle DensityJobHandle { get => _densityJobHandle; set => _densityJobHandle = value; }
-        public IDensityCalculationJob DensityCalculationJob { get => _densityCalculationJob; set => _densityCalculationJob = value; }
+        public NativeArray<float> Densities { get => _densities; private set => _densities = value; }
+
+        public IDensityCalculationJob DensityCalculationJob { get; set; }
+        public JobHandle DensityJobHandle { get; set; }
+
+        public MarchingCubesJob MarchingCubesJob { get; set; }
+        public JobHandle MarchingCubesJobHandle { get; set; }
 
         protected virtual void Awake()
         {
@@ -57,7 +53,7 @@ namespace MarchingCubes.Examples
                 CompleteMeshGeneration();
             }
 
-            if (AreDensitiesDirty)
+            if (_densityModifications.Count >= 1)
             {
                 StartMeshGeneration();
             }
@@ -65,44 +61,31 @@ namespace MarchingCubes.Examples
 
         protected virtual void OnDestroy()
         {
-            if (!_marchingCubesJobHandle.IsCompleted)
-                _marchingCubesJobHandle.Complete();
-
             Dispose();
         }
 
-        public void Dispose()
+        private void Dispose()
         {
-            Densities.Dispose();
+            MarchingCubesJobHandle.Complete();
+            _densities.Dispose();
             _outputVertices.Dispose();
             _outputTriangles.Dispose();
         }
 
-        public void Initialize(int chunkSize, float isolevel, int3 coordinate)
+        public virtual void Initialize(int chunkSize, float isolevel, int3 coordinate)
         {
             _isolevel = isolevel;
+            Coordinate = coordinate;
             ChunkSize = chunkSize;
 
             Densities = new NativeArray<float>((ChunkSize + 1) * (ChunkSize + 1) * (ChunkSize + 1), Allocator.Persistent);
             _outputVertices = new NativeArray<Vector3>(15 * ChunkSize * ChunkSize * ChunkSize, Allocator.Persistent);
             _outputTriangles = new NativeArray<int>(15 * ChunkSize * ChunkSize * ChunkSize, Allocator.Persistent);
-
-            SetCoordinate(coordinate);
-        }
-
-        public void SetCoordinate(int3 coordinate)
-        {
-            Coordinate = coordinate;
-            transform.position = coordinate.ToVectorInt() * ChunkSize;
-            name = $"Chunk_{coordinate.x.ToString()}_{coordinate.y.ToString()}_{coordinate.z.ToString()}";
-
-            StartDensityCalculation();
-            StartMeshGeneration();
         }
 
         public abstract void StartDensityCalculation();
 
-        private void StartMeshGeneration()
+        public void StartMeshGeneration()
         {
             _counter = new Counter(Allocator.Persistent);
 
@@ -114,7 +97,7 @@ namespace MarchingCubes.Examples
 
             _densityModifications.Clear();
 
-            _marchingCubesJob = new MarchingCubesJob
+            MarchingCubesJob = new MarchingCubesJob
             {
                 densities = _densities,
                 isolevel = _isolevel,
@@ -125,14 +108,14 @@ namespace MarchingCubes.Examples
                 triangles = _outputTriangles
             };
 
-            _marchingCubesJobHandle = _marchingCubesJob.Schedule(ChunkSize * ChunkSize * ChunkSize, 128, DensityJobHandle);
+            MarchingCubesJobHandle = MarchingCubesJob.Schedule(ChunkSize * ChunkSize * ChunkSize, 128, DensityJobHandle);
 
             _creatingMesh = true;
         }
 
         private void CompleteMeshGeneration()
         {
-            _marchingCubesJobHandle.Complete();
+            MarchingCubesJobHandle.Complete();
 
             Vector3[] vertices = _outputVertices.Slice(0, _counter.Count * 3).ToArray();
             int[] triangles = _outputTriangles.Slice(0, _counter.Count * 3).ToArray();

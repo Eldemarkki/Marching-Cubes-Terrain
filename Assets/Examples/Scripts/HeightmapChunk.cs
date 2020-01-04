@@ -41,7 +41,7 @@ namespace MarchingCubes.Examples
 
             DensityCalculationJob = job;
 
-            DensityJobHandle = IJobParallelForExtensions.Schedule<HeightmapTerrainDensityCalculationJob>(job, Densities.Length, 256);
+            DensityJobHandle = job.Schedule(Densities.Length, 256);
         }
     }
 }
