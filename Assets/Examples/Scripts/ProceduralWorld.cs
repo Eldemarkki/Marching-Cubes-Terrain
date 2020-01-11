@@ -10,18 +10,13 @@ namespace MarchingCubes.Examples
         [SerializeField] private int renderDistance = 3;
         [SerializeField] private Transform player;
 
-        private Dictionary<int3, ProceduralChunk> _chunks;
         private Vector3 _startPos;
 
         public ProceduralTerrainSettings ProceduralTerrainSettings { get => proceduralTerrainSettings; set => proceduralTerrainSettings = value; }
 
-        private void Awake()
+        protected override void Start()
         {
-            _chunks = new Dictionary<int3, ProceduralChunk>();
-        }
-
-        private void Start()
-        {
+            base.Start();
             GenerateNewTerrain(player.position);
         }
 
@@ -41,10 +36,10 @@ namespace MarchingCubes.Examples
             int3 playerCoordinate = ((float3)playerChunkPosition / ChunkSize).Floor();
 
             // TODO: Initialize this only once
-            var newTerrainChunks = new Dictionary<int3, ProceduralChunk>((renderDistance * 2 + 1) * (renderDistance * 2 + 1) * (renderDistance * 2 + 1));
+            var newTerrainChunks = new Dictionary<int3, Chunk>((renderDistance * 2 + 1) * (renderDistance * 2 + 1) * (renderDistance * 2 + 1));
 
             Queue<ProceduralChunk> availableChunks = new Queue<ProceduralChunk>();
-            foreach (var chunk in _chunks.Values)
+            foreach (var chunk in Chunks.Values)
             {
                 int xOffset = Mathf.Abs(chunk.Coordinate.x - playerCoordinate.x);
                 int yOffset = Mathf.Abs(chunk.Coordinate.y - playerCoordinate.y);
@@ -52,7 +47,8 @@ namespace MarchingCubes.Examples
 
                 if (xOffset > renderDistance || yOffset > renderDistance || zOffset > renderDistance)
                 {
-                    availableChunks.Enqueue(chunk);
+                    // This conversion always succeeds because we are always adding only ProceduralChunks to Chunks.
+                    availableChunks.Enqueue(chunk as ProceduralChunk);
                 }
             }
 
@@ -64,43 +60,32 @@ namespace MarchingCubes.Examples
                     {
                         int3 chunkCoordinate = playerCoordinate + new int3(x, y, z);
 
-                        ProceduralChunk chunk;
-                        bool chunkExistsAtCoordinate = _chunks.ContainsKey(chunkCoordinate);
-                        if (chunkExistsAtCoordinate)
+                        ProceduralChunk proceduralChunk;
+                        if (Chunks.TryGetValue(chunkCoordinate, out Chunk chunk))
                         {
-                            chunk = _chunks[chunkCoordinate];
+                            proceduralChunk = chunk as ProceduralChunk;
                         }
                         else
                         {
                             // There is not a chunk at that coordinate, so move (or create) one there
                             if (availableChunks.Count > 0)
                             {
-                                chunk = availableChunks.Dequeue();
-                                chunk.SetCoordinate(chunkCoordinate);
+                                proceduralChunk = availableChunks.Dequeue();
+                                proceduralChunk.SetCoordinate(chunkCoordinate);
                             }
                             else
                             {
-                                chunk = CreateChunk(chunkCoordinate);
+                                proceduralChunk = CreateChunk(chunkCoordinate);
                             }
                         }
 
-                        newTerrainChunks.Add(chunkCoordinate, chunk);
+                        newTerrainChunks.Add(chunkCoordinate, proceduralChunk);
                     }
                 }
             }
 
-            _chunks = newTerrainChunks;
+            Chunks = newTerrainChunks;
             _startPos = playerPos;
-        }
-
-        public override Chunk GetChunk(int3 worldPosition)
-        {
-            int newX = Utils.FloorToNearestX((float)worldPosition.x, ChunkSize) / ChunkSize;
-            int newY = Utils.FloorToNearestX((float)worldPosition.y, ChunkSize) / ChunkSize;
-            int newZ = Utils.FloorToNearestX((float)worldPosition.z, ChunkSize) / ChunkSize;
-
-            int3 key = new int3(newX, newY, newZ);
-            return _chunks.TryGetValue(key, out ProceduralChunk chunk) ? chunk : null;
         }
 
         private ProceduralChunk CreateChunk(int3 chunkCoordinate)
@@ -109,30 +94,9 @@ namespace MarchingCubes.Examples
             chunk.name = $"Chunk_{chunkCoordinate.x}_{chunkCoordinate.y}_{chunkCoordinate.z}";
             chunk.World = this;
             chunk.Initialize(ChunkSize, Isolevel, chunkCoordinate);
-            _chunks.Add(chunkCoordinate, chunk);
+            Chunks.Add(chunkCoordinate, chunk);
 
             return chunk;
-        }
-
-        public override float GetDensity(int3 worldPosition)
-        {
-            Chunk chunk = GetChunk(worldPosition);
-            if (chunk == null) { return 0; }
-
-            return chunk.GetDensity(worldPosition.Mod(ChunkSize));
-        }
-
-        public override void SetDensity(float density, int3 pos)
-        {
-            for (int i = 0; i < 8; i++)
-            {
-                int3 chunkPos = (pos - LookupTables.CubeCorners[i]).FloorToNearestX(ChunkSize);
-                Chunk chunk = GetChunk(chunkPos);
-                if (chunk == null) { continue; }
-
-                int3 localPos = (pos - chunkPos).Mod(ChunkSize + 1);
-                chunk.SetDensity(density, localPos.x, localPos.y, localPos.z);
-            }
         }
     }
 }

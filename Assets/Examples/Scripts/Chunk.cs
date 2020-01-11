@@ -32,10 +32,7 @@ namespace MarchingCubes.Examples
         public int ChunkSize { get; private set; }
         public NativeArray<float> Densities { get => _densities; private set => _densities = value; }
 
-        public IDensityCalculationJob DensityCalculationJob { get; set; }
         public JobHandle DensityJobHandle { get; set; }
-
-        public MarchingCubesJob MarchingCubesJob { get; set; }
         public JobHandle MarchingCubesJobHandle { get; set; }
 
         protected virtual void Awake()
@@ -100,7 +97,7 @@ namespace MarchingCubes.Examples
 
             _densityModifications.Clear();
 
-            MarchingCubesJob = new MarchingCubesJob
+            var marchingCubesJob = new MarchingCubesJob
             {
                 densities = _densities,
                 isolevel = _isolevel,
@@ -111,7 +108,7 @@ namespace MarchingCubes.Examples
                 triangles = _outputTriangles
             };
 
-            MarchingCubesJobHandle = MarchingCubesJob.Schedule(ChunkSize * ChunkSize * ChunkSize, 128, DensityJobHandle);
+            MarchingCubesJobHandle = marchingCubesJob.Schedule(ChunkSize * ChunkSize * ChunkSize, 128, DensityJobHandle);
 
             _creatingMesh = true;
         }

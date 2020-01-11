@@ -7,22 +7,6 @@ namespace MarchingCubes.Examples
     {
         public HeightmapWorld World { get; set; }
 
-        // These have to be here because Unity doesn't automatically call the base class's Unity-functions
-        protected override void Awake()
-        {
-            base.Awake();
-        }
-
-        protected override void Update()
-        {
-            base.Update();
-        }
-
-        protected override void OnDestroy()
-        {
-            base.OnDestroy();
-        }
-
         public override void StartDensityCalculation()
         {
             int3 worldPosition = Coordinate * ChunkSize;
@@ -38,8 +22,6 @@ namespace MarchingCubes.Examples
                 amplitude = World.HeightmapTerrainSettings.Amplitude,
                 heightOffset = World.HeightmapTerrainSettings.HeightOffset
             };
-
-            DensityCalculationJob = job;
 
             DensityJobHandle = job.Schedule(Densities.Length, 256);
         }

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Unity.Mathematics;
+﻿using Unity.Mathematics;
 using UnityEngine;
 
 namespace MarchingCubes.Examples
@@ -7,19 +6,16 @@ namespace MarchingCubes.Examples
     public class HeightmapWorld : World
     {
         [SerializeField] private HeightmapTerrainSettings heightmapTerrainSettings;
-
-        private Dictionary<int3, HeightmapChunk> _chunks;
-
         public HeightmapTerrainSettings HeightmapTerrainSettings => heightmapTerrainSettings;
 
         private void Awake()
         {
-            _chunks = new Dictionary<int3, HeightmapChunk>();
             heightmapTerrainSettings = new HeightmapTerrainSettings(heightmapTerrainSettings.Heightmap, heightmapTerrainSettings.Amplitude, heightmapTerrainSettings.HeightOffset);
         }
 
-        private void Start()
+        protected override void Start()
         {
+            base.Start();
             CreateHeightmapTerrain();
         }
 
@@ -46,49 +42,15 @@ namespace MarchingCubes.Examples
             }
         }
 
-        public override Chunk GetChunk(int3 worldPosition)
-        {
-            int newX = Utils.FloorToNearestX((float)worldPosition.x, ChunkSize) / ChunkSize;
-            int newY = Utils.FloorToNearestX((float)worldPosition.y, ChunkSize) / ChunkSize;
-            int newZ = Utils.FloorToNearestX((float)worldPosition.z, ChunkSize) / ChunkSize;
-
-            int3 key = new int3(newX, newY, newZ);
-            return _chunks.TryGetValue(key, out HeightmapChunk chunk) ? chunk : null;
-        }
-
         private HeightmapChunk CreateChunk(int3 chunkCoordinate)
         {
             HeightmapChunk chunk = Instantiate(ChunkPrefab, (chunkCoordinate * ChunkSize).ToVectorInt(), Quaternion.identity).GetComponent<HeightmapChunk>();
             chunk.name = $"Chunk_{chunkCoordinate.x}_{chunkCoordinate.y}_{chunkCoordinate.z}";
             chunk.World = this;
             chunk.Initialize(ChunkSize, Isolevel, chunkCoordinate);
-            _chunks.Add(chunkCoordinate, chunk);
+            Chunks.Add(chunkCoordinate, chunk);
 
             return chunk;
-        }
-
-        public override float GetDensity(int3 worldPosition)
-        {
-            Chunk chunk = GetChunk(worldPosition);
-            if (chunk == null) { return 0; }
-
-            float density = chunk.GetDensity(worldPosition.x.Mod(ChunkSize),
-                                             worldPosition.y.Mod(ChunkSize),
-                                             worldPosition.z.Mod(ChunkSize));
-            return density;
-        }
-
-        public override void SetDensity(float density, int3 pos)
-        {
-            for (int i = 0; i < 8; i++)
-            {
-                int3 chunkPos = (pos - LookupTables.CubeCorners[i]).FloorToNearestX(ChunkSize);
-                Chunk chunk = GetChunk(chunkPos);
-                if (chunk == null) continue;
-               
-                int3 localPos = (pos - chunkPos).Mod(ChunkSize + 1);
-                chunk.SetDensity(density, localPos.x, localPos.y, localPos.z);
-            }
         }
     }
 }
