@@ -14,6 +14,7 @@ namespace MarchingCubes.Examples
         [SerializeField] private AnimationCurve forceOverDistance = AnimationCurve.Constant(0, 1, 1);
 
         [Header("Flattening")]
+        [SerializeField] private float flatteningRadius = 3f;
         [SerializeField] private KeyCode flatteningKey = KeyCode.LeftControl;
 
         [Header("Player Settings")]
@@ -90,10 +91,7 @@ namespace MarchingCubes.Examples
             var result = PlaneLineIntersection(flatteningOrigin, flatteningNormal, playerCamera.position, playerCamera.forward, out float3 intersectionPoint);
             if (result != PlaneLineIntersectionResult.OneHit) return;
 
-            Plane plane = new Plane(flatteningNormal, flatteningOrigin);
-            float flattenRadius = 2f;
-
-            int intRange = (int)math.ceil(flattenRadius);
+            int intRange = (int)math.ceil(flatteningRadius);
             for (int x = -intRange; x <= intRange; x++)
             {
                 for (int y = -intRange; y <= intRange; y++)
@@ -104,17 +102,16 @@ namespace MarchingCubes.Examples
                         float3 offsetPoint = intersectionPoint + localPosition;
 
                         float distance = math.distance(offsetPoint, intersectionPoint);
-                        if (distance > flattenRadius)
+                        if (distance > flatteningRadius)
                         {
                             continue;
                         }
 
                         int3 densityWorldPosition = (int3)offsetPoint;
+                        float density = (math.dot(flatteningNormal, densityWorldPosition) - math.dot(flatteningNormal, flatteningOrigin)) / flatteningRadius;
+                        float oldDensity = world.GetDensity(densityWorldPosition);
 
-                        // Casting offsetPoint to float3 is NOT an error! It is because Vector3 is not assignable from int3. Also, it 
-                        // can not be taken directly from offsetPoint because the point has to be rounded to the density's actual position
-                        float density = plane.GetDistanceToPoint((float3)densityWorldPosition) / flattenRadius;
-                        world.SetDensity(density, densityWorldPosition);
+                        world.SetDensity((density+oldDensity) * 0.8f, densityWorldPosition);
                     }
                 }
             }
