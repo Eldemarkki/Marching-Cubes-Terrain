@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -11,8 +12,14 @@ namespace MarchingCubes.Examples
         [SerializeField] private Transform player;
 
         private Vector3 _startPos;
+        private Queue<ProceduralChunk> _availableChunks;
 
-        public ProceduralTerrainSettings ProceduralTerrainSettings { get => proceduralTerrainSettings; set => proceduralTerrainSettings = value; }
+        public ProceduralTerrainSettings ProceduralTerrainSettings => proceduralTerrainSettings;
+
+        private void Awake()
+        {
+            _availableChunks = new Queue<ProceduralChunk>();
+        }
 
         protected override void Start()
         {
@@ -32,14 +39,11 @@ namespace MarchingCubes.Examples
 
         private void GenerateNewTerrain(Vector3 playerPos)
         {
-            int3 playerChunkPosition = playerPos.ToMathematicsFloat().FloorToNearestX(ChunkSize);
-            int3 playerCoordinate = ((float3)playerChunkPosition / ChunkSize).Floor();
+            int3 playerCoordinate = WorldPositionToCoordinate(playerPos);
 
-            // TODO: Initialize this only once
-            var newTerrainChunks = new Dictionary<int3, Chunk>((renderDistance * 2 + 1) * (renderDistance * 2 + 1) * (renderDistance * 2 + 1));
+            _availableChunks.Clear();
 
-            Queue<ProceduralChunk> availableChunks = new Queue<ProceduralChunk>();
-            foreach (var chunk in Chunks.Values)
+            foreach (var chunk in Chunks.Values.ToList())
             {
                 int xOffset = Mathf.Abs(chunk.Coordinate.x - playerCoordinate.x);
                 int yOffset = Mathf.Abs(chunk.Coordinate.y - playerCoordinate.y);
@@ -48,7 +52,8 @@ namespace MarchingCubes.Examples
                 if (xOffset > renderDistance || yOffset > renderDistance || zOffset > renderDistance)
                 {
                     // This conversion always succeeds because we are always adding only ProceduralChunks to Chunks.
-                    availableChunks.Enqueue(chunk as ProceduralChunk);
+                    _availableChunks.Enqueue(chunk as ProceduralChunk);
+                    Chunks.Remove(chunk.Coordinate);
                 }
             }
 
@@ -59,42 +64,35 @@ namespace MarchingCubes.Examples
                     for (int z = -renderDistance; z <= renderDistance; z++)
                     {
                         int3 chunkCoordinate = playerCoordinate + new int3(x, y, z);
+                        if (Chunks.ContainsKey(chunkCoordinate)) continue;
 
-                        ProceduralChunk proceduralChunk;
-                        if (Chunks.TryGetValue(chunkCoordinate, out Chunk chunk))
-                        {
-                            proceduralChunk = chunk as ProceduralChunk;
-                        }
-                        else
-                        {
-                            // There is not a chunk at that coordinate, so move (or create) one there
-                            if (availableChunks.Count > 0)
-                            {
-                                proceduralChunk = availableChunks.Dequeue();
-                                proceduralChunk.SetCoordinate(chunkCoordinate);
-                            }
-                            else
-                            {
-                                proceduralChunk = CreateChunk(chunkCoordinate);
-                            }
-                        }
-
-                        newTerrainChunks.Add(chunkCoordinate, proceduralChunk);
+                        // Make sure that there is a chunk at that coordinate
+                        Chunk chunk = EnsureChunkAtCoordinate(chunkCoordinate);
+                        Chunks.Add(chunkCoordinate, chunk);
                     }
                 }
             }
 
-            Chunks = newTerrainChunks;
             _startPos = playerPos;
+        }
+
+        private Chunk EnsureChunkAtCoordinate(int3 chunkCoordinate)
+        {
+            if (_availableChunks.Count > 0)
+            {
+                ProceduralChunk proceduralChunk = _availableChunks.Dequeue();
+                proceduralChunk.SetCoordinate(chunkCoordinate);
+                return proceduralChunk;
+            }
+
+            return CreateChunk(chunkCoordinate);
         }
 
         private ProceduralChunk CreateChunk(int3 chunkCoordinate)
         {
             ProceduralChunk chunk = Instantiate(ChunkPrefab, (chunkCoordinate * ChunkSize).ToVectorInt(), Quaternion.identity).GetComponent<ProceduralChunk>();
-            chunk.name = $"Chunk_{chunkCoordinate.x}_{chunkCoordinate.y}_{chunkCoordinate.z}";
             chunk.World = this;
             chunk.Initialize(ChunkSize, Isolevel, chunkCoordinate);
-            Chunks.Add(chunkCoordinate, chunk);
 
             return chunk;
         }
