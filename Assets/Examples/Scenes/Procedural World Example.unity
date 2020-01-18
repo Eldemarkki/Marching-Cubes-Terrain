@@ -482,7 +482,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b25c4f659e9d0f84d9897b9f38efef04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  increaseTerrain: 1
+  leftClickAddsTerrain: 1
   modificationForce: 0.1
   modificationRange: 3
   maxReachDistance: 100
@@ -510,6 +510,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+  flatteningRadius: 3
   flatteningKey: 306
   world: {fileID: 609110451}
   playerCamera: {fileID: 534669905}
@@ -625,41 +626,6 @@ PrefabInstance:
       propertyPath: player
       value: 
       objectReference: {fileID: 534669905}
-    - target: {fileID: 5984913983263934270, guid: 0a7fdfdc32922934fb49078a896090c1,
-        type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5984913983263934270, guid: 0a7fdfdc32922934fb49078a896090c1,
-        type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5984913983263934270, guid: 0a7fdfdc32922934fb49078a896090c1,
-        type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5984913983263934270, guid: 0a7fdfdc32922934fb49078a896090c1,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5984913983263934270, guid: 0a7fdfdc32922934fb49078a896090c1,
-        type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5984913983263934270, guid: 0a7fdfdc32922934fb49078a896090c1,
-        type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5984913983263934270, guid: 0a7fdfdc32922934fb49078a896090c1,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 5984913983263934270, guid: 0a7fdfdc32922934fb49078a896090c1,
         type: 3}
       propertyPath: m_RootOrder

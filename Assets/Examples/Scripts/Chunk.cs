@@ -69,11 +69,14 @@ namespace MarchingCubes.Examples
             _outputTriangles.Dispose();
         }
 
-        public virtual void Initialize(int chunkSize, float isolevel, int3 coordinate)
+        public void Initialize(int chunkSize, float isolevel, int3 coordinate)
         {
             _isolevel = isolevel;
             Coordinate = coordinate;
             ChunkSize = chunkSize;
+            
+            transform.position = coordinate.ToVectorInt() * ChunkSize;
+            name = $"Chunk_{coordinate.x}_{coordinate.y}_{coordinate.z}";
 
             Densities = new NativeArray<float>((ChunkSize + 1) * (ChunkSize + 1) * (ChunkSize + 1), Allocator.Persistent);
             _outputVertices = new NativeArray<Vector3>(15 * ChunkSize * ChunkSize * ChunkSize, Allocator.Persistent);
@@ -117,8 +120,14 @@ namespace MarchingCubes.Examples
         {
             MarchingCubesJobHandle.Complete();
 
-            Vector3[] vertices = _outputVertices.Slice(0, _counter.Count * 3).ToArray();
-            int[] triangles = _outputTriangles.Slice(0, _counter.Count * 3).ToArray();
+            Vector3[] vertices = new Vector3[_counter.Count * 3];
+            int[] triangles = new int[_counter.Count * 3];
+            
+            if (_counter.Count * 3 > 0)
+            {
+                _outputVertices.Slice(0, vertices.Length).CopyToFast(vertices);
+                _outputTriangles.Slice(0, triangles.Length).CopyToFast(triangles);
+            }
 
             _counter.Dispose();
 
@@ -146,6 +155,11 @@ namespace MarchingCubes.Examples
         public void SetDensity(float density, int x, int y, int z)
         {
             _densityModifications.Add((x * (ChunkSize + 1) * (ChunkSize + 1) + y * (ChunkSize + 1) + z, density));
+        }
+
+        public void SetDensity(float density, int3 localPos)
+        {
+            SetDensity(density, localPos.x, localPos.y, localPos.z);
         }
     }
 }

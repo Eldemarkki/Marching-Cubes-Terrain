@@ -7,12 +7,6 @@ namespace MarchingCubes.Examples
     {
         public ProceduralWorld World { get; set; }
 
-        public override void Initialize(int chunkSize, float isolevel, int3 coordinate)
-        {
-            base.Initialize(chunkSize, isolevel, coordinate);
-            SetCoordinate(Coordinate);
-        }
-
         public void SetCoordinate(int3 coordinate)
         {
             Coordinate = coordinate;

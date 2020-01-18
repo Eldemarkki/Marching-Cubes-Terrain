@@ -7,7 +7,7 @@ namespace MarchingCubes.Examples
     public class TerrainEditor : MonoBehaviour
     {
         [Header("Terrain Modification Settings")]
-        [SerializeField] private bool increaseTerrain = true;
+        [SerializeField] private bool leftClickAddsTerrain = true;
         [SerializeField] private float modificationForce = 0.1f;
         [SerializeField] private float modificationRange = 3f;
         [SerializeField] private float maxReachDistance = 100f;
@@ -21,9 +21,9 @@ namespace MarchingCubes.Examples
         [SerializeField] private World world;
         [SerializeField] private Transform playerCamera;
 
-        private bool isFlattening;
-        private float3 flatteningOrigin;
-        private float3 flatteningNormal;
+        private bool _isFlattening;
+        private float3 _flatteningOrigin;
+        private float3 _flatteningNormal;
 
         private void Awake()
         {
@@ -53,42 +53,42 @@ namespace MarchingCubes.Examples
                     var ray = new Ray(startP, direction);
 
                     if (!Physics.Raycast(ray, out RaycastHit hit, maxReachDistance)) { return; }
-                    isFlattening = true;
+                    _isFlattening = true;
 
-                    flatteningOrigin = hit.point;
-                    flatteningNormal = hit.normal;
+                    _flatteningOrigin = hit.point;
+                    _flatteningNormal = hit.normal;
                 }
                 else if (Input.GetMouseButtonUp(0))
                 {
-                    isFlattening = false;
+                    _isFlattening = false;
                 }
             }
 
             if (Input.GetKeyUp(flatteningKey))
             {
-                isFlattening = false;
+                _isFlattening = false;
             }
 
             if (Input.GetMouseButton(0))
             {
-                if (isFlattening)
+                if (_isFlattening)
                 {
                     FlattenTerrain();
                 }
                 else
                 {
-                    RaycastToTerrain(increaseTerrain);
+                    RaycastToTerrain(leftClickAddsTerrain);
                 }
             }
             else if (Input.GetMouseButton(1))
             {
-                RaycastToTerrain(!increaseTerrain);
+                RaycastToTerrain(!leftClickAddsTerrain);
             }
         }
 
         private void FlattenTerrain()
         {
-            var result = PlaneLineIntersection(flatteningOrigin, flatteningNormal, playerCamera.position, playerCamera.forward, out float3 intersectionPoint);
+            var result = PlaneLineIntersection(_flatteningOrigin, _flatteningNormal, playerCamera.position, playerCamera.forward, out float3 intersectionPoint);
             if (result != PlaneLineIntersectionResult.OneHit) return;
 
             int intRange = (int)math.ceil(flatteningRadius);
@@ -108,7 +108,7 @@ namespace MarchingCubes.Examples
                         }
 
                         int3 densityWorldPosition = (int3)offsetPoint;
-                        float density = (math.dot(flatteningNormal, densityWorldPosition) - math.dot(flatteningNormal, flatteningOrigin)) / flatteningRadius;
+                        float density = (math.dot(_flatteningNormal, densityWorldPosition) - math.dot(_flatteningNormal, _flatteningOrigin)) / flatteningRadius;
                         float oldDensity = world.GetDensity(densityWorldPosition);
 
                         world.SetDensity((density+oldDensity) * 0.8f, densityWorldPosition);
@@ -129,7 +129,7 @@ namespace MarchingCubes.Examples
                 return (planeOrigin - lineOrigin).Equals(float3.zero) ? PlaneLineIntersectionResult.ParallelInsidePlane : PlaneLineIntersectionResult.NoHit;
             }
 
-            var d = Vector3.Dot(planeOrigin, -planeNormal);
+            var d = math.dot(planeOrigin, -planeNormal);
             var t = -(d + lineOrigin.z * planeNormal.z + lineOrigin.y * planeNormal.y + lineOrigin.x * planeNormal.x) / (lineDirection.z * planeNormal.z + lineDirection.y * planeNormal.y + lineDirection.x * planeNormal.x);
             intersectionPoint = lineOrigin + t * lineDirection;
             return PlaneLineIntersectionResult.OneHit;
