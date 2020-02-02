@@ -51,6 +51,8 @@ namespace MarchingCubes.Examples
         private void Awake()
         {
             _cam = GetComponent<Camera>();
+            _rotationX = -transform.eulerAngles.x;
+            _rotationY = transform.eulerAngles.y;
         }
 
         private void Update()
