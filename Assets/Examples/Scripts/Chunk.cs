@@ -51,7 +51,7 @@ namespace MarchingCubes.Examples
         /// <summary>
         /// Stores the density modifications because the densities can not be modified while a job that requires them is running.
         /// </summary>
-        private List<(int index, float density)> _densityModifications;
+        protected List<(int index, float density)> _densityModifications;
 
         /// <summary>
         /// An incremental counter that keeps track of a single integer inside the mesh generation job. This is because the jobs
