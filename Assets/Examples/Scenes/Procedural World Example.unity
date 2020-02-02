@@ -483,34 +483,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   leftClickAddsTerrain: 1
-  modificationForce: 0.1
-  modificationRange: 3
+  deformSpeed: 0.1
+  deformRange: 3
   maxReachDistance: 100
-  forceOverDistance:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    - serializedVersion: 3
-      time: 1
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0
-      outWeight: 0
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  flatteningRadius: 3
   flatteningKey: 306
   world: {fileID: 609110451}
   playerCamera: {fileID: 534669905}
