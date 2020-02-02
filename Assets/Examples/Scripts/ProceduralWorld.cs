@@ -5,15 +5,39 @@ using UnityEngine;
 
 namespace MarchingCubes.Examples
 {
+    /// <summary>
+    /// A procedurally generated world
+    /// </summary>
     public class ProceduralWorld : World
     {
+        /// <summary>
+        /// The procedural terrain generation settings
+        /// </summary>
         [SerializeField] private ProceduralTerrainSettings proceduralTerrainSettings = new ProceduralTerrainSettings(1, 16, 50, -40);
+
+        /// <summary>
+        /// The "radius" of the chunks the player sees
+        /// </summary>
         [SerializeField] private int renderDistance = 3;
+
+        /// <summary>
+        /// The viewer which the terrain is generated around
+        /// </summary>
         [SerializeField] private Transform player;
 
+        /// <summary>
+        /// The point where terrain was last generated around
+        /// </summary>
         private Vector3 _startPos;
+
+        /// <summary>
+        /// The pooled chunks that can be moved to a new position
+        /// </summary>
         private Queue<ProceduralChunk> _availableChunks;
 
+        /// <summary>
+        /// The procedural terrain generation settings
+        /// </summary>
         public ProceduralTerrainSettings ProceduralTerrainSettings => proceduralTerrainSettings;
 
         private void Awake()
@@ -37,6 +61,10 @@ namespace MarchingCubes.Examples
             }
         }
 
+        /// <summary>
+        /// Generates new procedural terrain
+        /// </summary>
+        /// <param name="playerPos">The position to generate the terrain around</param>
         private void GenerateNewTerrain(Vector3 playerPos)
         {
             int3 playerCoordinate = WorldPositionToCoordinate(playerPos);
@@ -64,30 +92,51 @@ namespace MarchingCubes.Examples
                     for (int z = -renderDistance; z <= renderDistance; z++)
                     {
                         int3 chunkCoordinate = playerCoordinate + new int3(x, y, z);
-                        if (Chunks.ContainsKey(chunkCoordinate)) continue;
 
                         // Make sure that there is a chunk at that coordinate
-                        Chunk chunk = EnsureChunkAtCoordinate(chunkCoordinate);
-                        Chunks.Add(chunkCoordinate, chunk);
+                        bool chunkExists = GetOrCreateChunk(chunkCoordinate, out Chunk chunk);
+                        if (!chunkExists)
+                        { 
+                            Chunks.Add(chunkCoordinate, chunk);
+                        }
                     }
                 }
             }
 
             _startPos = playerPos;
         }
-
-        private Chunk EnsureChunkAtCoordinate(int3 chunkCoordinate)
+        
+        /// <summary>
+        /// Ensures that a chunk exists at a coordinate. It either moves (from availableChunks) or instantiates a chunk
+        /// </summary>
+        /// <param name="chunkCoordinate">The chunk's coordinate</param>
+        /// <param name="chunk">The chunk at that position</param>
+        /// <returns>Does a chunk already exist there</returns>
+        private bool GetOrCreateChunk(int3 chunkCoordinate, out Chunk chunk)
         {
+            if (Chunks.TryGetValue(chunkCoordinate, out Chunk existingChunk))
+            {
+                chunk = existingChunk;
+                return true;
+            }
+
             if (_availableChunks.Count > 0)
             {
                 ProceduralChunk proceduralChunk = _availableChunks.Dequeue();
                 proceduralChunk.SetCoordinate(chunkCoordinate);
-                return proceduralChunk;
+                chunk = proceduralChunk;
+                return false;
             }
 
-            return CreateChunk(chunkCoordinate);
+            chunk = CreateChunk(chunkCoordinate);
+            return false;
         }
 
+        /// <summary>
+        /// Instantiates a chunk at a coordinate
+        /// </summary>
+        /// <param name="chunkCoordinate">The chunk's coordinate</param>
+        /// <returns>The created chunk</returns>
         private ProceduralChunk CreateChunk(int3 chunkCoordinate)
         {
             ProceduralChunk chunk = Instantiate(ChunkPrefab, (chunkCoordinate * ChunkSize).ToVectorInt(), Quaternion.identity).GetComponent<ProceduralChunk>();
