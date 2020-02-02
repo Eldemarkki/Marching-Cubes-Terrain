@@ -4,25 +4,62 @@ using UnityEngine;
 
 namespace MarchingCubes.Examples
 {
-    public class TerrainEditor : MonoBehaviour
+    /// <summary>
+    /// The terrain deformer which modifies the terrain
+    /// </summary>
+    public class TerrainDeformer : MonoBehaviour
     {
-        [Header("Terrain Modification Settings")]
+        /// <summary>
+        /// Does the left mouse button add or remove terrain
+        /// </summary>
+        [Header("Terrain Deforming Settings")]
         [SerializeField] private bool leftClickAddsTerrain = true;
-        [SerializeField] private float modificationForce = 0.1f;
-        [SerializeField] private float modificationRange = 3f;
-        [SerializeField] private float maxReachDistance = 100f;
-        [SerializeField] private AnimationCurve forceOverDistance = AnimationCurve.Constant(0, 1, 1);
-
+        
+        /// <summary>
+        /// How fast the terrain is deformed
+        /// </summary>
+        [SerializeField] private float deformSpeed = 0.1f;
+        
+        /// <summary>
+        /// How far the deformation can reach
+        /// </summary>
+        [SerializeField] private float deformRange = 3f;
+        
+        /// <summary>
+        /// How far away points the player can deform
+        /// </summary>
+        [SerializeField] private float maxReachDistance = Mathf.Infinity;
+        
+        /// <summary>
+        /// Which key must be held down to flatten the terrain
+        /// </summary>
         [Header("Flattening")]
-        [SerializeField] private float flatteningRadius = 3f;
         [SerializeField] private KeyCode flatteningKey = KeyCode.LeftControl;
 
+        /// <summary>
+        /// The world the will be deformed
+        /// </summary>
         [Header("Player Settings")]
         [SerializeField] private World world;
+        
+        /// <summary>
+        /// The game object that the deformation raycast will be casted from
+        /// </summary>
         [SerializeField] private Transform playerCamera;
-
+        
+        /// <summary>
+        /// Is the terrain currently being flattened
+        /// </summary>
         private bool _isFlattening;
+        
+        /// <summary>
+        /// The point where the flattening started
+        /// </summary>
         private float3 _flatteningOrigin;
+        
+        /// <summary>
+        /// The normal of the flattening plane
+        /// </summary>
         private float3 _flatteningNormal;
 
         private void Awake()
@@ -32,13 +69,15 @@ namespace MarchingCubes.Examples
 
         private void Update()
         {
-            TryEditTerrain();
-        }
-
-        private void TryEditTerrain()
-        {
-            if (modificationForce <= 0 || modificationRange <= 0)
+            if (deformSpeed <= 0)
             {
+                Debug.LogWarning("Deform Speed must be positive!");
+                return;
+            }
+
+            if (deformRange <= 0)
+            {
+                Debug.LogWarning("Deform Range must be positive");
                 return;
             }
 
@@ -86,12 +125,15 @@ namespace MarchingCubes.Examples
             }
         }
 
+        /// <summary>
+        /// Get a point on the flattening plane and flatten the terrain around it
+        /// </summary>
         private void FlattenTerrain()
         {
-            var result = PlaneLineIntersection(_flatteningOrigin, _flatteningNormal, playerCamera.position, playerCamera.forward, out float3 intersectionPoint);
+            var result = Utils.PlaneLineIntersection(_flatteningOrigin, _flatteningNormal, playerCamera.position, playerCamera.forward, out float3 intersectionPoint);
             if (result != PlaneLineIntersectionResult.OneHit) return;
 
-            int intRange = (int)math.ceil(flatteningRadius);
+            int intRange = (int)math.ceil(deformRange);
             for (int x = -intRange; x <= intRange; x++)
             {
                 for (int y = -intRange; y <= intRange; y++)
@@ -102,13 +144,13 @@ namespace MarchingCubes.Examples
                         float3 offsetPoint = intersectionPoint + localPosition;
 
                         float distance = math.distance(offsetPoint, intersectionPoint);
-                        if (distance > flatteningRadius)
+                        if (distance > deformRange)
                         {
                             continue;
                         }
 
                         int3 densityWorldPosition = (int3)offsetPoint;
-                        float density = (math.dot(_flatteningNormal, densityWorldPosition) - math.dot(_flatteningNormal, _flatteningOrigin)) / flatteningRadius;
+                        float density = (math.dot(_flatteningNormal, densityWorldPosition) - math.dot(_flatteningNormal, _flatteningOrigin)) / deformRange;
                         float oldDensity = world.GetDensity(densityWorldPosition);
 
                         world.SetDensity((density+oldDensity) * 0.8f, densityWorldPosition);
@@ -117,24 +159,10 @@ namespace MarchingCubes.Examples
             }
         }
 
-        private PlaneLineIntersectionResult PlaneLineIntersection(float3 planeOrigin, float3 planeNormal, float3 lineOrigin,
-            float3 lineDirection, out float3 intersectionPoint)
-        {
-            planeNormal = math.normalize(planeNormal);
-            lineDirection = math.normalize(lineDirection);
-
-            if (math.dot(planeNormal, lineDirection) == 0)
-            {
-                intersectionPoint = float3.zero;
-                return (planeOrigin - lineOrigin).Equals(float3.zero) ? PlaneLineIntersectionResult.ParallelInsidePlane : PlaneLineIntersectionResult.NoHit;
-            }
-
-            var d = math.dot(planeOrigin, -planeNormal);
-            var t = -(d + lineOrigin.z * planeNormal.z + lineOrigin.y * planeNormal.y + lineOrigin.x * planeNormal.x) / (lineDirection.z * planeNormal.z + lineDirection.y * planeNormal.y + lineDirection.x * planeNormal.x);
-            intersectionPoint = lineOrigin + t * lineDirection;
-            return PlaneLineIntersectionResult.OneHit;
-        }
-
+        /// <summary>
+        /// Tests if the player is in the way of deforming and edits the terrain if the player is not.
+        /// </summary>
+        /// <param name="addTerrain">Should terrain be added or removed</param>
         private void RaycastToTerrain(bool addTerrain)
         {
             var ray = new Ray(playerCamera.position, playerCamera.forward);
@@ -144,14 +172,21 @@ namespace MarchingCubes.Examples
 
             if (addTerrain)
             {
-                Collider[] hits = Physics.OverlapSphere(hitPoint, modificationRange / 2f * 0.8f);
+                Collider[] hits = Physics.OverlapSphere(hitPoint, deformRange / 2f * 0.8f);
                 if (hits.Any(h => h.CompareTag("Player"))) { return; }
             }
 
-            EditTerrain(hitPoint, addTerrain, modificationForce, modificationRange);
+            EditTerrain(hitPoint, addTerrain, deformSpeed, deformRange);
         }
 
-        private void EditTerrain(Vector3 point, bool addTerrain, float force, float range)
+        /// <summary>
+        /// Deforms the terrain in a spherical region around the point
+        /// </summary>
+        /// <param name="point">The point to modify the terrain around</param>
+        /// <param name="addTerrain">Should terrain be added or removed</param>
+        /// <param name="deformSpeed">How fast the terrain should be deformed</param>
+        /// <param name="range">How far the deformation can reach</param>
+        private void EditTerrain(Vector3 point, bool addTerrain, float deformSpeed, float range)
         {
             int buildModifier = addTerrain ? 1 : -1;
 
@@ -178,7 +213,7 @@ namespace MarchingCubes.Examples
                             continue;
                         }
 
-                        float modificationAmount = force / distance * forceOverDistance.Evaluate(1 - distance.Map(0, force, 0, 1)) * buildModifier;
+                        float modificationAmount = deformSpeed / distance * buildModifier;
 
                         float oldDensity = world.GetDensity(offsetPoint);
                         float newDensity = Mathf.Clamp(oldDensity - modificationAmount, -1, 1);

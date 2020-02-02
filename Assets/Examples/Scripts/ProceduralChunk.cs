@@ -3,10 +3,20 @@ using Unity.Mathematics;
 
 namespace MarchingCubes.Examples
 {
+    /// <summary>
+    /// A chunk that generates procedurally
+    /// </summary>
     public class ProceduralChunk : Chunk
     {
+        /// <summary>
+        /// The ProceduralWorld that owns this chunk
+        /// </summary>
         public ProceduralWorld World { get; set; }
 
+        /// <summary>
+        /// Sets the coordinate of this chunk and starts generating the and the mesh.
+        /// </summary>
+        /// <param name="coordinate">The new coordinate</param>
         public void SetCoordinate(int3 coordinate)
         {
             Coordinate = coordinate;
@@ -17,6 +27,9 @@ namespace MarchingCubes.Examples
             StartMeshGeneration();
         }
 
+        /// <summary>
+        /// Completes the mesh generation (if that is still running) and starts calculating the densities
+        /// </summary>
         public override void StartDensityCalculation()
         {
             MarchingCubesJobHandle.Complete();

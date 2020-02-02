@@ -1,28 +1,56 @@
 ﻿namespace MarchingCubes
 {
+    /// <summary>
+    /// A container for the voxel's corners
+    /// </summary>
+    /// <typeparam name="T">The element's type to hold in the corners</typeparam>
     public struct VoxelCorners<T>
-    { 
+    {
+        /// <summary>
+        /// The first corner
+        /// </summary>
         public T Corner1 { get; set; }
+
+        /// <summary>
+        /// The second corner
+        /// </summary>
         public T Corner2 { get; set; }
+
+        /// <summary>
+        /// The third corner
+        /// </summary>
         public T Corner3 { get; set; }
+
+        /// <summary>
+        /// The fourth corner
+        /// </summary>
         public T Corner4 { get; set; }
+
+        /// <summary>
+        /// The fifth corner
+        /// </summary>
         public T Corner5 { get; set; }
+
+        /// <summary>
+        /// The sixth corner
+        /// </summary>
         public T Corner6 { get; set; }
+
+        /// <summary>
+        /// The seventh corner
+        /// </summary>
         public T Corner7 { get; set; }
+
+        /// <summary>
+        /// The eighth corner
+        /// </summary>
         public T Corner8 { get; set; }
 
-        public VoxelCorners(T c1, T c2, T c3, T c4, T c5, T c6, T c7, T c8)
-        {
-            Corner1 = c1;
-            Corner2 = c2;
-            Corner3 = c3;
-            Corner4 = c4;
-            Corner5 = c5;
-            Corner6 = c6;
-            Corner7 = c7;
-            Corner8 = c8;
-        }
-
+        /// <summary>
+        /// The indexer for the voxel corners
+        /// </summary>
+        /// <param name="index">The corner's index</param>
+        /// <exception cref="System.IndexOutOfRangeException">Thrown when index is more than 7.</exception>
         public T this[int index]
         {
             get

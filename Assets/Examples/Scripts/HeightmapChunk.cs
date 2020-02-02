@@ -3,10 +3,19 @@ using Unity.Mathematics;
 
 namespace MarchingCubes.Examples
 {
+    /// <summary>
+    /// A chunk that is generated from a heightmap
+    /// </summary>
     public class HeightmapChunk : Chunk
     {
+        /// <summary>
+        /// The HeightmapWorld that owns this chunk
+        /// </summary>
         public HeightmapWorld World { get; set; }
 
+        /// <summary>
+        /// Starts the density calculation
+        /// </summary>
         public override void StartDensityCalculation()
         {
             int3 worldPosition = Coordinate * ChunkSize;
