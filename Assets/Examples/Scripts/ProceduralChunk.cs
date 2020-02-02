@@ -22,6 +22,7 @@ namespace MarchingCubes.Examples
             Coordinate = coordinate;
             transform.position = coordinate.ToVectorInt() * ChunkSize;
             name = $"Chunk_{coordinate.x.ToString()}_{coordinate.y.ToString()}_{coordinate.z.ToString()}";
+            _densityModifications.Clear();
 
             StartDensityCalculation();
             StartMeshGeneration();
