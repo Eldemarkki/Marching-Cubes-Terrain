@@ -7,8 +7,8 @@ namespace MarchingCubes.Examples.Utilities
 {
     public static class ObjExporter
     {
-        public static string ModelFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "MarchingCubesModels");
-        public static string FileName = @"MarchingCubesModel_#";
+        private static readonly string ModelFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "MarchingCubesModels");
+        private const string FileName = @"MarchingCubesModel_#";
 
         /// <summary>
         /// Exports the gameObject's mesh to a .obj file
