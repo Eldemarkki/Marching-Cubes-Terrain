@@ -3,6 +3,7 @@ using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
+using MarchingCubes.Examples.Utilities;
 
 namespace MarchingCubes.Examples
 {
@@ -260,6 +261,15 @@ namespace MarchingCubes.Examples
         public void SetDensity(float density, int3 localPos)
         {
             SetDensity(density, localPos.x, localPos.y, localPos.z);
+        }
+
+        /// <summary>
+        /// Exports this chunk to a .obj file
+        /// </summary>
+        [ContextMenu("Export selected chunk to .obj")]
+        public void ExportToObjFile()
+        {
+            ObjExporter.Export(gameObject);
         }
     }
 }
