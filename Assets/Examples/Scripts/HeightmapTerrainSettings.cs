@@ -110,7 +110,7 @@ namespace MarchingCubes.Examples
         /// <summary>
         /// Disposes HeightmapData
         /// </summary>
-        public void Dispose()
+        public void DisposeHeightmapData()
         {
             heightmapData.Dispose();
         }

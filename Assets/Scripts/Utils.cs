@@ -65,8 +65,7 @@ namespace MarchingCubes
             int nativeArrayLength = source.Length;
             if (target.Length < nativeArrayLength)
             {
-                throw new IndexOutOfRangeException(
-                    nameof(target) + " is shorter than " + nameof(source));
+                throw new IndexOutOfRangeException(nameof(target) + " is shorter than " + nameof(source));
             }
  
             int byteLength = source.Length * Marshal.SizeOf(default(T));

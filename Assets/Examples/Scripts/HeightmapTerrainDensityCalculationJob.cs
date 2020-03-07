@@ -71,8 +71,10 @@ namespace MarchingCubes.Examples
             int worldPositionZ = index % chunkSize + offset.z;
 
             float density = 0;
-            if(worldPositionX < heightmapWidth && worldPositionZ < heightmapHeight)
+            if (worldPositionX < heightmapWidth && worldPositionZ < heightmapHeight)
+            {
                 density = CalculateDensity(worldPositionX, worldPositionY, worldPositionZ);
+            }
 
             densities[index] = math.clamp(density, -1, 1);
         }

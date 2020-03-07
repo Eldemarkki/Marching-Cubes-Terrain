@@ -14,22 +14,22 @@ namespace MarchingCubes.Examples
         /// </summary>
         [Header("Terrain Deforming Settings")]
         [SerializeField] private bool leftClickAddsTerrain = true;
-        
+
         /// <summary>
         /// How fast the terrain is deformed
         /// </summary>
         [SerializeField] private float deformSpeed = 0.1f;
-        
+
         /// <summary>
         /// How far the deformation can reach
         /// </summary>
         [SerializeField] private float deformRange = 3f;
-        
+
         /// <summary>
         /// How far away points the player can deform
         /// </summary>
         [SerializeField] private float maxReachDistance = Mathf.Infinity;
-        
+
         /// <summary>
         /// Which key must be held down to flatten the terrain
         /// </summary>
@@ -41,22 +41,22 @@ namespace MarchingCubes.Examples
         /// </summary>
         [Header("Player Settings")]
         [SerializeField] private World world;
-        
+
         /// <summary>
         /// The game object that the deformation raycast will be casted from
         /// </summary>
         [SerializeField] private Transform playerCamera;
-        
+
         /// <summary>
         /// Is the terrain currently being flattened
         /// </summary>
         private bool _isFlattening;
-        
+
         /// <summary>
         /// The point where the flattening started
         /// </summary>
         private float3 _flatteningOrigin;
-        
+
         /// <summary>
         /// The normal of the flattening plane
         /// </summary>
@@ -131,7 +131,7 @@ namespace MarchingCubes.Examples
         private void FlattenTerrain()
         {
             var result = Utils.PlaneLineIntersection(_flatteningOrigin, _flatteningNormal, playerCamera.position, playerCamera.forward, out float3 intersectionPoint);
-            if (result != PlaneLineIntersectionResult.OneHit) return;
+            if (result != PlaneLineIntersectionResult.OneHit) { return; }
 
             int intRange = (int)math.ceil(deformRange);
             for (int x = -intRange; x <= intRange; x++)
@@ -153,7 +153,7 @@ namespace MarchingCubes.Examples
                         float density = (math.dot(_flatteningNormal, densityWorldPosition) - math.dot(_flatteningNormal, _flatteningOrigin)) / deformRange;
                         float oldDensity = world.GetDensity(densityWorldPosition);
 
-                        world.SetDensity((density+oldDensity) * 0.8f, densityWorldPosition);
+                        world.SetDensity((density + oldDensity) * 0.8f, densityWorldPosition);
                     }
                 }
             }
@@ -205,7 +205,7 @@ namespace MarchingCubes.Examples
                         int offsetX = hitX - x;
                         int offsetY = hitY - y;
                         int offsetZ = hitZ - z;
-                        
+
                         var offsetPoint = new int3(offsetX, offsetY, offsetZ);
                         float distance = math.distance(offsetPoint, point);
                         if (distance > range)

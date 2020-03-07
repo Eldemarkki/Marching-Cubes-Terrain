@@ -31,7 +31,7 @@ namespace MarchingCubes.Examples
 
         private void OnDestroy()
         {
-            HeightmapTerrainSettings.Dispose();
+            HeightmapTerrainSettings.DisposeHeightmapData();
         }
 
         /// <summary>
