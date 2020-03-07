@@ -2,8 +2,14 @@
 
 namespace MarchingCubes
 {
+    /// <summary>
+    /// The lookup tables for the marching cubes algorithm
+    /// </summary>
     public static class LookupTables
     {
+        /// <summary>
+        /// Lookup table for how the edges should be connected
+        /// </summary>
         public static readonly int[] EdgeIndexTable =
         {
             0, 1,
@@ -20,6 +26,9 @@ namespace MarchingCubes
             3, 7
         };
 
+        /// <summary>
+        /// The corners of a voxel
+        /// </summary>
         public static readonly int3[] CubeCorners =
         {
             new int3(0, 0, 0),
@@ -32,44 +41,9 @@ namespace MarchingCubes
             new int3(0, 1, 1)
         };
 
-        // The Burst compiler can read from a static managed array, but apparently not if that array also reads from a managed 
-        // array, so these values had to be hard-coded. 
-        public static readonly int[] CubeCornersX =
-        {
-            0, //CubeCorners[0].x,
-            1, //CubeCorners[1].x,
-            1, //CubeCorners[2].x,
-            0, //CubeCorners[3].x,
-            0, //CubeCorners[4].x,
-            1, //CubeCorners[5].x,
-            1, //CubeCorners[6].x,
-            0  //CubeCorners[7].x
-        };
-
-        public static readonly int[] CubeCornersY =
-        {
-            0, //CubeCorners[0].y,
-            0, //CubeCorners[1].y,
-            0, //CubeCorners[2].y,
-            0, //CubeCorners[3].y,
-            1, //CubeCorners[4].y,
-            1, //CubeCorners[5].y,
-            1, //CubeCorners[6].y,
-            1  //CubeCorners[7].y
-        };
-
-        public static readonly int[] CubeCornersZ =
-        {
-            0, //CubeCorners[0].z,
-            0, //CubeCorners[1].z,
-            1, //CubeCorners[2].z,
-            1, //CubeCorners[3].z,
-            0, //CubeCorners[4].z,
-            0, //CubeCorners[5].z,
-            1, //CubeCorners[6].z,
-            1  //CubeCorners[7].z
-        };
-
+        /// <summary>
+        /// The edge table for the marching cubes. Used to determine which edges are intersected by the isosurface
+        /// </summary>
         public static readonly int[] EdgeTable =
         {
             0x0, 0x109, 0x203, 0x30a, 0x406, 0x50f, 0x605, 0x70c,
@@ -106,7 +80,9 @@ namespace MarchingCubes
             0x70c, 0x605, 0x50f, 0x406, 0x30a, 0x203, 0x109, 0x0
         };
 
-        // The triangle table had to be flattened because the Burst compiler can not use jagged- or more than 1 -dimensional arrays.
+        /// <summary>
+        /// The triangle table for the marching cubes algorithm. Used to determine how the faces should be connected.
+        /// </summary>
         public static readonly int[] TriangleTable =
         {
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,

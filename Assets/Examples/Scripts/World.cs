@@ -4,152 +4,107 @@ using UnityEngine;
 
 namespace MarchingCubes.Examples
 {
-    public class World : MonoBehaviour
+    public abstract class World : MonoBehaviour
     {
-        [Header("Chunk settings")]
+        /// <summary>
+        /// The chunk's size. This represents the width, height and depth in Unity units.
+        /// </summary>
         [SerializeField] private int chunkSize = 16;
+
+        /// <summary>
+        /// The chunk's prefab that will be instantiated
+        /// </summary>
         [SerializeField] private GameObject chunkPrefab;
 
-        [Header("Marching Cubes settings")]
-        [SerializeField] private float isolevel = 0.5F;
+        /// <summary>
+        /// The density level where a surface will be created. Densities below this will be inside the surface (solid),
+        /// and densities above this will be outside the surface (air)
+        /// </summary>
+        [SerializeField] private float isolevel;
 
-        [Header("Terrain Settings")]
-        [SerializeField] private TerrainSettings terrainSettings = new TerrainSettings(0.001f, 16, 10, 5);
+        /// <summary>
+        /// The chunk's size. This represents the width, height and depth in Unity units.
+        /// </summary>
+        public int ChunkSize => chunkSize;
 
-        [Header("Player settings")]
-        [SerializeField] private int renderDistance = 4;
-        [SerializeField] private Transform player;
+        /// <summary>
+        /// The chunk's prefab that will be instantiated
+        /// </summary>
+        public GameObject ChunkPrefab => chunkPrefab;
 
-        private Dictionary<int3, Chunk> _chunks;
-        private Vector3 _startPos;
+        /// <summary>
+        /// The density level where a surface will be created. Densities below this will be inside the surface (solid),
+        /// and densities above this will be outside the surface (air)
+        /// </summary>
+        public float Isolevel => isolevel;
 
-        public TerrainSettings TerrainSettings { get => terrainSettings; private set => terrainSettings = value; }
+        /// <summary>
+        /// All the chunks of this world
+        /// </summary>
+        public Dictionary<int3, Chunk> Chunks { get; set; }
 
-        private void Awake()
+        protected virtual void Start()
         {
-            _chunks = new Dictionary<int3, Chunk>();
+            Chunks = new Dictionary<int3, Chunk>();
+        }
+        
+        /// <summary>
+        /// Tries to get a chunk at a world position
+        /// </summary>
+        /// <param name="worldPosition">World position of the chunk (can be inside the chunk, doesn't have to be the chunk's origin)</param>
+        /// <param name="chunk">The chunk at that position (if any)</param>
+        /// <returns>Does a chunk exist at that world position</returns>
+        public bool TryGetChunk(int3 worldPosition, out Chunk chunk)
+        {
+            int3 chunkCoordinate = WorldPositionToCoordinate(worldPosition);
+            return Chunks.TryGetValue(chunkCoordinate, out chunk);
         }
 
-        private void Start()
+        /// <summary>
+        /// Gets the density at a world position
+        /// </summary>
+        /// <param name="worldPosition">The world position of the density to get</param>
+        /// <returns>The density at that world position (0 if it doesn't exist)</returns>
+        public float GetDensity(int3 worldPosition)
         {
-            GenerateNewTerrain(player.position);
-        }
-
-        private void Update()
-        {
-            if (Mathf.Abs(player.position.x - _startPos.x) >= chunkSize ||
-                Mathf.Abs(player.position.y - _startPos.y) >= chunkSize ||
-                Mathf.Abs(player.position.z - _startPos.z) >= chunkSize)
+            if (TryGetChunk(worldPosition, out Chunk chunk))
             {
-                GenerateNewTerrain(player.position);
-            }
-        }
-
-        private void GenerateNewTerrain(Vector3 playerPos)
-        {
-            int3 playerChunkPosition = playerPos.ToMathematicsFloat().FloorToNearestX(chunkSize);
-            int3 playerCoordinate = ((float3)playerChunkPosition / chunkSize).Floor();
-
-            // TODO: Initialize this only once
-            var newTerrainChunks = new Dictionary<int3, Chunk>((renderDistance * 2 + 1) * (renderDistance * 2 + 1) * (renderDistance * 2 + 1));
-
-            Queue<Chunk> availableChunks = new Queue<Chunk>();
-            foreach (var chunk in _chunks.Values)
-            {
-                int xOffset = Mathf.Abs(chunk.Coordinate.x - playerCoordinate.x);
-                int yOffset = Mathf.Abs(chunk.Coordinate.y - playerCoordinate.y);
-                int zOffset = Mathf.Abs(chunk.Coordinate.z - playerCoordinate.z);
-
-                if(xOffset > renderDistance || yOffset > renderDistance || zOffset > renderDistance)
-                {
-                    availableChunks.Enqueue(chunk);
-                }
-            }
-
-            for (int x = -renderDistance; x <= renderDistance; x++)
-            {
-                for (int y = -renderDistance; y <= renderDistance; y++)
-                {
-                    for (int z = -renderDistance; z <= renderDistance; z++)
-                    {
-                        int3 chunkCoordinate = playerCoordinate + new int3(x, y, z);
-
-                        Chunk chunk;
-                        bool chunkExistsAtCoordinate = _chunks.ContainsKey(chunkCoordinate);
-                        if (chunkExistsAtCoordinate)
-                        {
-                            chunk = _chunks[chunkCoordinate];
-                        }
-                        else
-                        {
-                            // There is not a chunk at that coordinate, so move (or create) one there
-                            if (availableChunks.Count > 0)
-                            {
-                                chunk = availableChunks.Dequeue();
-                                chunk.SetCoordinate(chunkCoordinate);
-                            }
-                            else
-                            {
-                                chunk = CreateChunk(chunkCoordinate);
-                            }
-                        }
-
-                        newTerrainChunks.Add(chunkCoordinate, chunk);
-                    }
-                }
+                return chunk.GetDensity(worldPosition.Mod(ChunkSize));
             }
 
-            _chunks = newTerrainChunks;
-            _startPos = playerPos;
+            return 0;
         }
 
-        private Chunk GetChunk(int x, int y, int z)
+        /// <summary>
+        /// Sets the density at a world position
+        /// </summary>
+        /// <param name="density">The new density</param>
+        /// <param name="worldPosition">The density's world position</param>
+        public void SetDensity(float density, int3 worldPosition)
         {
-            int newX = Utils.FloorToNearestX((float)x, chunkSize) / chunkSize;
-            int newY = Utils.FloorToNearestX((float)y, chunkSize) / chunkSize;
-            int newZ = Utils.FloorToNearestX((float)z, chunkSize) / chunkSize;
-
-            int3 key = new int3(newX, newY, newZ);
-            if (_chunks.TryGetValue(key, out Chunk chunk))
-            {
-                return chunk;
-            }
-
-            return null;
-        }
-
-        public float GetDensity(int x, int y, int z)
-        {
-            Chunk chunk = GetChunk(x, y, z);
-            if (chunk == null) { return 0; }
-
-            float density = chunk.GetDensity(x.Mod(chunkSize),
-                                             y.Mod(chunkSize),
-                                             z.Mod(chunkSize));
-            return density;
-        }
-
-        public void SetDensity(float density, int3 pos)
-        {
+            List<int3> modifiedChunkPositions = new List<int3>();
             for (int i = 0; i < 8; i++)
             {
-                int3 chunkPos = (pos - LookupTables.CubeCorners[i]).FloorToNearestX(chunkSize);
-                Chunk chunk = GetChunk(chunkPos.x, chunkPos.y, chunkPos.z);
-                if (chunk != null)
+                int3 chunkPos = chunkSize * WorldPositionToCoordinate(worldPosition - LookupTables.CubeCorners[i]);
+                if (modifiedChunkPositions.Contains(chunkPos)) { continue; }
+
+                if (TryGetChunk(chunkPos, out Chunk chunk))
                 {
-                    int3 localPos = (pos - chunkPos).Mod(chunkSize + 1);
-                    chunk.SetDensity(density, localPos.x, localPos.y, localPos.z);
+                    int3 localPos = (worldPosition - chunkPos).Mod(ChunkSize + 1);
+                    chunk.SetDensity(density, localPos);
+                    modifiedChunkPositions.Add(chunkPos);
                 }
             }
         }
 
-        private Chunk CreateChunk(int3 chunkCoordinate)
+        /// <summary>
+        /// Converts a world position to a chunk coordinate
+        /// </summary>
+        /// <param name="worldPosition">The world-position that should be converted</param>
+        /// <returns>The world position converted to a chunk coordinate</returns>
+        public int3 WorldPositionToCoordinate(float3 worldPosition)
         {
-            var chunk = Instantiate(chunkPrefab, (chunkCoordinate * chunkSize).ToVectorInt(), Quaternion.identity).GetComponent<Chunk>();
-            chunk.Initialize(this, chunkSize, isolevel, chunkCoordinate);
-            _chunks.Add(chunkCoordinate, chunk);
-
-            return chunk;
+            return worldPosition.FloorToMultipleOfX(ChunkSize) / ChunkSize;
         }
     }
 }

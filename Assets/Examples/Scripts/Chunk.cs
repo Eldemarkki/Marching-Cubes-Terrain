@@ -3,46 +3,98 @@ using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
+using MarchingCubes.Examples.Utilities;
 
 namespace MarchingCubes.Examples
 {
+    /// <summary>
+    /// The base class for all chunks
+    /// </summary>
     [RequireComponent(typeof(MeshRenderer), typeof(MeshFilter))]
-    public class Chunk : MonoBehaviour
+    public abstract class Chunk : MonoBehaviour
     {
-        private int3 _coordinate;
+        /// <summary>
+        /// The density level where a surface will be created. Densities below this will be inside the surface (solid),
+        /// and densities above this will be outside the surface (air)
+        /// </summary>
         private float _isolevel;
-        private int _chunkSize;
 
+        /// <summary>
+        /// The chunk's MeshFilter
+        /// </summary>
         private MeshFilter _meshFilter;
+
+        /// <summary>
+        /// The chunk's MeshCollider
+        /// </summary>
         private MeshCollider _meshCollider;
+
+        /// <summary>
+        /// The chunk's cached Mesh so a new one doesn't always have to be created
+        /// </summary>
         private Mesh _mesh;
 
-        private World _world;
-
+        /// <summary>
+        /// The chunk's density field
+        /// </summary>
         private NativeArray<float> _densities;
 
-        private JobHandle _densityJobHandle;
-        private DensityCalculationJob _densityCalculationJob;
-        private MarchingCubesJob _marchingCubesJob;
-        private JobHandle _marchingCubesJobHandle;
-
+        /// <summary>
+        /// The vertices from the mesh generation job
+        /// </summary>
         private NativeArray<Vector3> _outputVertices;
+
+        /// <summary>
+        /// The triangles from the mesh generation job
+        /// </summary>
         private NativeArray<int> _outputTriangles;
 
-        // Stores the density modifications because the densities can not be modified while a job that requires them is running.
-        private List<(int index, float density)> _densityModifications;
+        /// <summary>
+        /// Stores the density modifications because the densities can not be modified while a job that requires them is running.
+        /// </summary>
+        protected List<(int index, float density)> _densityModifications;
 
-        // An incremental counter that keeps track of a single integer inside the Marching Cubes job. This is because the jobs
-        // can not modify a shared integer because of race conditions.
+        /// <summary>
+        /// An incremental counter that keeps track of a single integer inside the mesh generation job. This is because the jobs
+        /// can not modify a shared integer because of race conditions.
+        /// </summary>
         private Counter _counter;
 
-        private bool _areDensitiesDirty => _densityModifications.Count >= 1;
-
+        /// <summary>
+        /// Is the mesh being generated
+        /// </summary>
         private bool _creatingMesh;
 
-        public int3 Coordinate => _coordinate;
+        /// <summary>
+        /// The chunk's coordinate
+        /// </summary>
+        public int3 Coordinate { get; set; }
 
-        private void Awake()
+        /// <summary>
+        /// The chunk's size. This represents the width, height and depth in Unity units.
+        /// </summary>
+        public int ChunkSize { get; private set; }
+
+        /// <summary>
+        /// The chunk's density field
+        /// </summary>
+        public NativeArray<float> Densities
+        {
+            get => _densities;
+            private set => _densities = value;
+        }
+
+        /// <summary>
+        /// Density Job Calculation job's handle
+        /// </summary>
+        public JobHandle DensityJobHandle { get; set; }
+
+        /// <summary>
+        /// Mesh generation job's handle
+        /// </summary>
+        public JobHandle MarchingCubesJobHandle { get; set; }
+
+        protected virtual void Awake()
         {
             _meshFilter = GetComponent<MeshFilter>();
             _meshCollider = GetComponent<MeshCollider>();
@@ -50,70 +102,67 @@ namespace MarchingCubes.Examples
             _densityModifications = new List<(int index, float density)>();
         }
 
-        private void OnDestroy()
-        {
-            if (!_marchingCubesJobHandle.IsCompleted)
-                _marchingCubesJobHandle.Complete();
-
-            _densities.Dispose();
-            _outputVertices.Dispose();
-            _outputTriangles.Dispose();
-        }
-
-        private void Update()
+        protected virtual void Update()
         {
             if (_creatingMesh)
             {
                 CompleteMeshGeneration();
             }
 
-            if (_areDensitiesDirty)
+            if (_densityModifications.Count >= 1)
             {
                 StartMeshGeneration();
             }
         }
 
-        public void Initialize(World world, int chunkSize, float isolevel, int3 coordinate)
+        protected virtual void OnDestroy()
         {
-            _world = world;
-            _isolevel = isolevel;
-            _chunkSize = chunkSize;
-
-            _densities = new NativeArray<float>((_chunkSize + 1) * (_chunkSize + 1) * (_chunkSize + 1), Allocator.Persistent);
-            _outputVertices = new NativeArray<Vector3>(15 * _chunkSize * _chunkSize * _chunkSize, Allocator.Persistent);
-            _outputTriangles = new NativeArray<int>(15 * _chunkSize * _chunkSize * _chunkSize, Allocator.Persistent);
-
-            SetCoordinate(coordinate);
+            Dispose();
         }
 
-        public void SetCoordinate(int3 coordinate)
+        /// <summary>
+        /// Disposes the NativeArrays that this chunk has.
+        /// </summary>
+        private void Dispose()
         {
-            _coordinate = coordinate;
-            transform.position = coordinate.ToVectorInt() * _chunkSize;
-            name = $"Chunk_{coordinate.x.ToString()}_{coordinate.y.ToString()}_{coordinate.z.ToString()}";
+            MarchingCubesJobHandle.Complete();
+            _densities.Dispose();
+            _outputVertices.Dispose();
+            _outputTriangles.Dispose();
+        }
+
+        /// <summary>
+        /// Initializes the chunk and starts generating the mesh.
+        /// </summary>
+        /// <param name="chunkSize">The chunk's size. This represents the width, height and depth in Unity units.</param>
+        /// <param name="isolevel">The density level where a surface will be created. Densities below this will be inside the surface (solid), and densities above this will be outside the surface (air)</param>
+        /// <param name="coordinate">The chunk's coordinate</param>
+        public void Initialize(int chunkSize, float isolevel, int3 coordinate)
+        {
+            _isolevel = isolevel;
+            Coordinate = coordinate;
+            ChunkSize = chunkSize;
+            
+            transform.position = coordinate.ToVectorInt() * ChunkSize;
+            name = $"Chunk_{coordinate.x}_{coordinate.y}_{coordinate.z}";
+
+            Densities = new NativeArray<float>((ChunkSize + 1) * (ChunkSize + 1) * (ChunkSize + 1), Allocator.Persistent);
+            _outputVertices = new NativeArray<Vector3>(15 * ChunkSize * ChunkSize * ChunkSize, Allocator.Persistent);
+            _outputTriangles = new NativeArray<int>(15 * ChunkSize * ChunkSize * ChunkSize, Allocator.Persistent);
 
             StartDensityCalculation();
             StartMeshGeneration();
         }
 
-        public void StartDensityCalculation()
-        {
-            int3 worldPosition = _coordinate * _chunkSize;
+        /// <summary>
+        /// Starts the density calculation job
+        /// </summary>
+        public abstract void StartDensityCalculation();
 
-            _densityCalculationJob = new DensityCalculationJob
-            {
-                densities = _densities,
-                xOffset = worldPosition.x,
-                yOffset = worldPosition.y,
-                zOffset = worldPosition.z,
-                chunkSize = _chunkSize + 1, // +1 because chunkSize is the amount of "voxels", and that +1 is the amount of density points
-                terrainSettings = _world.TerrainSettings,
-            };
-
-            _densityJobHandle = _densityCalculationJob.Schedule(_densities.Length, 256);
-        }
-
-        private void StartMeshGeneration()
+        /// <summary>
+        /// Starts the mesh generation job
+        /// </summary>
+        public void StartMeshGeneration()
         {
             _counter = new Counter(Allocator.Persistent);
 
@@ -125,28 +174,37 @@ namespace MarchingCubes.Examples
 
             _densityModifications.Clear();
 
-            _marchingCubesJob = new MarchingCubesJob
+            var marchingCubesJob = new MarchingCubesJob
             {
                 densities = _densities,
                 isolevel = _isolevel,
-                chunkSize = _chunkSize,
+                chunkSize = ChunkSize,
                 counter = _counter,
 
                 vertices = _outputVertices,
                 triangles = _outputTriangles
             };
 
-            _marchingCubesJobHandle = _marchingCubesJob.Schedule(_chunkSize * _chunkSize * _chunkSize, 128, _densityJobHandle);
+            MarchingCubesJobHandle = marchingCubesJob.Schedule(ChunkSize * ChunkSize * ChunkSize, 128, DensityJobHandle);
 
             _creatingMesh = true;
         }
 
+        /// <summary>
+        /// Completes the mesh generation job and updates the MeshFilter's and the MeshCollider's meshes.
+        /// </summary>
         private void CompleteMeshGeneration()
         {
-            _marchingCubesJobHandle.Complete();
+            MarchingCubesJobHandle.Complete();
 
-            Vector3[] vertices = _outputVertices.Slice(0, _counter.Count * 3).ToArray();
-            int[] triangles = _outputTriangles.Slice(0, _counter.Count * 3).ToArray();
+            Vector3[] vertices = new Vector3[_counter.Count * 3];
+            int[] triangles = new int[_counter.Count * 3];
+            
+            if (_counter.Count * 3 > 0)
+            {
+                _outputVertices.Slice(0, vertices.Length).CopyToFast(vertices);
+                _outputTriangles.Slice(0, triangles.Length).CopyToFast(triangles);
+            }
 
             _counter.Dispose();
 
@@ -161,14 +219,57 @@ namespace MarchingCubes.Examples
             _creatingMesh = false;
         }
 
+        /// <summary>
+        /// Gets the density at a local-space position
+        /// </summary>
+        /// <param name="x">The density's x position inside the chunk (valid values: 0 to chunkSize+1)</param>
+        /// <param name="y">The density's y position inside the chunk (valid values: 0 to chunkSize+1)</param>
+        /// <param name="z">The density's z position inside the chunk (valid values: 0 to chunkSize+1)</param>
+        /// <returns>The density at that local-space position</returns>
         public float GetDensity(int x, int y, int z)
         {
-            return _densities[x * (_chunkSize + 1) * (_chunkSize + 1) + y * (_chunkSize + 1) + z];
+            return Densities[x * (ChunkSize + 1) * (ChunkSize + 1) + y * (ChunkSize + 1) + z];
         }
 
+        /// <summary>
+        /// Gets the density at a local space position
+        /// </summary>
+        /// <param name="localPosition">The density's position inside the chunk</param>
+        /// <returns>The density at that local-space position</returns>
+        public float GetDensity(int3 localPosition)
+        {
+            return GetDensity(localPosition.x, localPosition.y, localPosition.z);
+        }
+
+        /// <summary>
+        /// Sets the density at a local-space position
+        /// </summary>
+        /// <param name="density">The new density value</param>
+        /// <param name="x">The density's x position inside the chunk (valid values: 0 to chunkSize+1)</param>
+        /// <param name="y">The density's y position inside the chunk (valid values: 0 to chunkSize+1)</param>
+        /// <param name="z">The density's z position inside the chunk (valid values: 0 to chunkSize+1)</param>
         public void SetDensity(float density, int x, int y, int z)
         {
-            _densityModifications.Add((x * (_chunkSize + 1) * (_chunkSize + 1) + y * (_chunkSize + 1) + z, density));
+            _densityModifications.Add((x * (ChunkSize + 1) * (ChunkSize + 1) + y * (ChunkSize + 1) + z, density));
+        }
+
+        /// <summary>
+        /// Sets the density at a local-space position
+        /// </summary>
+        /// <param name="density">The new density value</param>
+        /// <param name="localPos">The density's position inside the chunk</param>
+        public void SetDensity(float density, int3 localPos)
+        {
+            SetDensity(density, localPos.x, localPos.y, localPos.z);
+        }
+
+        /// <summary>
+        /// Exports this chunk to a .obj file
+        /// </summary>
+        [ContextMenu("Export selected chunk to .obj")]
+        public void ExportToObjFile()
+        {
+            ObjExporter.Export(gameObject);
         }
     }
 }
