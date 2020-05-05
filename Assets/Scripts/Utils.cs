@@ -1,9 +1,5 @@
-﻿using System;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.CompilerServices;
 using MarchingCubes.Examples;
-using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -44,34 +40,6 @@ namespace MarchingCubes
         public static int3 Mod(this int3 n, int x)
         {
             return (n % x + x) % x;
-        }
-        
-        // Taken and modified to use NativeSlices from here: https://forum.unity.com/threads/allow-setting-mesh-arrays-with-nativearrays.536736/
-        /// <summary>
-        /// Directly copies the memory for faster copying of arrays
-        /// </summary>
-        /// <param name="source">The source array to copy from</param>
-        /// <param name="target">The target array to copy to</param>
-        /// <typeparam name="T">The element type of the source and target arrays</typeparam>
-        /// <exception cref="NullReferenceException">Thrown when target is null</exception>
-        /// <exception cref="IndexOutOfRangeException">Thrown when target is shorter than source.</exception>
-        public static unsafe void CopyToFast<T>(this NativeSlice<T> source, T[] target) where T : struct
-        {
-            if (target == null)
-            {
-                throw new NullReferenceException(nameof(target) + " is null");
-            }
- 
-            int nativeArrayLength = source.Length;
-            if (target.Length < nativeArrayLength)
-            {
-                throw new IndexOutOfRangeException(nameof(target) + " is shorter than " + nameof(source));
-            }
- 
-            int byteLength = source.Length * Marshal.SizeOf(default(T));
-            void* managedBuffer = UnsafeUtility.AddressOf(ref target[0]);
-            void* nativeBuffer = source.GetUnsafePtr();
-            Buffer.MemoryCopy(nativeBuffer, managedBuffer, byteLength, byteLength);
         }
         
         /// <summary>

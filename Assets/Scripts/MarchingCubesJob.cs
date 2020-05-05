@@ -37,12 +37,12 @@ namespace MarchingCubes
         /// <summary>
         /// The generated vertices
         /// </summary>
-        [NativeDisableParallelForRestriction, WriteOnly] public NativeArray<Vector3> vertices;
+        [NativeDisableParallelForRestriction, WriteOnly] public NativeArray<MarchingCubesVertexData> vertices;
         
         /// <summary>
         /// The generated triangles
         /// </summary>
-        [NativeDisableParallelForRestriction, WriteOnly] public NativeArray<int> triangles;
+        [NativeDisableParallelForRestriction, WriteOnly] public NativeArray<ushort> triangles;
 
         /// <summary>
         /// The execute method required by the Unity Job System's IJobParallelFor
@@ -77,14 +77,20 @@ namespace MarchingCubes
             {
                 int triangleIndex = counter.Increment() * 3;
 
-                vertices[triangleIndex + 0] = vertexList[LookupTables.TriangleTable[rowIndex + i + 0]];
-                triangles[triangleIndex + 0] = triangleIndex + 0;
+                float3 vertex1 = vertexList[LookupTables.TriangleTable[rowIndex + i + 0]];
+                float3 vertex2 = vertexList[LookupTables.TriangleTable[rowIndex + i + 1]];
+                float3 vertex3 = vertexList[LookupTables.TriangleTable[rowIndex + i + 2]];
 
-                vertices[triangleIndex + 1] = vertexList[LookupTables.TriangleTable[rowIndex + i + 1]];
-                triangles[triangleIndex + 1] = triangleIndex + 1;
+                float3 normal = math.normalize(math.cross(vertex2 - vertex1, vertex3 - vertex1));
 
-                vertices[triangleIndex + 2] = vertexList[LookupTables.TriangleTable[rowIndex + i + 2]];
-                triangles[triangleIndex + 2] = triangleIndex + 2;
+                vertices[triangleIndex + 0] = new MarchingCubesVertexData(vertex1, normal);
+                triangles[triangleIndex + 0] = (ushort)(triangleIndex + 0);
+
+                vertices[triangleIndex + 1] = new MarchingCubesVertexData(vertex2, normal);
+                triangles[triangleIndex + 1] = (ushort)(triangleIndex + 1);
+
+                vertices[triangleIndex + 2] = new MarchingCubesVertexData(vertex3, normal);
+                triangles[triangleIndex + 2] = (ushort)(triangleIndex + 2);
             }
         }
 

@@ -4,6 +4,7 @@ using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 using MarchingCubes.Examples.Utilities;
+using UnityEngine.Rendering;
 
 namespace MarchingCubes.Examples
 {
@@ -42,12 +43,12 @@ namespace MarchingCubes.Examples
         /// <summary>
         /// The vertices from the mesh generation job
         /// </summary>
-        private NativeArray<Vector3> _outputVertices;
+        private NativeArray<MarchingCubesVertexData> _outputVertices;
 
         /// <summary>
         /// The triangles from the mesh generation job
         /// </summary>
-        private NativeArray<int> _outputTriangles;
+        private NativeArray<ushort> _outputTriangles;
 
         /// <summary>
         /// Stores the density modifications because the densities can not be modified while a job that requires them is running.
@@ -142,13 +143,13 @@ namespace MarchingCubes.Examples
             _isolevel = isolevel;
             Coordinate = coordinate;
             ChunkSize = chunkSize;
-            
+
             transform.position = coordinate.ToVectorInt() * ChunkSize;
             name = $"Chunk_{coordinate.x}_{coordinate.y}_{coordinate.z}";
 
             Densities = new NativeArray<float>((ChunkSize + 1) * (ChunkSize + 1) * (ChunkSize + 1), Allocator.Persistent);
-            _outputVertices = new NativeArray<Vector3>(15 * ChunkSize * ChunkSize * ChunkSize, Allocator.Persistent);
-            _outputTriangles = new NativeArray<int>(15 * ChunkSize * ChunkSize * ChunkSize, Allocator.Persistent);
+            _outputVertices = new NativeArray<MarchingCubesVertexData>(15 * ChunkSize * ChunkSize * ChunkSize, Allocator.Persistent);
+            _outputTriangles = new NativeArray<ushort>(15 * ChunkSize * ChunkSize * ChunkSize, Allocator.Persistent);
 
             StartDensityCalculation();
             StartMeshGeneration();
@@ -197,21 +198,29 @@ namespace MarchingCubes.Examples
         {
             MarchingCubesJobHandle.Complete();
 
-            Vector3[] vertices = new Vector3[_counter.Count * 3];
-            int[] triangles = new int[_counter.Count * 3];
-            
-            if (_counter.Count * 3 > 0)
-            {
-                _outputVertices.Slice(0, vertices.Length).CopyToFast(vertices);
-                _outputTriangles.Slice(0, triangles.Length).CopyToFast(triangles);
-            }
+            _mesh = new Mesh();
+            _mesh.subMeshCount = 0;
 
+            int vertexCount = _counter.Count * 3;
             _counter.Dispose();
 
-            _mesh.Clear();
-            _mesh.vertices = vertices;
-            _mesh.SetTriangles(triangles, 0);
-            _mesh.RecalculateNormals();
+            VertexAttributeDescriptor[] layout = new VertexAttributeDescriptor[]
+            {
+                new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3),
+                new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.Float32, 3)
+            };
+            
+            _mesh.SetVertexBufferParams(vertexCount, layout);
+            _mesh.SetIndexBufferParams(vertexCount, IndexFormat.UInt16);
+
+            _mesh.SetVertexBufferData(_outputVertices.Slice(0, vertexCount).ToArray(), 0, 0, vertexCount);
+            _mesh.SetIndexBufferData(_outputTriangles.Slice(0, vertexCount).ToArray(), 0, 0, vertexCount);
+
+            _mesh.subMeshCount = 1;
+            SubMeshDescriptor subMesh = new SubMeshDescriptor(0, vertexCount, MeshTopology.Triangles);
+            _mesh.SetSubMesh(0, subMesh);
+
+            _mesh.RecalculateBounds();
 
             _meshFilter.sharedMesh = _mesh;
             _meshCollider.sharedMesh = _mesh;
