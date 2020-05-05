@@ -7,7 +7,7 @@ This is my implementation of the Marching Cubes algorithm using Unity.
   - Procedurally-generated infinite world
 
 ## System Requirements
-  - Unity3D (I'm developing this project with version **2019.2.2f1**, but any newer version should also work)
+  - Unity3D (I'm developing this project with version **2019.3.0f6**, but any newer version should also work)
 
 ## Setup
   1. Clone the repository with `git clone https://github.com/Eldemarkki/Marching-Cubes-Terrain.git`
