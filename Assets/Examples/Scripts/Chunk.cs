@@ -211,6 +211,8 @@ namespace MarchingCubes.Examples
         {
             MarchingCubesJobHandle.Complete();
 
+            _mesh.Clear();
+
             int vertexCount = _counter.Count * 3;
             _counter.Dispose();
 
