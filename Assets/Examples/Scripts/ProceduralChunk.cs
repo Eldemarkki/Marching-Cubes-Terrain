@@ -39,13 +39,13 @@ namespace MarchingCubes.Examples
 
             var job = new ProceduralTerrainDensityCalculationJob
             {
-                Densities = Densities,
+                DensityStorage = DensityStorage,
                 offset = worldPosition,
                 chunkSize = ChunkSize + 1, // +1 because ChunkSize is the amount of "voxels", and that +1 is the amount of density points
                 proceduralTerrainSettings = World.ProceduralTerrainSettings
             };
             
-            DensityJobHandle = job.Schedule(Densities.Length, 256);
+            DensityJobHandle = job.Schedule(DensityStorage.Length, 256);
         }
     }
 }

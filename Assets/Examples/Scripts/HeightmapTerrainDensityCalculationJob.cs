@@ -14,7 +14,7 @@ namespace MarchingCubes.Examples
         /// <summary>
         /// The output densities
         /// </summary>
-        [WriteOnly] private NativeArray<float> densities;
+        [WriteOnly] private DensityStorage densityStorage;
 
         /// <summary>
         /// The height data from the heightmap
@@ -54,10 +54,10 @@ namespace MarchingCubes.Examples
         /// <summary>
         /// The chunk's density field
         /// </summary>
-        public NativeArray<float> Densities
+        public DensityStorage DensityStorage
         {
-            get => densities;
-            set => densities = value;
+            get => densityStorage;
+            set => densityStorage = value;
         }
 
         /// <summary>
@@ -76,7 +76,7 @@ namespace MarchingCubes.Examples
                 density = CalculateDensity(worldPositionX, worldPositionY, worldPositionZ);
             }
 
-            densities[index] = math.clamp(density, -1, 1);
+            densityStorage.SetDensity(math.clamp(density, -1, 1), index);
         }
 
         /// <summary>

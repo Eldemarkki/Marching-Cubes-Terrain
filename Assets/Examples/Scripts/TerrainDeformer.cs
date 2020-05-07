@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using MarchingCubes.Examples.Utilities;
+using System.Linq;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -130,7 +131,7 @@ namespace MarchingCubes.Examples
         /// </summary>
         private void FlattenTerrain()
         {
-            var result = Utils.PlaneLineIntersection(_flatteningOrigin, _flatteningNormal, playerCamera.position, playerCamera.forward, out float3 intersectionPoint);
+            var result = IntersectionUtilities.PlaneLineIntersection(_flatteningOrigin, _flatteningNormal, playerCamera.position, playerCamera.forward, out float3 intersectionPoint);
             if (result != PlaneLineIntersectionResult.OneHit) { return; }
 
             int intRange = (int)math.ceil(deformRange);

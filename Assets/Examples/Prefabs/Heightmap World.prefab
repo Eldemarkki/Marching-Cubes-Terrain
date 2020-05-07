@@ -49,5 +49,5 @@ MonoBehaviour:
   isolevel: 0
   heightmapTerrainSettings:
     heightmap: {fileID: 2800000, guid: 2cb1cd891623f1643b57dd752a2e2c45, type: 3}
-    amplitude: 30
+    amplitude: 25
     heightOffset: 0

@@ -44,7 +44,7 @@ namespace MarchingCubes.Examples
         /// <summary>
         /// The chunk's density field
         /// </summary>
-        private NativeArray<float> _densities;
+        private DensityStorage _densityStorage;
 
         /// <summary>
         /// The vertices from the mesh generation job
@@ -90,10 +90,10 @@ namespace MarchingCubes.Examples
         /// <summary>
         /// The chunk's density field
         /// </summary>
-        public NativeArray<float> Densities
+        public DensityStorage DensityStorage
         {
-            get => _densities;
-            private set => _densities = value;
+            get => _densityStorage;
+            private set => _densityStorage = value;
         }
 
         /// <summary>
@@ -139,7 +139,7 @@ namespace MarchingCubes.Examples
         private void Dispose()
         {
             MarchingCubesJobHandle.Complete();
-            _densities.Dispose();
+            _densityStorage.Dispose();
             _outputVertices.Dispose();
             _outputTriangles.Dispose();
         }
@@ -159,7 +159,8 @@ namespace MarchingCubes.Examples
             Coordinate = coordinate;
             ChunkSize = chunkSize;
 
-            Densities = new NativeArray<float>((ChunkSize + 1) * (ChunkSize + 1) * (ChunkSize + 1), Allocator.Persistent);
+            _densityStorage = new DensityStorage(ChunkSize + 1);
+
             _outputVertices = new NativeArray<MarchingCubesVertexData>(15 * ChunkSize * ChunkSize * ChunkSize, Allocator.Persistent);
             _outputTriangles = new NativeArray<ushort>(15 * ChunkSize * ChunkSize * ChunkSize, Allocator.Persistent);
 
@@ -182,14 +183,14 @@ namespace MarchingCubes.Examples
             for (int i = 0; i < _densityModifications.Count; i++)
             {
                 var modification = _densityModifications[i];
-                _densities[modification.index] = modification.density;
+                _densityStorage.SetDensity(modification.density, modification.index);
             }
 
             _densityModifications.Clear();
 
             var marchingCubesJob = new MarchingCubesJob
             {
-                densities = _densities,
+                densityStorage = _densityStorage,
                 isolevel = _isolevel,
                 chunkSize = ChunkSize,
                 counter = _counter,
@@ -212,7 +213,7 @@ namespace MarchingCubes.Examples
 
             int vertexCount = _counter.Count * 3;
             _counter.Dispose();
-            
+
             _mesh.SetVertexBufferParams(vertexCount, VertexBufferMemoryLayout);
             _mesh.SetIndexBufferParams(vertexCount, IndexFormat.UInt16);
 
@@ -240,7 +241,7 @@ namespace MarchingCubes.Examples
         /// <returns>The density at that local-space position</returns>
         public float GetDensity(int x, int y, int z)
         {
-            return Densities[x * (ChunkSize + 1) * (ChunkSize + 1) + y * (ChunkSize + 1) + z];
+            return _densityStorage.GetDensity(x, y, z);
         }
 
         /// <summary>

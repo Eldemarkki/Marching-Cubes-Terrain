@@ -15,7 +15,7 @@ namespace MarchingCubes
         /// <summary>
         /// The densities to generate the mesh off of
         /// </summary>
-        [ReadOnly] public NativeArray<float> densities;
+        [ReadOnly] public DensityStorage densityStorage;
         
         /// <summary>
         /// The density level where a surface will be created. Densities below this will be inside the surface (solid),
@@ -105,8 +105,7 @@ namespace MarchingCubes
             for (int i = 0; i < 8; i++)
             {
                 int3 voxelCorner = localPosition + LookupTables.CubeCorners[i];
-                int densityIndex = voxelCorner.x * (chunkSize + 1) * (chunkSize + 1) + voxelCorner.y * (chunkSize + 1) + voxelCorner.z;
-                densities[i] = this.densities[densityIndex];
+                densities[i] = densityStorage.GetDensity(voxelCorner.x, voxelCorner.y, voxelCorner.z);
             }
 
             return densities;

@@ -11,7 +11,7 @@ namespace MarchingCubes.Examples
         /// <summary>
         /// The output densities
         /// </summary>
-        NativeArray<float> Densities { get; set; }
+        DensityStorage DensityStorage { get; set; }
 
         /// <summary>
         /// Calculates the density at the world-space position

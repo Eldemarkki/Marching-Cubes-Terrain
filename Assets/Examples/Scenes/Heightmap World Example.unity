@@ -570,21 +570,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 7511563785240538596, guid: eea1f03f8e24f294dbf91dd235177e1f,
-        type: 3}
-      propertyPath: heightmapTerrainSettings.heightmap
-      value: 
-      objectReference: {fileID: 2800000, guid: 2cb1cd891623f1643b57dd752a2e2c45, type: 3}
-    - target: {fileID: 7511563785240538596, guid: eea1f03f8e24f294dbf91dd235177e1f,
-        type: 3}
-      propertyPath: heightmapTerrainSettings.amplitude
-      value: 23.1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7511563785240538596, guid: eea1f03f8e24f294dbf91dd235177e1f,
-        type: 3}
-      propertyPath: heightmapTerrainSettings.heightOffset
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 7511563785240538597, guid: eea1f03f8e24f294dbf91dd235177e1f,
         type: 3}
       propertyPath: m_Name

@@ -22,7 +22,7 @@ namespace MarchingCubes.Examples
 
             var job = new HeightmapTerrainDensityCalculationJob
             {
-                Densities = Densities,
+                DensityStorage = DensityStorage,
                 heightmapData = World.HeightmapTerrainSettings.HeightmapData,
                 offset = worldPosition,
                 chunkSize = ChunkSize + 1, // +1 because chunkSize is the amount of "voxels", and that +1 is the amount of density points
@@ -32,7 +32,7 @@ namespace MarchingCubes.Examples
                 heightOffset = World.HeightmapTerrainSettings.HeightOffset
             };
 
-            DensityJobHandle = job.Schedule(Densities.Length, 256);
+            DensityJobHandle = job.Schedule(DensityStorage.Length, 256);
         }
     }
 }

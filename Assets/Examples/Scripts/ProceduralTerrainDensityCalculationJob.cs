@@ -14,7 +14,7 @@ namespace MarchingCubes.Examples
         /// <summary>
         /// The output densities
         /// </summary>
-        [WriteOnly] private NativeArray<float> densities;
+        [WriteOnly] private DensityStorage densityStorage;
 
         /// <summary>
         /// The sampling point's offset
@@ -34,7 +34,7 @@ namespace MarchingCubes.Examples
         /// <summary>
         /// The chunk's density field
         /// </summary>
-        public NativeArray<float> Densities { get => densities; set => densities = value; }
+        public DensityStorage DensityStorage { get => densityStorage; set => densityStorage = value; }
 
         /// <summary>
         /// The execute method required for Unity's IJobParallelFor job type
@@ -47,7 +47,7 @@ namespace MarchingCubes.Examples
             int worldPositionZ = index % chunkSize + offset.z;
 
             float density = CalculateDensity(worldPositionX, worldPositionY, worldPositionZ);
-            densities[index] = math.clamp(density, -1, 1);
+            densityStorage.SetDensity(math.clamp(density, -1, 1), index);
         }
 
         /// <summary>
