@@ -467,7 +467,7 @@ MonoBehaviour:
   leftClickAddsTerrain: 1
   deformSpeed: 0.1
   deformRange: 3
-  maxReachDistance: 100
+  maxReachDistance: Infinity
   flatteningKey: 306
   world: {fileID: 609110451}
   playerCamera: {fileID: 534669905}

@@ -4,7 +4,7 @@ namespace MarchingCubes
 {
     public struct DensityStorage
     {
-        private NativeArray<float> _densities;
+        private NativeArray<byte> _densities;
 
         private int chunkSize;
 
@@ -13,7 +13,7 @@ namespace MarchingCubes
         public DensityStorage(int chunkSize)
         {
             this.chunkSize = chunkSize;
-            _densities = new NativeArray<float>(chunkSize * chunkSize * chunkSize, Allocator.Persistent);
+            _densities = new NativeArray<byte>(chunkSize * chunkSize * chunkSize, Allocator.Persistent);
         }
 
         public void Dispose()
@@ -29,7 +29,7 @@ namespace MarchingCubes
 
         public float GetDensity(int index)
         {
-            return _densities[index];
+            return _densities[index] / 127.5f - 1;
         }
 
         public void SetDensity(float density, int x, int y, int z)
@@ -40,7 +40,7 @@ namespace MarchingCubes
 
         public void SetDensity(float density, int index)
         {
-            _densities[index] = density;
+            _densities[index] = (byte)(127.5 * (density + 1));
         }
 
         private int XYZToIndex(int x, int y, int z)
