@@ -49,8 +49,8 @@ MonoBehaviour:
   isolevel: 0
   proceduralTerrainSettings:
     noiseFrequency: 1
-    noiseOctaveCount: 16
-    amplitude: 50
-    heightOffset: -40
-  renderDistance: 3
+    noiseOctaveCount: 9
+    amplitude: 140
+    heightOffset: 0
+  renderDistance: 4
   player: {fileID: 0}

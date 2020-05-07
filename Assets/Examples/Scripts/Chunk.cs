@@ -14,6 +14,12 @@ namespace MarchingCubes.Examples
     [RequireComponent(typeof(MeshRenderer), typeof(MeshFilter))]
     public abstract class Chunk : MonoBehaviour
     {
+        public static VertexAttributeDescriptor[] VertexBufferMemoryLayout = new VertexAttributeDescriptor[]
+        {
+            new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3),
+            new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.Float32, 3)
+        };
+
         /// <summary>
         /// The density level where a surface will be created. Densities below this will be inside the surface (solid),
         /// and densities above this will be outside the surface (air)
@@ -67,6 +73,11 @@ namespace MarchingCubes.Examples
         private bool _creatingMesh;
 
         /// <summary>
+        /// The submesh for this chunk
+        /// </summary>
+        private SubMeshDescriptor _subMesh;
+
+        /// <summary>
         /// The chunk's coordinate
         /// </summary>
         public int3 Coordinate { get; set; }
@@ -101,6 +112,7 @@ namespace MarchingCubes.Examples
             _meshCollider = GetComponent<MeshCollider>();
             _mesh = new Mesh();
             _densityModifications = new List<(int index, float density)>();
+            _subMesh = new SubMeshDescriptor(0, 0, MeshTopology.Triangles);
         }
 
         protected virtual void Update()
@@ -140,12 +152,12 @@ namespace MarchingCubes.Examples
         /// <param name="coordinate">The chunk's coordinate</param>
         public void Initialize(int chunkSize, float isolevel, int3 coordinate)
         {
+            transform.position = coordinate.ToVectorInt() * chunkSize;
+            name = $"Chunk_{coordinate.x}_{coordinate.y}_{coordinate.z}";
+
             _isolevel = isolevel;
             Coordinate = coordinate;
             ChunkSize = chunkSize;
-
-            transform.position = coordinate.ToVectorInt() * ChunkSize;
-            name = $"Chunk_{coordinate.x}_{coordinate.y}_{coordinate.z}";
 
             Densities = new NativeArray<float>((ChunkSize + 1) * (ChunkSize + 1) * (ChunkSize + 1), Allocator.Persistent);
             _outputVertices = new NativeArray<MarchingCubesVertexData>(15 * ChunkSize * ChunkSize * ChunkSize, Allocator.Persistent);
@@ -198,27 +210,18 @@ namespace MarchingCubes.Examples
         {
             MarchingCubesJobHandle.Complete();
 
-            _mesh = new Mesh();
-            _mesh.subMeshCount = 0;
-
             int vertexCount = _counter.Count * 3;
             _counter.Dispose();
-
-            VertexAttributeDescriptor[] layout = new VertexAttributeDescriptor[]
-            {
-                new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3),
-                new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.Float32, 3)
-            };
             
-            _mesh.SetVertexBufferParams(vertexCount, layout);
+            _mesh.SetVertexBufferParams(vertexCount, VertexBufferMemoryLayout);
             _mesh.SetIndexBufferParams(vertexCount, IndexFormat.UInt16);
 
-            _mesh.SetVertexBufferData(_outputVertices.Slice(0, vertexCount).ToArray(), 0, 0, vertexCount);
-            _mesh.SetIndexBufferData(_outputTriangles.Slice(0, vertexCount).ToArray(), 0, 0, vertexCount);
+            _mesh.SetVertexBufferData(_outputVertices, 0, 0, vertexCount, 0, MeshUpdateFlags.DontValidateIndices);
+            _mesh.SetIndexBufferData(_outputTriangles, 0, 0, vertexCount, MeshUpdateFlags.DontValidateIndices);
 
             _mesh.subMeshCount = 1;
-            SubMeshDescriptor subMesh = new SubMeshDescriptor(0, vertexCount, MeshTopology.Triangles);
-            _mesh.SetSubMesh(0, subMesh);
+            _subMesh.indexCount = vertexCount;
+            _mesh.SetSubMesh(0, _subMesh);
 
             _mesh.RecalculateBounds();
 
