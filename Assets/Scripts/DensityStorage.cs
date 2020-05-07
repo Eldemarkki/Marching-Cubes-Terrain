@@ -1,4 +1,5 @@
 ﻿using Unity.Collections;
+using Unity.Mathematics;
 
 namespace MarchingCubes
 {
@@ -40,7 +41,7 @@ namespace MarchingCubes
 
         public void SetDensity(float density, int index)
         {
-            _densities[index] = (byte)(127.5 * (density + 1));
+            _densities[index] = (byte)(127.5 * (math.clamp(density, -1, 1) + 1));
         }
 
         private int XYZToIndex(int x, int y, int z)

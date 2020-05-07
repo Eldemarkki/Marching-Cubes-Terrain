@@ -127,40 +127,6 @@ namespace MarchingCubes.Examples
         }
 
         /// <summary>
-        /// Get a point on the flattening plane and flatten the terrain around it
-        /// </summary>
-        private void FlattenTerrain()
-        {
-            var result = IntersectionUtilities.PlaneLineIntersection(_flatteningOrigin, _flatteningNormal, playerCamera.position, playerCamera.forward, out float3 intersectionPoint);
-            if (result != PlaneLineIntersectionResult.OneHit) { return; }
-
-            int intRange = (int)math.ceil(deformRange);
-            for (int x = -intRange; x <= intRange; x++)
-            {
-                for (int y = -intRange; y <= intRange; y++)
-                {
-                    for (int z = -intRange; z <= intRange; z++)
-                    {
-                        int3 localPosition = new int3(x, y, z);
-                        float3 offsetPoint = intersectionPoint + localPosition;
-
-                        float distance = math.distance(offsetPoint, intersectionPoint);
-                        if (distance > deformRange)
-                        {
-                            continue;
-                        }
-
-                        int3 densityWorldPosition = (int3)offsetPoint;
-                        float density = (math.dot(_flatteningNormal, densityWorldPosition) - math.dot(_flatteningNormal, _flatteningOrigin)) / deformRange;
-                        float oldDensity = world.GetDensity(densityWorldPosition);
-
-                        world.SetDensity((density + oldDensity) * 0.8f, densityWorldPosition);
-                    }
-                }
-            }
-        }
-
-        /// <summary>
         /// Tests if the player is in the way of deforming and edits the terrain if the player is not.
         /// </summary>
         /// <param name="addTerrain">Should terrain be added or removed</param>
@@ -217,9 +183,43 @@ namespace MarchingCubes.Examples
                         float modificationAmount = deformSpeed / distance * buildModifier;
 
                         float oldDensity = world.GetDensity(offsetPoint);
-                        float newDensity = Mathf.Clamp(oldDensity - modificationAmount, -1, 1);
+                        float newDensity = oldDensity - modificationAmount;
 
                         world.SetDensity(newDensity, offsetPoint);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Get a point on the flattening plane and flatten the terrain around it
+        /// </summary>
+        private void FlattenTerrain()
+        {
+            var result = IntersectionUtilities.PlaneLineIntersection(_flatteningOrigin, _flatteningNormal, playerCamera.position, playerCamera.forward, out float3 intersectionPoint);
+            if (result != PlaneLineIntersectionResult.OneHit) { return; }
+
+            int intRange = (int)math.ceil(deformRange);
+            for (int x = -intRange; x <= intRange; x++)
+            {
+                for (int y = -intRange; y <= intRange; y++)
+                {
+                    for (int z = -intRange; z <= intRange; z++)
+                    {
+                        int3 localPosition = new int3(x, y, z);
+                        float3 offsetPoint = intersectionPoint + localPosition;
+
+                        float distance = math.distance(offsetPoint, intersectionPoint);
+                        if (distance > deformRange)
+                        {
+                            continue;
+                        }
+
+                        int3 densityWorldPosition = (int3)offsetPoint;
+                        float density = (math.dot(_flatteningNormal, densityWorldPosition) - math.dot(_flatteningNormal, _flatteningOrigin)) / deformRange;
+                        float oldDensity = world.GetDensity(densityWorldPosition);
+
+                        world.SetDensity((density + oldDensity) * 0.8f, densityWorldPosition);
                     }
                 }
             }

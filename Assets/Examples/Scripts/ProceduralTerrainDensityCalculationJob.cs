@@ -47,7 +47,7 @@ namespace MarchingCubes.Examples
             int worldPositionZ = index % chunkSize + offset.z;
 
             float density = CalculateDensity(worldPositionX, worldPositionY, worldPositionZ);
-            densityStorage.SetDensity(math.clamp(density, -1, 1), index);
+            densityStorage.SetDensity(density, index);
         }
 
         /// <summary>

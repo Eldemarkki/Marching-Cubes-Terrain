@@ -70,13 +70,13 @@ namespace MarchingCubes.Examples
             int worldPositionY = index / chunkSize % chunkSize + offset.y;
             int worldPositionZ = index % chunkSize + offset.z;
 
-            float density = 0;
+            float density = 1; // 1, because the default density should be air
             if (worldPositionX < heightmapWidth && worldPositionZ < heightmapHeight)
             {
                 density = CalculateDensity(worldPositionX, worldPositionY, worldPositionZ);
             }
 
-            densityStorage.SetDensity(math.clamp(density, -1, 1), index);
+            densityStorage.SetDensity(density, index);
         }
 
         /// <summary>
