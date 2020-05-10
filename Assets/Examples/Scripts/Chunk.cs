@@ -138,10 +138,11 @@ namespace MarchingCubes.Examples
         /// </summary>
         private void Dispose()
         {
-            MarchingCubesJobHandle.Complete();
-            _densityStorage.Dispose();
-            _outputVertices.Dispose();
-            _outputTriangles.Dispose();
+            if(!MarchingCubesJobHandle.IsCompleted) MarchingCubesJobHandle.Complete();
+
+            if(_densityStorage.IsCreated) _densityStorage.Dispose();
+            if(_outputVertices.IsCreated) _outputVertices.Dispose();
+            if(_outputTriangles.IsCreated) _outputTriangles.Dispose();
         }
 
         /// <summary>
@@ -161,9 +162,6 @@ namespace MarchingCubes.Examples
 
             _densityStorage = new DensityStorage(ChunkSize + 1);
 
-            _outputVertices = new NativeArray<MarchingCubesVertexData>(15 * ChunkSize * ChunkSize * ChunkSize, Allocator.Persistent);
-            _outputTriangles = new NativeArray<ushort>(15 * ChunkSize * ChunkSize * ChunkSize, Allocator.Persistent);
-
             StartDensityCalculation();
             StartMeshGeneration();
         }
@@ -178,7 +176,6 @@ namespace MarchingCubes.Examples
         /// </summary>
         public void StartMeshGeneration()
         {
-            _counter = new Counter(Allocator.Persistent);
 
             for (int i = 0; i < _densityModifications.Count; i++)
             {
@@ -187,6 +184,10 @@ namespace MarchingCubes.Examples
             }
 
             _densityModifications.Clear();
+
+            _counter = new Counter(Allocator.TempJob);
+            _outputVertices = new NativeArray<MarchingCubesVertexData>(15 * ChunkSize * ChunkSize * ChunkSize, Allocator.TempJob);
+            _outputTriangles = new NativeArray<ushort>(15 * ChunkSize * ChunkSize * ChunkSize, Allocator.TempJob);
 
             var marchingCubesJob = new MarchingCubesJob
             {
@@ -221,6 +222,9 @@ namespace MarchingCubes.Examples
 
             _mesh.SetVertexBufferData(_outputVertices, 0, 0, vertexCount, 0, MeshUpdateFlags.DontValidateIndices);
             _mesh.SetIndexBufferData(_outputTriangles, 0, 0, vertexCount, MeshUpdateFlags.DontValidateIndices);
+
+            _outputVertices.Dispose();
+            _outputTriangles.Dispose();
 
             _mesh.subMeshCount = 1;
             _subMesh.indexCount = vertexCount;

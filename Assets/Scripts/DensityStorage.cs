@@ -1,15 +1,18 @@
-﻿using Unity.Collections;
+﻿using System;
+using Unity.Collections;
 using Unity.Mathematics;
 
 namespace MarchingCubes
 {
-    public struct DensityStorage
+    public struct DensityStorage : IDisposable
     {
         private NativeArray<byte> _densities;
 
         private int chunkSize;
 
         public int Length => chunkSize * chunkSize * chunkSize;
+
+        public bool IsCreated => _densities.IsCreated;
 
         public DensityStorage(int chunkSize)
         {
