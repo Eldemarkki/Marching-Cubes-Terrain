@@ -469,7 +469,7 @@ MonoBehaviour:
   deformRange: 3
   maxReachDistance: Infinity
   flatteningKey: 306
-  world: {fileID: 609110451}
+  worldDensityProvider: {fileID: 2045615647}
   playerCamera: {fileID: 534669905}
 --- !u!114 &534669907
 MonoBehaviour:
@@ -488,18 +488,6 @@ MonoBehaviour:
   minimumFieldOfView: 2
   maximumFieldOfView: 170
   zoomSpeed: 3
---- !u!114 &609110451 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 5984913983263934269, guid: 0a7fdfdc32922934fb49078a896090c1,
-    type: 3}
-  m_PrefabInstance: {fileID: 1452569541}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0f97e4ff6bf8c0541aca7cfae307087f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &1452569541
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -515,7 +503,7 @@ PrefabInstance:
     - target: {fileID: 5984913983263934270, guid: 0a7fdfdc32922934fb49078a896090c1,
         type: 3}
       propertyPath: m_RootOrder
-      value: 3
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 5984913983263934270, guid: 0a7fdfdc32922934fb49078a896090c1,
         type: 3}
@@ -603,5 +591,11 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2045615647 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5984913983263934271, guid: 0a7fdfdc32922934fb49078a896090c1,
+    type: 3}
+  m_PrefabInstance: {fileID: 1452569541}
+  m_PrefabAsset: {fileID: 0}

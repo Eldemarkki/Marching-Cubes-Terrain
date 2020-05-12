@@ -6,32 +6,28 @@ namespace MarchingCubes.Examples
     /// <summary>
     /// A heightmap world generated from a heightmap
     /// </summary>
-    public class HeightmapWorld : World
+    [RequireComponent(typeof(HeightmapChunkProvider))]
+    public class HeightmapWorld : World<HeightmapChunk>
     {
         /// <summary>
         /// The heightmap terrain generation settings
         /// </summary>
         [SerializeField] private HeightmapTerrainSettings heightmapTerrainSettings;
 
-        /// <summary>
-        /// The heightmap terrain generation settings
-        /// </summary>
-        public HeightmapTerrainSettings HeightmapTerrainSettings => heightmapTerrainSettings;
-
         private void Awake()
         {
-            heightmapTerrainSettings = new HeightmapTerrainSettings(heightmapTerrainSettings.Heightmap, heightmapTerrainSettings.Amplitude, heightmapTerrainSettings.HeightOffset);
+            base.Awake();
+            heightmapTerrainSettings.Initialize(heightmapTerrainSettings.Heightmap, heightmapTerrainSettings.Amplitude, heightmapTerrainSettings.HeightOffset);
         }
 
-        protected override void Start()
+        private void Start()
         {
-            base.Start();
             CreateHeightmapTerrain();
         }
 
         private void OnDestroy()
         {
-            HeightmapTerrainSettings.DisposeHeightmapData();
+            heightmapTerrainSettings.DisposeHeightmapData();
         }
 
         /// <summary>
@@ -39,9 +35,9 @@ namespace MarchingCubes.Examples
         /// </summary>
         private void CreateHeightmapTerrain()
         {
-            int chunkCountX = Mathf.CeilToInt((float) (heightmapTerrainSettings.Width - 1) / ChunkSize);
-            int chunkCountZ = Mathf.CeilToInt((float) (heightmapTerrainSettings.Height - 1) / ChunkSize);
-            int chunkCountY = Mathf.CeilToInt(heightmapTerrainSettings.Amplitude / ChunkSize);
+            int chunkCountX = Mathf.CeilToInt((float) (heightmapTerrainSettings.Width - 1) / ChunkProvider.ChunkGenerationParams.ChunkSize);
+            int chunkCountZ = Mathf.CeilToInt((float) (heightmapTerrainSettings.Height - 1) / ChunkProvider.ChunkGenerationParams.ChunkSize);
+            int chunkCountY = Mathf.CeilToInt(heightmapTerrainSettings.Amplitude / ChunkProvider.ChunkGenerationParams.ChunkSize);
 
             for (int x = 0; x < chunkCountX; x++)
             {
@@ -49,26 +45,10 @@ namespace MarchingCubes.Examples
                 {
                     for (int z = 0; z < chunkCountZ; z++)
                     {
-                        CreateChunk(new int3(x, y, z));
+                        ChunkProvider.CreateChunkAtCoordinate(new int3(x, y, z));
                     }
                 }
             }
-        }
-
-        /// <summary>
-        /// Instantiates a chunk to the specified coordinate
-        /// </summary>
-        /// <param name="chunkCoordinate">The chunk's coordinate</param>
-        /// <returns>The instantiated chunk</returns>
-        private HeightmapChunk CreateChunk(int3 chunkCoordinate)
-        {
-            HeightmapChunk chunk = Instantiate(ChunkPrefab, (chunkCoordinate * ChunkSize).ToVectorInt(), Quaternion.identity).GetComponent<HeightmapChunk>();
-            chunk.name = $"Chunk_{chunkCoordinate.x}_{chunkCoordinate.y}_{chunkCoordinate.z}";
-            chunk.World = this;
-            chunk.Initialize(ChunkSize, Isolevel, chunkCoordinate);
-            Chunks.Add(chunkCoordinate, chunk);
-
-            return chunk;
         }
     }
 }

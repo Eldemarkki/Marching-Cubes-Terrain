@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5984913983263934270}
   - component: {fileID: 5984913983263934269}
+  - component: {fileID: 9080896586299188196}
   m_Layer: 0
   m_Name: Procedural World
   m_TagString: Untagged
@@ -43,14 +44,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f97e4ff6bf8c0541aca7cfae307087f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  chunkSize: 16
-  chunkPrefab: {fileID: 7489232383384105734, guid: 58c1dc75b64dbec41a572954c3bcd523,
-    type: 3}
-  isolevel: 0
-  proceduralTerrainSettings:
-    noiseFrequency: 1
-    noiseOctaveCount: 9
-    amplitude: 140
-    heightOffset: 0
   renderDistance: 4
   player: {fileID: 0}
+--- !u!114 &9080896586299188196
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5984913983263934271}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cf2139c3087ce95439212cb2d0c8091a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _chunkGenerationParams:
+    chunkSize: 16
+    isolevel: 0
+    chunkPrefab: {fileID: 7489232383384105734, guid: 58c1dc75b64dbec41a572954c3bcd523,
+      type: 3}
+  _proceduralTerrainSettings:
+    noiseFrequency: 1
+    noiseOctaveCount: 9
+    amplitude: 120
+    heightOffset: 0

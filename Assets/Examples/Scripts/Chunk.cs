@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -12,7 +13,7 @@ namespace MarchingCubes.Examples
     /// The base class for all chunks
     /// </summary>
     [RequireComponent(typeof(MeshRenderer), typeof(MeshFilter))]
-    public abstract class Chunk : MonoBehaviour
+    public abstract class Chunk : MonoBehaviour, IDisposable
     {
         public static VertexAttributeDescriptor[] VertexBufferMemoryLayout = new VertexAttributeDescriptor[]
         {
@@ -93,7 +94,6 @@ namespace MarchingCubes.Examples
         public DensityStorage DensityStorage
         {
             get => _densityStorage;
-            private set => _densityStorage = value;
         }
 
         /// <summary>
@@ -136,29 +136,29 @@ namespace MarchingCubes.Examples
         /// <summary>
         /// Disposes the NativeArrays that this chunk has.
         /// </summary>
-        private void Dispose()
+        public void Dispose()
         {
-            if(!MarchingCubesJobHandle.IsCompleted) MarchingCubesJobHandle.Complete();
+            if (!DensityJobHandle.IsCompleted) DensityJobHandle.Complete();
+            if (!MarchingCubesJobHandle.IsCompleted) MarchingCubesJobHandle.Complete();
 
-            if(_densityStorage.IsCreated) _densityStorage.Dispose();
-            if(_outputVertices.IsCreated) _outputVertices.Dispose();
-            if(_outputTriangles.IsCreated) _outputTriangles.Dispose();
+            if (_densityStorage.IsCreated) _densityStorage.Dispose();
+            if (_outputVertices.IsCreated) _outputVertices.Dispose();
+            if (_outputTriangles.IsCreated) _outputTriangles.Dispose();
         }
 
         /// <summary>
         /// Initializes the chunk and starts generating the mesh.
         /// </summary>
-        /// <param name="chunkSize">The chunk's size. This represents the width, height and depth in Unity units.</param>
-        /// <param name="isolevel">The density level where a surface will be created. Densities below this will be inside the surface (solid), and densities above this will be outside the surface (air)</param>
         /// <param name="coordinate">The chunk's coordinate</param>
-        public void Initialize(int chunkSize, float isolevel, int3 coordinate)
+        /// <param name="chunkGenerationParams">The parameters about how this chunk should be generated</param>
+        public void Initialize(int3 coordinate, ChunkGenerationParams chunkGenerationParams)
         {
-            transform.position = coordinate.ToVectorInt() * chunkSize;
+            transform.position = coordinate.ToVectorInt() * chunkGenerationParams.ChunkSize;
             name = $"Chunk_{coordinate.x}_{coordinate.y}_{coordinate.z}";
 
-            _isolevel = isolevel;
+            _isolevel = chunkGenerationParams.Isolevel;
             Coordinate = coordinate;
-            ChunkSize = chunkSize;
+            ChunkSize = chunkGenerationParams.ChunkSize;
 
             _densityStorage = new DensityStorage(ChunkSize + 1);
 
@@ -176,7 +176,6 @@ namespace MarchingCubes.Examples
         /// </summary>
         public void StartMeshGeneration()
         {
-
             for (int i = 0; i < _densityModifications.Count; i++)
             {
                 var modification = _densityModifications[i];

@@ -4,60 +4,32 @@ using UnityEngine;
 
 namespace MarchingCubes.Examples
 {
-    public abstract class World : MonoBehaviour
+    /// <summary>
+    /// Base class for all worlds
+    /// </summary>
+    /// <typeparam name="T">The type of chunks the world will control</typeparam>
+    public abstract class World<T> : MonoBehaviour, IDensityProvider where T : Chunk
     {
         /// <summary>
-        /// The chunk's size. This represents the width, height and depth in Unity units.
+        /// Chunk provider for this world
         /// </summary>
-        [SerializeField] private int chunkSize = 16;
+        public IChunkProvider<T> ChunkProvider { get; protected set; }
 
-        /// <summary>
-        /// The chunk's prefab that will be instantiated
-        /// </summary>
-        [SerializeField] private GameObject chunkPrefab;
-
-        /// <summary>
-        /// The density level where a surface will be created. Densities below this will be inside the surface (solid),
-        /// and densities above this will be outside the surface (air)
-        /// </summary>
-        [SerializeField] private float isolevel;
-
-        /// <summary>
-        /// The chunk's size. This represents the width, height and depth in Unity units.
-        /// </summary>
-        public int ChunkSize => chunkSize;
-
-        /// <summary>
-        /// The chunk's prefab that will be instantiated
-        /// </summary>
-        public GameObject ChunkPrefab => chunkPrefab;
-
-        /// <summary>
-        /// The density level where a surface will be created. Densities below this will be inside the surface (solid),
-        /// and densities above this will be outside the surface (air)
-        /// </summary>
-        public float Isolevel => isolevel;
-
-        /// <summary>
-        /// All the chunks of this world
-        /// </summary>
-        public Dictionary<int3, Chunk> Chunks { get; set; }
-
-        protected virtual void Start()
+        protected virtual void Awake()
         {
-            Chunks = new Dictionary<int3, Chunk>();
+            ChunkProvider = GetComponent<IChunkProvider<T>>();
         }
-        
+
         /// <summary>
         /// Tries to get a chunk at a world position
         /// </summary>
         /// <param name="worldPosition">World position of the chunk (can be inside the chunk, doesn't have to be the chunk's origin)</param>
         /// <param name="chunk">The chunk at that position (if any)</param>
         /// <returns>Does a chunk exist at that world position</returns>
-        public bool TryGetChunk(int3 worldPosition, out Chunk chunk)
+        public bool TryGetChunk(int3 worldPosition, out T chunk)
         {
             int3 chunkCoordinate = WorldPositionToCoordinate(worldPosition);
-            return Chunks.TryGetValue(chunkCoordinate, out chunk);
+            return ChunkProvider.TryGetChunkAtCoordinate(chunkCoordinate, out chunk);
         }
 
         /// <summary>
@@ -67,9 +39,9 @@ namespace MarchingCubes.Examples
         /// <returns>The density at that world position (0 if it doesn't exist)</returns>
         public float GetDensity(int3 worldPosition)
         {
-            if (TryGetChunk(worldPosition, out Chunk chunk))
+            if (TryGetChunk(worldPosition, out T chunk))
             {
-                return chunk.GetDensity(worldPosition.Mod(ChunkSize));
+                return chunk.GetDensity(worldPosition.Mod(ChunkProvider.ChunkGenerationParams.ChunkSize));
             }
 
             return 0;
@@ -85,12 +57,12 @@ namespace MarchingCubes.Examples
             List<int3> modifiedChunkPositions = new List<int3>();
             for (int i = 0; i < 8; i++)
             {
-                int3 chunkPos = chunkSize * WorldPositionToCoordinate(worldPosition - LookupTables.CubeCorners[i]);
+                int3 chunkPos = ChunkProvider.ChunkGenerationParams.ChunkSize * WorldPositionToCoordinate(worldPosition - LookupTables.CubeCorners[i]);
                 if (modifiedChunkPositions.Contains(chunkPos)) { continue; }
 
-                if (TryGetChunk(chunkPos, out Chunk chunk))
+                if (TryGetChunk(chunkPos, out T chunk))
                 {
-                    int3 localPos = (worldPosition - chunkPos).Mod(ChunkSize + 1);
+                    int3 localPos = (worldPosition - chunkPos).Mod(ChunkProvider.ChunkGenerationParams.ChunkSize + 1);
                     chunk.SetDensity(density, localPos);
                     modifiedChunkPositions.Add(chunkPos);
                 }
@@ -104,7 +76,8 @@ namespace MarchingCubes.Examples
         /// <returns>The world position converted to a chunk coordinate</returns>
         public int3 WorldPositionToCoordinate(float3 worldPosition)
         {
-            return worldPosition.FloorToMultipleOfX(ChunkSize) / ChunkSize;
+            int chunkSize = ChunkProvider.ChunkGenerationParams.ChunkSize;
+            return worldPosition.FloorToMultipleOfX(chunkSize) / chunkSize;
         }
     }
 }
