@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -20,9 +21,19 @@ namespace MarchingCubes.Examples
         [SerializeField] private ProceduralTerrainSettings _proceduralTerrainSettings;
 
         /// <summary>
+        /// How many chunks maximum can be generated in one frame
+        /// </summary>
+        [SerializeField] private int chunksToGeneratePerFrame = 10;
+
+        /// <summary>
         /// A queue that contains the chunks' coordinates that are out of view and thus ready to be moved anywhere
         /// </summary>
         private Queue<int3> _availableChunkCoordinates;
+
+        /// <summary>
+        /// A list that contains all the coordinates where a chunk will eventually have to be generated
+        /// </summary>
+        private List<int3> _generationQueue;
 
         /// <summary>
         /// A dictionary of all the chunks currently in the world. The key is the chunk's coordinate, and the value is the chunk
@@ -38,6 +49,48 @@ namespace MarchingCubes.Examples
         {
             Chunks = new Dictionary<int3, ProceduralChunk>();
             _availableChunkCoordinates = new Queue<int3>();
+            _generationQueue = new List<int3>();
+        }
+
+        private void Start()
+        {
+            StartCoroutine(GenerateChunks());
+        }
+
+        /// <summary>
+        /// Kind of like Unity's Update() function, generates chunks but not all at once
+        /// </summary>
+        /// <returns></returns>
+        private IEnumerator GenerateChunks()
+        {
+            while (true)
+            {
+                // This loop represents Unity's update function
+
+                int chunksGenerated = 0;
+                while (_generationQueue.Count > 0 && chunksGenerated < chunksToGeneratePerFrame)
+                {
+                    int3 chunkCoordinate = _generationQueue[0];
+                    _generationQueue.RemoveAt(0);
+
+                    if (_availableChunkCoordinates.Count == 0)
+                    {
+                        CreateChunkAtCoordinate(chunkCoordinate);
+                    }
+                    else
+                    {
+                        int3 availableChunkCoordinate = _availableChunkCoordinates.Dequeue();
+                        ProceduralChunk chunk = Chunks[availableChunkCoordinate];
+                        Chunks.Remove(availableChunkCoordinate);
+                        Chunks.Add(chunkCoordinate, chunk);
+                        chunk.SetCoordinate(chunkCoordinate);
+                    }
+
+                    chunksGenerated++;
+                }
+
+                yield return null;
+            }
         }
 
         /// <summary>
@@ -73,27 +126,31 @@ namespace MarchingCubes.Examples
         {
             if (Chunks.ContainsKey(chunkCoordinate)) return;
 
-            if (_availableChunkCoordinates.Count == 0)
-            {
-                CreateChunkAtCoordinate(chunkCoordinate);
-            }
-            else
-            {
-                int3 availableChunkCoordinate = _availableChunkCoordinates.Dequeue();
-                ProceduralChunk chunk = Chunks[availableChunkCoordinate];
-                Chunks.Remove(availableChunkCoordinate);
-                Chunks.Add(chunkCoordinate, chunk);
-                chunk.SetCoordinate(chunkCoordinate);
-            }
+            if (_generationQueue.Contains(chunkCoordinate)) return;
+
+            _generationQueue.Add(chunkCoordinate);
         }
 
         /// <summary>
         /// Unloads the Chunks whose coordinate is in the coordinatesToUnload parameter
         /// </summary>
-        /// <param name="coordinatesToUnload">A queue of the coordinates to unload</param>
-        public void UnloadCoordinates(Queue<int3> coordinatesToUnload)
+        /// <param name="coordinatesToUnload">A list of the coordinates to unload</param>
+        public void UnloadCoordinates(List<int3> coordinatesToUnload)
         {
-            _availableChunkCoordinates = coordinatesToUnload;
+            // Mark coordinates as available
+            for (var i = 0; i < coordinatesToUnload.Count; i++)
+            {
+                int3 coordinateToUnload = coordinatesToUnload[i];
+                if (!_availableChunkCoordinates.Contains(coordinateToUnload))
+                {
+                    _availableChunkCoordinates.Enqueue(coordinateToUnload);
+                }
+
+                if (_generationQueue.Contains(coordinateToUnload))
+                {
+                    _generationQueue.Remove(coordinateToUnload);
+                }
+            }
         }
     }
 }

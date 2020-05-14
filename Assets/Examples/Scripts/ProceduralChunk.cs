@@ -12,7 +12,7 @@ namespace MarchingCubes.Examples
         /// The procedural terrain generation settings
         /// </summary>
         public ProceduralTerrainSettings TerrainGenerationSettings { get; set; }
-        
+
         /// <summary>
         /// Completes the mesh generation (if that is still running) and starts calculating the densities
         /// </summary>
@@ -39,6 +39,7 @@ namespace MarchingCubes.Examples
         /// <param name="coordinate">The new coordinate</param>
         public void SetCoordinate(int3 coordinate)
         {
+            _meshRenderer.enabled = false;
             Coordinate = coordinate;
             transform.position = coordinate.ToVectorInt() * ChunkSize;
             name = $"Chunk_{coordinate.x.ToString()}_{coordinate.y.ToString()}_{coordinate.z.ToString()}";

@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0f97e4ff6bf8c0541aca7cfae307087f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  renderDistance: 4
+  renderDistance: 5
   player: {fileID: 0}
 --- !u!114 &9080896586299188196
 MonoBehaviour:
@@ -68,3 +68,4 @@ MonoBehaviour:
     noiseOctaveCount: 9
     amplitude: 120
     heightOffset: 0
+  chunksToGeneratePerFrame: 10

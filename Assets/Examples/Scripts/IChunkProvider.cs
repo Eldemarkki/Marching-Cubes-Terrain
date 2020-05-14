@@ -43,7 +43,7 @@ namespace MarchingCubes.Examples
         /// <summary>
         /// Unloads the Chunks whose coordinate is in the coordinatesToUnload parameter
         /// </summary>
-        /// <param name="coordinatesToUnload">A queue of the coordinates to unload</param>
-        void UnloadCoordinates(Queue<int3> coordinatesToUnload);
+        /// <param name="coordinatesToUnload">A list of the coordinates to unload</param>
+        void UnloadCoordinates(List<int3> coordinatesToUnload);
     }
 }

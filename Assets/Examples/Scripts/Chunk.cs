@@ -12,7 +12,7 @@ namespace MarchingCubes.Examples
     /// <summary>
     /// The base class for all chunks
     /// </summary>
-    [RequireComponent(typeof(MeshRenderer), typeof(MeshFilter))]
+    [RequireComponent(typeof(MeshRenderer), typeof(MeshFilter), typeof(MeshCollider))]
     public abstract class Chunk : MonoBehaviour, IDisposable
     {
         public static VertexAttributeDescriptor[] VertexBufferMemoryLayout = new VertexAttributeDescriptor[]
@@ -31,6 +31,11 @@ namespace MarchingCubes.Examples
         /// The chunk's MeshFilter
         /// </summary>
         private MeshFilter _meshFilter;
+
+        /// <summary>
+        /// This chunk's mesh renderer
+        /// </summary>
+        protected MeshRenderer _meshRenderer;
 
         /// <summary>
         /// The chunk's MeshCollider
@@ -109,6 +114,7 @@ namespace MarchingCubes.Examples
         protected virtual void Awake()
         {
             _meshFilter = GetComponent<MeshFilter>();
+            _meshRenderer = GetComponent<MeshRenderer>();
             _meshCollider = GetComponent<MeshCollider>();
             _mesh = new Mesh();
             _densityModifications = new List<(int index, float density)>();
@@ -232,6 +238,8 @@ namespace MarchingCubes.Examples
             _mesh.RecalculateBounds();
 
             _meshFilter.sharedMesh = _mesh;
+            _meshRenderer.enabled = true;
+
             _meshCollider.sharedMesh = _mesh;
 
             _creatingMesh = false;

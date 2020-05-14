@@ -74,11 +74,12 @@ namespace MarchingCubes.Examples
         /// <summary>
         /// Destroy's and removes (from <see cref="Chunks"/>) all chunks whose coordinate is in <see cref="coordinatesToUnload"/>
         /// </summary>
-        /// <param name="coordinatesToUnload">A queue of all the coordinates that should be unloaded</param>
-        public void UnloadCoordinates(Queue<int3> coordinatesToUnload)
+        /// <param name="coordinatesToUnload">A list of all the coordinates that should be unloaded</param>
+        public void UnloadCoordinates(List<int3> coordinatesToUnload)
         {
-            foreach (int3 coordinate in coordinatesToUnload)
+            for (var i = 0; i < coordinatesToUnload.Count; i++)
             {
+                int3 coordinate = coordinatesToUnload[i];
                 if (TryGetChunkAtCoordinate(coordinate, out HeightmapChunk chunk))
                 {
                     Destroy(chunk.gameObject);

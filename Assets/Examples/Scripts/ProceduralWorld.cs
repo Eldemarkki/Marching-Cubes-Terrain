@@ -53,7 +53,7 @@ namespace MarchingCubes.Examples
             int3 playerCoordinate = WorldPositionToCoordinate(player.position);
             if (!playerCoordinate.Equals(_lastGenerationCoordinate))
             {
-                Queue<int3> coordinatesToUnload = GetChunkCoordinatesOutsideOfRenderDistance(playerCoordinate);
+                List<int3> coordinatesToUnload = GetChunkCoordinatesOutsideOfRenderDistance(playerCoordinate);
                 ChunkProvider.UnloadCoordinates(coordinatesToUnload);
 
                 for (int x = -renderDistance; x <= renderDistance; x++)
@@ -73,13 +73,13 @@ namespace MarchingCubes.Examples
         }
 
         /// <summary>
-        /// Gets a queue of chunk coordinates (from <see cref="IChunkProvider{T}.Chunks"/>) whose Manhattan Distance to the coordinate parameter is more than <see cref="renderDistance"/>
+        /// Gets a list of chunk coordinates (from <see cref="IChunkProvider{T}.Chunks"/>) whose Manhattan Distance to the coordinate parameter is more than <see cref="renderDistance"/>
         /// </summary>
         /// <param name="coordinate">Central coordinate</param>
-        /// <returns>A queue of chunk coordinates outside of the viewing range from the coordinate parameter</returns>
-        private Queue<int3> GetChunkCoordinatesOutsideOfRenderDistance(int3 coordinate)
+        /// <returns>A list of chunk coordinates outside of the viewing range from the coordinate parameter</returns>
+        private List<int3> GetChunkCoordinatesOutsideOfRenderDistance(int3 coordinate)
         {
-            Queue<int3> chunkCoordinates = new Queue<int3>();
+            List<int3> chunkCoordinates = new List<int3>();
             foreach(int3 chunkCoordinate in ChunkProvider.Chunks.Keys)
             {
                 int dX = math.abs(coordinate.x - chunkCoordinate.x);
@@ -88,7 +88,7 @@ namespace MarchingCubes.Examples
 
                 if(dX > renderDistance || dY > renderDistance || dZ > renderDistance)
                 {
-                    chunkCoordinates.Enqueue(chunkCoordinate);
+                    chunkCoordinates.Add(chunkCoordinate);
                 }
             }
 
