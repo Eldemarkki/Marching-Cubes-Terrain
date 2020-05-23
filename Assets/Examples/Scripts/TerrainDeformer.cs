@@ -41,12 +41,17 @@ namespace MarchingCubes.Examples
         /// The world the will be deformed
         /// </summary>
         [Header("Player Settings")]
-        [SerializeField] private World world;
+        [SerializeField] private GameObject worldDensityProvider = null;
+
+        /// <summary>
+        /// Internal IDensityProvider that is gotten from <see cref="worldDensityProvider"/> because Unity doesn't support serialization of interfaces
+        /// </summary>
+        private IDensityProvider world;
 
         /// <summary>
         /// The game object that the deformation raycast will be casted from
         /// </summary>
-        [SerializeField] private Transform playerCamera;
+        [SerializeField] private Transform playerCamera = null;
 
         /// <summary>
         /// Is the terrain currently being flattened
@@ -65,23 +70,20 @@ namespace MarchingCubes.Examples
 
         private void Awake()
         {
+            try
+            {
+                world = worldDensityProvider.GetComponent(typeof(IDensityProvider)) as IDensityProvider;
+            }
+            catch
+            {
+                Debug.LogError("You need to set the World Density Provider to the target world!");
+            }
+
             Cursor.lockState = CursorLockMode.Locked;
         }
 
         private void Update()
         {
-            if (deformSpeed <= 0)
-            {
-                Debug.LogWarning("Deform Speed must be positive!");
-                return;
-            }
-
-            if (deformRange <= 0)
-            {
-                Debug.LogWarning("Deform Range must be positive");
-                return;
-            }
-
             if (Input.GetKey(flatteningKey))
             {
                 if (Input.GetMouseButtonDown(0))

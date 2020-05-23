@@ -9,9 +9,9 @@ namespace MarchingCubes.Examples
     public class HeightmapChunk : Chunk
     {
         /// <summary>
-        /// The HeightmapWorld that owns this chunk
+        /// Information about how the heightmap world should be generated
         /// </summary>
-        public HeightmapWorld World { get; set; }
+        public HeightmapTerrainSettings HeightmapTerrainSettings { get; set; }
 
         /// <summary>
         /// Starts the density calculation
@@ -23,13 +23,13 @@ namespace MarchingCubes.Examples
             var job = new HeightmapTerrainDensityCalculationJob
             {
                 DensityStorage = DensityStorage,
-                heightmapData = World.HeightmapTerrainSettings.HeightmapData,
+                heightmapData = HeightmapTerrainSettings.HeightmapData,
                 offset = worldPosition,
                 chunkSize = ChunkSize + 1, // +1 because chunkSize is the amount of "voxels", and that +1 is the amount of density points
-                heightmapWidth = World.HeightmapTerrainSettings.Width,
-                heightmapHeight = World.HeightmapTerrainSettings.Height,
-                amplitude = World.HeightmapTerrainSettings.Amplitude,
-                heightOffset = World.HeightmapTerrainSettings.HeightOffset
+                heightmapWidth = HeightmapTerrainSettings.Width,
+                heightmapHeight = HeightmapTerrainSettings.Height,
+                amplitude = HeightmapTerrainSettings.Amplitude,
+                heightOffset = HeightmapTerrainSettings.HeightOffset
             };
 
             DensityJobHandle = job.Schedule(DensityStorage.Length, 256);

@@ -1,11 +1,13 @@
-﻿using System;
-using Unity.Collections;
+﻿using Unity.Collections;
 using UnityEngine;
 
 namespace MarchingCubes.Examples
 {
-    [Serializable]
-    public struct HeightmapTerrainSettings
+    /// <summary>
+    /// A class that tells information about how the heightmap world should be generated
+    /// </summary>
+    [CreateAssetMenu(fileName = "New Heightmap Terrain Settings", menuName = "Marching Cubes Terrain/Heightmap Terrain Settings")]
+    public class HeightmapTerrainSettings : ScriptableObject
     {
         /// <summary>
         /// The black and white heightmap texture
@@ -74,12 +76,12 @@ namespace MarchingCubes.Examples
         }
 
         /// <summary>
-        /// HeightmapTerrainSettings constructor. Creates HeightmapData from the heightmap
+        /// Converts the parameters to a format the can be used by the Job System
         /// </summary>
         /// <param name="heightmap">The black and white heightmap</param>
         /// <param name="amplitude">Height multiplier</param>
         /// <param name="heightOffset">Moves the sampling point up and down</param>
-        public HeightmapTerrainSettings(Texture2D heightmap, float amplitude, float heightOffset)
+        public void Initialize(Texture2D heightmap, float amplitude, float heightOffset)
         {
             this.amplitude = amplitude;
             this.heightOffset = heightOffset;

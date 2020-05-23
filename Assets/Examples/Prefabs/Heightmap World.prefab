@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 7511563785240538603}
   - component: {fileID: 7511563785240538596}
+  - component: {fileID: 1901294685505583203}
   m_Layer: 0
   m_Name: Heightmap World
   m_TagString: Untagged
@@ -43,11 +44,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce867055cd4ad3b4bbe3236eb952762a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  chunkSize: 16
-  chunkPrefab: {fileID: 2787238630475463326, guid: af3c6cc5263a22248a7324e33d77b2e0,
-    type: 3}
-  isolevel: 0
-  heightmapTerrainSettings:
-    heightmap: {fileID: 2800000, guid: 2cb1cd891623f1643b57dd752a2e2c45, type: 3}
-    amplitude: 25
-    heightOffset: 0
+  heightmapTerrainSettings: {fileID: 11400000, guid: b09c379fa88978d4d83dcf65edad60bf,
+    type: 2}
+--- !u!114 &1901294685505583203
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7511563785240538597}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: feccda00234cd9d46b6a608d63e6e822, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _chunkGenerationParams:
+    chunkSize: 16
+    isolevel: 0
+    chunkPrefab: {fileID: 2787238630475463326, guid: af3c6cc5263a22248a7324e33d77b2e0,
+      type: 3}
+  _heightmapTerrainSettings: {fileID: 11400000, guid: b09c379fa88978d4d83dcf65edad60bf,
+    type: 2}

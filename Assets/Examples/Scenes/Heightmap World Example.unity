@@ -418,7 +418,7 @@ MonoBehaviour:
   deformRange: 3
   maxReachDistance: Infinity
   flatteningKey: 306
-  world: {fileID: 2142988395}
+  worldDensityProvider: {fileID: 2142988395}
   playerCamera: {fileID: 597380020}
 --- !u!81 &597380023
 AudioListener:
@@ -597,15 +597,9 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: eea1f03f8e24f294dbf91dd235177e1f, type: 3}
---- !u!114 &2142988395 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 7511563785240538596, guid: eea1f03f8e24f294dbf91dd235177e1f,
+--- !u!1 &2142988395 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7511563785240538597, guid: eea1f03f8e24f294dbf91dd235177e1f,
     type: 3}
   m_PrefabInstance: {fileID: 2142988394}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ce867055cd4ad3b4bbe3236eb952762a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
