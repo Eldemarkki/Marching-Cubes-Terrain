@@ -18,7 +18,7 @@ namespace MarchingCubes.Examples
         /// <summary>
         /// The viewer which the terrain is generated around
         /// </summary>
-        [SerializeField] private Transform player;
+        [SerializeField] private Transform player = null;
 
         /// <summary>
         /// The coordinate of the chunk where terrain was last generated around

@@ -12,12 +12,12 @@ namespace MarchingCubes.Examples
         /// <summary>
         /// Parameters that specify how a chunk should be generated
         /// </summary>
-        [SerializeField] private ChunkGenerationParams _chunkGenerationParams;
+        [SerializeField] private ChunkGenerationParams _chunkGenerationParams = null;
 
         /// <summary>
         /// Information about how the heightmap world should be generated
         /// </summary>
-        [SerializeField] private HeightmapTerrainSettings _heightmapTerrainSettings;
+        [SerializeField] private HeightmapTerrainSettings _heightmapTerrainSettings = null;
 
         /// <summary>
         /// A dictonary of all the chunks currently in the world. The key is the chunk's coordinate, and the value is the chunk

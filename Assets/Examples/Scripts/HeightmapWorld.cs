@@ -12,9 +12,9 @@ namespace MarchingCubes.Examples
         /// <summary>
         /// The heightmap terrain generation settings
         /// </summary>
-        [SerializeField] private HeightmapTerrainSettings heightmapTerrainSettings;
+        [SerializeField] private HeightmapTerrainSettings heightmapTerrainSettings = null;
 
-        private void Awake()
+        protected override void Awake()
         {
             base.Awake();
             heightmapTerrainSettings.Initialize(heightmapTerrainSettings.Heightmap, heightmapTerrainSettings.Amplitude, heightmapTerrainSettings.HeightOffset);

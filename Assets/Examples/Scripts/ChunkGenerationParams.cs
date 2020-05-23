@@ -23,7 +23,7 @@ namespace MarchingCubes.Examples
         /// <summary>
         /// The chunk's prefab that will be instantiated
         /// </summary>
-        [SerializeField] private GameObject chunkPrefab;
+        [SerializeField] private GameObject chunkPrefab = null;
 
         /// <summary>
         /// The chunk's size. This represents the width, height and depth in Unity units.

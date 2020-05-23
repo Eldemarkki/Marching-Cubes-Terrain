@@ -144,12 +144,12 @@ namespace MarchingCubes.Examples
         /// </summary>
         public void Dispose()
         {
-            if (!DensityJobHandle.IsCompleted) DensityJobHandle.Complete();
-            if (!MarchingCubesJobHandle.IsCompleted) MarchingCubesJobHandle.Complete();
+            if (!DensityJobHandle.IsCompleted) { DensityJobHandle.Complete(); }
+            if (!MarchingCubesJobHandle.IsCompleted) { MarchingCubesJobHandle.Complete(); }
 
-            if (_densityStorage.IsCreated) _densityStorage.Dispose();
-            if (_outputVertices.IsCreated) _outputVertices.Dispose();
-            if (_outputTriangles.IsCreated) _outputTriangles.Dispose();
+            if (_densityStorage.IsCreated) { _densityStorage.Dispose(); }
+            if (_outputVertices.IsCreated) { _outputVertices.Dispose(); }
+            if (_outputTriangles.IsCreated) { _outputTriangles.Dispose(); }
         }
 
         /// <summary>

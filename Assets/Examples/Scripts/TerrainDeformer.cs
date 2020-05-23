@@ -41,7 +41,7 @@ namespace MarchingCubes.Examples
         /// The world the will be deformed
         /// </summary>
         [Header("Player Settings")]
-        [SerializeField] public GameObject worldDensityProvider;
+        [SerializeField] private GameObject worldDensityProvider = null;
 
         /// <summary>
         /// Internal IDensityProvider that is gotten from <see cref="worldDensityProvider"/> because Unity doesn't support serialization of interfaces
@@ -51,7 +51,7 @@ namespace MarchingCubes.Examples
         /// <summary>
         /// The game object that the deformation raycast will be casted from
         /// </summary>
-        [SerializeField] private Transform playerCamera;
+        [SerializeField] private Transform playerCamera = null;
 
         /// <summary>
         /// Is the terrain currently being flattened

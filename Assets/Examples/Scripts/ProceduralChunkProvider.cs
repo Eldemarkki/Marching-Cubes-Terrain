@@ -13,12 +13,12 @@ namespace MarchingCubes.Examples
         /// <summary>
         /// Parameters that specify how a chunk will be generated
         /// </summary>
-        [SerializeField] private ChunkGenerationParams _chunkGenerationParams;
+        [SerializeField] private ChunkGenerationParams _chunkGenerationParams = null;
 
         /// <summary>
         /// The procedural terrain generation settings
         /// </summary>
-        [SerializeField] private ProceduralTerrainSettings _proceduralTerrainSettings;
+        [SerializeField] private ProceduralTerrainSettings _proceduralTerrainSettings = new ProceduralTerrainSettings(1, 9, 120, 0);
 
         /// <summary>
         /// How many chunks maximum can be generated in one frame
@@ -124,9 +124,8 @@ namespace MarchingCubes.Examples
         /// <param name="chunkCoordinate">The chunk's coordinate</param>
         public void EnsureChunkExistsAtCoordinate(int3 chunkCoordinate)
         {
-            if (Chunks.ContainsKey(chunkCoordinate)) return;
-
-            if (_generationQueue.Contains(chunkCoordinate)) return;
+            if (Chunks.ContainsKey(chunkCoordinate)) { return; }
+            if (_generationQueue.Contains(chunkCoordinate)) { return; }
 
             _generationQueue.Add(chunkCoordinate);
         }
