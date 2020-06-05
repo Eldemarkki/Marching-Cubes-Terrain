@@ -8,16 +8,16 @@ namespace MarchingCubes.Examples
     /// Base class for all worlds
     /// </summary>
     /// <typeparam name="T">The type of chunks the world will control</typeparam>
-    public abstract class World<T> : MonoBehaviour, IDensityProvider where T : Chunk
+    public abstract class VoxelWorld<T> : MonoBehaviour, IDensityProvider where T : Chunk
     {
         /// <summary>
         /// Chunk provider for this world
         /// </summary>
-        public IChunkProvider<T> ChunkProvider { get; protected set; }
+        public ChunkProvider<T> ChunkProvider { get; protected set; }
 
         protected virtual void Awake()
         {
-            ChunkProvider = GetComponent<IChunkProvider<T>>();
+            ChunkProvider = GetComponent<ChunkProvider<T>>();
         }
 
         /// <summary>

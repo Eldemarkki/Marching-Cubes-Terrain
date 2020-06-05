@@ -1,12 +1,11 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace MarchingCubes.Examples
 {
     /// <summary>
     /// Parameters that specify how a chunk will be generated
     /// </summary>
-    [Serializable]
+    [System.Serializable]
     public class ChunkGenerationParams
     {
         /// <summary>

@@ -8,13 +8,8 @@ namespace MarchingCubes.Examples
     /// <summary>
     /// Provider for procedurally generated chunks
     /// </summary>
-    public class ProceduralChunkProvider : MonoBehaviour, IChunkProvider<ProceduralChunk>
+    public class ProceduralChunkProvider : ChunkProvider<ProceduralChunk>
     {
-        /// <summary>
-        /// Parameters that specify how a chunk will be generated
-        /// </summary>
-        [SerializeField] private ChunkGenerationParams _chunkGenerationParams = null;
-
         /// <summary>
         /// The procedural terrain generation settings
         /// </summary>
@@ -35,19 +30,9 @@ namespace MarchingCubes.Examples
         /// </summary>
         private List<int3> _generationQueue;
 
-        /// <summary>
-        /// A dictionary of all the chunks currently in the world. The key is the chunk's coordinate, and the value is the chunk
-        /// </summary>
-        public Dictionary<int3, ProceduralChunk> Chunks { get; set; }
-
-        /// <summary>
-        /// Parameters that specify how a chunk will be generated
-        /// </summary>
-        public ChunkGenerationParams ChunkGenerationParams => _chunkGenerationParams;
-
-        private void Awake()
+        protected override void Awake()
         {
-            Chunks = new Dictionary<int3, ProceduralChunk>();
+            base.Awake();
             _availableChunkCoordinates = new Queue<int3>();
             _generationQueue = new List<int3>();
         }
@@ -94,35 +79,25 @@ namespace MarchingCubes.Examples
         }
 
         /// <summary>
-        /// Creates a chunk to a coordinate
+        /// Creates a chunk to a coordinate, adds it to the Chunks dictionary and Initializes the chunk
         /// </summary>
         /// <param name="chunkCoordinate">The chunk's coordinate</param>
         /// <returns>The created chunk</returns>
-        public ProceduralChunk CreateChunkAtCoordinate(int3 chunkCoordinate)
+        public override ProceduralChunk CreateChunkAtCoordinate(int3 chunkCoordinate)
         {
-            ProceduralChunk chunk = Instantiate(_chunkGenerationParams.ChunkPrefab, (chunkCoordinate * _chunkGenerationParams.ChunkSize).ToVectorInt(), Quaternion.identity).GetComponent<ProceduralChunk>();
+            ProceduralChunk chunk = Instantiate(ChunkGenerationParams.ChunkPrefab, (chunkCoordinate * ChunkGenerationParams.ChunkSize).ToVectorInt(), Quaternion.identity).GetComponent<ProceduralChunk>();
             Chunks.Add(chunkCoordinate, chunk);
             chunk.TerrainGenerationSettings = _proceduralTerrainSettings;
             chunk.Initialize(chunkCoordinate, ChunkGenerationParams);
             return chunk;
         }
 
-        /// <summary>
-        /// Tries to get a chunk from a coordinate, if it finds one it returns true and sets chunk to the found chunk, otherwise it returns false and sets chunk to null
-        /// </summary>
-        /// <param name="chunkCoordinate">The chunk's coordinate</param>
-        /// <param name="chunk">The found chunk, if none was found it is null</param>
-        /// <returns>Is there a chunk at the coordinate</returns>
-        public bool TryGetChunkAtCoordinate(int3 chunkCoordinate, out ProceduralChunk chunk)
-        {
-            return Chunks.TryGetValue(chunkCoordinate, out chunk);
-        }
 
         /// <summary>
         /// Ensures that a chunk exists at a coordinate, if there is not, a chunk is created using <see cref="CreateChunkAtCoordinate"/>
         /// </summary>
         /// <param name="chunkCoordinate">The chunk's coordinate</param>
-        public void EnsureChunkExistsAtCoordinate(int3 chunkCoordinate)
+        public override void EnsureChunkExistsAtCoordinate(int3 chunkCoordinate)
         {
             if (Chunks.ContainsKey(chunkCoordinate)) { return; }
             if (_generationQueue.Contains(chunkCoordinate)) { return; }
@@ -134,7 +109,7 @@ namespace MarchingCubes.Examples
         /// Unloads the Chunks whose coordinate is in the coordinatesToUnload parameter
         /// </summary>
         /// <param name="coordinatesToUnload">A list of the coordinates to unload</param>
-        public void UnloadCoordinates(List<int3> coordinatesToUnload)
+        public override void UnloadCoordinates(List<int3> coordinatesToUnload)
         {
             // Mark coordinates as available
             for (var i = 0; i < coordinatesToUnload.Count; i++)

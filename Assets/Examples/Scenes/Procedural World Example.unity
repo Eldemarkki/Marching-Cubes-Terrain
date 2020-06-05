@@ -525,6 +525,12 @@ PrefabInstance:
       propertyPath: m_Name
       value: Procedural World
       objectReference: {fileID: 0}
+    - target: {fileID: 9080896586299188196, guid: 0a7fdfdc32922934fb49078a896090c1,
+        type: 3}
+      propertyPath: _chunkGenerationParams.chunkPrefab
+      value: 
+      objectReference: {fileID: 7489232383384105734, guid: 58c1dc75b64dbec41a572954c3bcd523,
+        type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 0a7fdfdc32922934fb49078a896090c1, type: 3}
 --- !u!1 &1919900429

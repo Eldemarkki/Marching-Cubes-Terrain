@@ -8,7 +8,7 @@ namespace MarchingCubes.Examples
     /// A procedurally generated world
     /// </summary>
     [RequireComponent(typeof(ProceduralChunkProvider))]
-    public class ProceduralWorld : World<ProceduralChunk>
+    public class ProceduralWorld : VoxelWorld<ProceduralChunk>
     {
         /// <summary>
         /// The "radius" of the chunks the player sees
@@ -73,7 +73,7 @@ namespace MarchingCubes.Examples
         }
 
         /// <summary>
-        /// Gets a list of chunk coordinates (from <see cref="IChunkProvider{T}.Chunks"/>) whose Manhattan Distance to the coordinate parameter is more than <see cref="renderDistance"/>
+        /// Gets a list of chunk coordinates (from <see cref="ChunkProvider{T}.Chunks"/>) whose Manhattan Distance to the coordinate parameter is more than <see cref="renderDistance"/>
         /// </summary>
         /// <param name="coordinate">Central coordinate</param>
         /// <returns>A list of chunk coordinates outside of the viewing range from the coordinate parameter</returns>

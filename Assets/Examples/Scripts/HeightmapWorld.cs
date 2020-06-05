@@ -7,7 +7,7 @@ namespace MarchingCubes.Examples
     /// A heightmap world generated from a heightmap
     /// </summary>
     [RequireComponent(typeof(HeightmapChunkProvider))]
-    public class HeightmapWorld : World<HeightmapChunk>
+    public class HeightmapWorld : VoxelWorld<HeightmapChunk>
     {
         /// <summary>
         /// The heightmap terrain generation settings

@@ -58,7 +58,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cf2139c3087ce95439212cb2d0c8091a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _chunkGenerationParams:
+  chunkGenerationParams:
     chunkSize: 16
     isolevel: 0
     chunkPrefab: {fileID: 7489232383384105734, guid: 58c1dc75b64dbec41a572954c3bcd523,
