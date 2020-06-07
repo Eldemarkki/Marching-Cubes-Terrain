@@ -89,15 +89,11 @@ namespace Eldemarkki.VoxelTerrain.World
                     }
                     else
                     {
-                        int3 availableChunkCoordinate = _availableChunkCoordinates.Dequeue();
-                        Chunk chunk = _chunks[availableChunkCoordinate];
-                        _chunks.Remove(availableChunkCoordinate);
-                        _chunks.Add(chunkCoordinate, chunk);
-
                         var chunkDensities = CalculateChunkDensities(chunkCoordinate);                        
                         VoxelDensityStore.SetDensityChunk(chunkDensities, chunkCoordinate);
 
-                        chunk.Initialize(chunkCoordinate, ChunkGenerationParams, VoxelDensityStore);
+                        int3 availableChunkCoordinate = _availableChunkCoordinates.Dequeue();
+                        MoveChunk(availableChunkCoordinate, chunkCoordinate);
                     }
 
                     chunksGenerated++;
@@ -141,6 +137,35 @@ namespace Eldemarkki.VoxelTerrain.World
             }
 
             VoxelDensityStore.UnloadCoordinates(coordinatesToUnload);
+        }
+
+        /// <summary>
+        /// Moves a chunk to a different coordinate if a chunk doesn't already exist there
+        /// </summary>
+        /// <param name="fromCoordinate">The coordinate of the chunk to move</param>
+        /// <param name="toCoordinate">The coordinate where the chunk should be moved</param>
+        private void MoveChunk(int3 fromCoordinate, int3 toCoordinate)
+        {
+            if (!Chunks.TryGetValue(fromCoordinate, out Chunk chunk))
+            {
+                Debug.LogWarning($"No chunk at {fromCoordinate}, exiting the function");
+                return;
+            }
+
+            if (Chunks.ContainsKey(toCoordinate))
+            {
+                Debug.LogWarning($"A chunk already exists at {toCoordinate}, exiting the function");
+                return;
+            }
+
+            Chunks.Remove(fromCoordinate);
+            Chunks.Add(toCoordinate, chunk);
+
+            chunk.MeshRenderer.enabled = false;
+            chunk.Coordinate = toCoordinate;
+            chunk.transform.position = toCoordinate.ToVectorInt() * ChunkGenerationParams.ChunkSize;
+            chunk.name = Chunk.GetName(toCoordinate);
+            chunk.StartMeshGeneration();
         }
     }
 }

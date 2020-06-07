@@ -19,7 +19,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         /// <summary>
         /// The layout of one vertex in memory
         /// </summary>
-        public static VertexAttributeDescriptor[] VertexBufferMemoryLayout =
+        public static readonly VertexAttributeDescriptor[] VertexBufferMemoryLayout =
         {
             new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3),
             new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.Float32, 3)
@@ -35,11 +35,6 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         /// The chunk's MeshFilter
         /// </summary>
         private MeshFilter _meshFilter;
-
-        /// <summary>
-        /// This chunk's mesh renderer
-        /// </summary>
-        protected MeshRenderer _meshRenderer;
 
         /// <summary>
         /// The chunk's MeshCollider
@@ -112,10 +107,15 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         /// </summary>
         public bool HasChanges { get; set; }
 
+        /// <summary>
+        /// This chunk's mesh renderer
+        /// </summary>
+        public MeshRenderer MeshRenderer { get; private set; }
+
         protected virtual void Awake()
         {
             _meshFilter = GetComponent<MeshFilter>();
-            _meshRenderer = GetComponent<MeshRenderer>();
+            MeshRenderer = GetComponent<MeshRenderer>();
             _meshCollider = GetComponent<MeshCollider>();
             _mesh = new Mesh();
             _subMesh = new SubMeshDescriptor(0, 0, MeshTopology.Triangles);
@@ -160,7 +160,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         public void Initialize(int3 coordinate, ChunkGenerationParams chunkGenerationParams, VoxelDensityStore voxelDensityStore)
         {
             transform.position = coordinate.ToVectorInt() * chunkGenerationParams.ChunkSize;
-            name = $"Chunk_{coordinate.x}_{coordinate.y}_{coordinate.z}";
+            name = GetName(coordinate);
 
             _isolevel = chunkGenerationParams.Isolevel;
             Coordinate = coordinate;
@@ -233,7 +233,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
             _mesh.RecalculateBounds();
 
             _meshFilter.sharedMesh = _mesh;
-            _meshRenderer.enabled = true;
+            MeshRenderer.enabled = true;
 
             _meshCollider.sharedMesh = _mesh;
 
@@ -248,6 +248,16 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         public void ExportToObjFile()
         {
             ObjExporter.Export(gameObject);
+        }
+
+        /// <summary>
+        /// Generates a chunk name from a chunk coordinate
+        /// </summary>
+        /// <param name="coordinate"></param>
+        /// <returns></returns>
+        public static string GetName(int3 coordinate)
+        {
+            return $"Chunk_{coordinate.x}_{coordinate.y}_{coordinate.z}";
         }
     }
 }
