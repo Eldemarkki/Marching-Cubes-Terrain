@@ -1,4 +1,5 @@
-﻿using Unity.Collections;
+﻿using System;
+using Unity.Collections;
 using UnityEngine;
 
 namespace Eldemarkki.VoxelTerrain.World
@@ -7,7 +8,7 @@ namespace Eldemarkki.VoxelTerrain.World
     /// A class that contains information about how the heightmap world should be generated
     /// </summary>
     [CreateAssetMenu(fileName = "New Heightmap Terrain Settings", menuName = "Marching Cubes Terrain/Heightmap Terrain Settings")]
-    public class HeightmapTerrainSettings : ScriptableObject
+    public class HeightmapTerrainSettings : ScriptableObject, IDisposable
     {
         /// <summary>
         /// The black and white heightmap texture
@@ -112,7 +113,7 @@ namespace Eldemarkki.VoxelTerrain.World
         /// <summary>
         /// Disposes HeightmapData
         /// </summary>
-        public void DisposeHeightmapData()
+        public void Dispose()
         {
             heightmapData.Dispose();
         }

@@ -43,5 +43,16 @@ namespace Eldemarkki.VoxelTerrain.Utilities
         {
             return (n % x + x) % x;
         }
+
+        /// <summary>
+        /// Converts a world position to a chunk coordinate
+        /// </summary>
+        /// <param name="worldPosition">The world-position that should be converted</param>
+        /// <param name="chunkSize">The size of a chunk in the world</param>
+        /// <returns>The chunk coordinate</returns>
+        public static int3 WorldPositionToCoordinate(float3 worldPosition, int chunkSize)
+        {
+            return worldPosition.FloorToMultipleOfX(chunkSize) / chunkSize;
+        }
     }
 }

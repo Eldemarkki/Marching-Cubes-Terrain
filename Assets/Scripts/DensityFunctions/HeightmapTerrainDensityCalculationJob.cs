@@ -1,7 +1,7 @@
-﻿using Eldemarkki.VoxelTerrain.Data;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using Unity.Burst;
 using Unity.Collections;
+using Unity.Jobs;
 using Unity.Mathematics;
 
 namespace Eldemarkki.VoxelTerrain.Density
@@ -10,12 +10,12 @@ namespace Eldemarkki.VoxelTerrain.Density
     /// A heightmap terrain density calculation job
     /// </summary>
     [BurstCompile]
-    struct HeightmapTerrainDensityCalculationJob : IDensityCalculationJob
+    struct HeightmapTerrainDensityCalculationJob : IJobParallelFor
     {
         /// <summary>
         /// The output densities
         /// </summary>
-        [WriteOnly] private DensityStorage densityStorage;
+        [WriteOnly] private DensityVolume densityVolume;
 
         /// <summary>
         /// The height data from the heightmap
@@ -55,10 +55,10 @@ namespace Eldemarkki.VoxelTerrain.Density
         /// <summary>
         /// The chunk's density field
         /// </summary>
-        public DensityStorage DensityStorage
+        public DensityVolume DensityVolume
         {
-            get => densityStorage;
-            set => densityStorage = value;
+            get => densityVolume;
+            set => densityVolume = value;
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace Eldemarkki.VoxelTerrain.Density
                 density = CalculateDensity(worldPositionX, worldPositionY, worldPositionZ);
             }
 
-            densityStorage.SetDensity(density, index);
+            densityVolume.SetDensity(density, index);
         }
 
         /// <summary>

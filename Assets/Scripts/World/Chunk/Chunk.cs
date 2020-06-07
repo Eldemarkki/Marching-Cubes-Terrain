@@ -1,8 +1,7 @@
-﻿using Eldemarkki.VoxelTerrain.Data;
-using Eldemarkki.VoxelTerrain.MarchingCubes;
+﻿using Eldemarkki.VoxelTerrain.MarchingCubes;
 using Eldemarkki.VoxelTerrain.Utilities;
 using System;
-using System.Collections.Generic;
+using Eldemarkki.VoxelTerrain.Density;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -15,9 +14,12 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
     /// The base class for all chunks
     /// </summary>
     [RequireComponent(typeof(MeshRenderer), typeof(MeshFilter), typeof(MeshCollider))]
-    public abstract class Chunk : MonoBehaviour, IDisposable
+    public class Chunk : MonoBehaviour, IDisposable
     {
-        public static VertexAttributeDescriptor[] VertexBufferMemoryLayout = new VertexAttributeDescriptor[]
+        /// <summary>
+        /// The layout of one vertex in memory
+        /// </summary>
+        public static VertexAttributeDescriptor[] VertexBufferMemoryLayout =
         {
             new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3),
             new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.Float32, 3)
@@ -50,11 +52,6 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         private Mesh _mesh;
 
         /// <summary>
-        /// The chunk's density field
-        /// </summary>
-        private DensityStorage _densityStorage;
-
-        /// <summary>
         /// The vertices from the mesh generation job
         /// </summary>
         private NativeArray<MarchingCubesVertexData> _outputVertices;
@@ -63,11 +60,6 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         /// The triangles from the mesh generation job
         /// </summary>
         private NativeArray<ushort> _outputTriangles;
-
-        /// <summary>
-        /// Stores the density modifications because the densities can not be modified while a job that requires them is running.
-        /// </summary>
-        protected List<(int index, float density)> _densityModifications;
 
         /// <summary>
         /// An incremental counter that keeps track of a single integer inside the mesh generation job. This is because the jobs
@@ -86,6 +78,16 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         private SubMeshDescriptor _subMesh;
 
         /// <summary>
+        /// A temporary (lifespan from start to end of mesh generation) <see cref="DensityVolume"/> volume which contains the densities for this chunk
+        /// </summary>
+        private DensityVolume _densityVolume;
+
+        /// <summary>
+        /// The voxel density store where the densities will be gotten from
+        /// </summary>
+        private VoxelDensityStore _voxelDensityStore;
+
+        /// <summary>
         /// The chunk's coordinate
         /// </summary>
         public int3 Coordinate { get; set; }
@@ -94,14 +96,6 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         /// The chunk's size. This represents the width, height and depth in Unity units.
         /// </summary>
         public int ChunkSize { get; private set; }
-
-        /// <summary>
-        /// The chunk's density field
-        /// </summary>
-        public DensityStorage DensityStorage
-        {
-            get => _densityStorage;
-        }
 
         /// <summary>
         /// Density Job Calculation job's handle
@@ -113,13 +107,17 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         /// </summary>
         public JobHandle MarchingCubesJobHandle { get; set; }
 
+        /// <summary>
+        /// Have the densities of this chunk been changed during the last frame
+        /// </summary>
+        public bool HasChanges { get; set; }
+
         protected virtual void Awake()
         {
             _meshFilter = GetComponent<MeshFilter>();
             _meshRenderer = GetComponent<MeshRenderer>();
             _meshCollider = GetComponent<MeshCollider>();
             _mesh = new Mesh();
-            _densityModifications = new List<(int index, float density)>();
             _subMesh = new SubMeshDescriptor(0, 0, MeshTopology.Triangles);
         }
 
@@ -130,7 +128,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
                 CompleteMeshGeneration();
             }
 
-            if (_densityModifications.Count >= 1)
+            if (HasChanges)
             {
                 StartMeshGeneration();
             }
@@ -149,7 +147,6 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
             if (!DensityJobHandle.IsCompleted) { DensityJobHandle.Complete(); }
             if (!MarchingCubesJobHandle.IsCompleted) { MarchingCubesJobHandle.Complete(); }
 
-            if (_densityStorage.IsCreated) { _densityStorage.Dispose(); }
             if (_outputVertices.IsCreated) { _outputVertices.Dispose(); }
             if (_outputTriangles.IsCreated) { _outputTriangles.Dispose(); }
         }
@@ -159,7 +156,8 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         /// </summary>
         /// <param name="coordinate">The chunk's coordinate</param>
         /// <param name="chunkGenerationParams">The parameters about how this chunk should be generated</param>
-        public void Initialize(int3 coordinate, ChunkGenerationParams chunkGenerationParams)
+        /// <param name="voxelDensityStore">The voxel density store from where the densities should be gotten</param>
+        public void Initialize(int3 coordinate, ChunkGenerationParams chunkGenerationParams, VoxelDensityStore voxelDensityStore)
         {
             transform.position = coordinate.ToVectorInt() * chunkGenerationParams.ChunkSize;
             name = $"Chunk_{coordinate.x}_{coordinate.y}_{coordinate.z}";
@@ -168,37 +166,31 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
             Coordinate = coordinate;
             ChunkSize = chunkGenerationParams.ChunkSize;
 
-            _densityStorage = new DensityStorage(ChunkSize + 1);
+            _voxelDensityStore = voxelDensityStore;
 
-            StartDensityCalculation();
             StartMeshGeneration();
         }
-
-        /// <summary>
-        /// Starts the density calculation job
-        /// </summary>
-        public abstract void StartDensityCalculation();
 
         /// <summary>
         /// Starts the mesh generation job
         /// </summary>
         public void StartMeshGeneration()
         {
-            for (int i = 0; i < _densityModifications.Count; i++)
-            {
-                var modification = _densityModifications[i];
-                _densityStorage.SetDensity(modification.density, modification.index);
-            }
-
-            _densityModifications.Clear();
-
             _counter = new Counter(Allocator.TempJob);
             _outputVertices = new NativeArray<MarchingCubesVertexData>(15 * ChunkSize * ChunkSize * ChunkSize, Allocator.TempJob);
             _outputTriangles = new NativeArray<ushort>(15 * ChunkSize * ChunkSize * ChunkSize, Allocator.TempJob);
 
+            var densities = _voxelDensityStore.GetDensityChunk(Coordinate);
+            if (!_densityVolume.IsCreated)
+            {
+                _densityVolume = new DensityVolume(densities.Width, densities.Height, densities.Depth);
+            }
+
+            _densityVolume.CopyFrom(densities);
+
             var marchingCubesJob = new MarchingCubesJob
             {
-                densityStorage = _densityStorage,
+                densityVolume = _densityVolume,
                 isolevel = _isolevel,
                 chunkSize = ChunkSize,
                 counter = _counter,
@@ -232,6 +224,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
 
             _outputVertices.Dispose();
             _outputTriangles.Dispose();
+            _densityVolume.Dispose();
 
             _mesh.subMeshCount = 1;
             _subMesh.indexCount = vertexCount;
@@ -245,50 +238,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
             _meshCollider.sharedMesh = _mesh;
 
             _creatingMesh = false;
-        }
-
-        /// <summary>
-        /// Gets the density at a local-space position
-        /// </summary>
-        /// <param name="x">The density's x position inside the chunk (valid values: 0 to chunkSize+1)</param>
-        /// <param name="y">The density's y position inside the chunk (valid values: 0 to chunkSize+1)</param>
-        /// <param name="z">The density's z position inside the chunk (valid values: 0 to chunkSize+1)</param>
-        /// <returns>The density at that local-space position</returns>
-        public float GetDensity(int x, int y, int z)
-        {
-            return _densityStorage.GetDensity(x, y, z);
-        }
-
-        /// <summary>
-        /// Gets the density at a local space position
-        /// </summary>
-        /// <param name="localPosition">The density's position inside the chunk</param>
-        /// <returns>The density at that local-space position</returns>
-        public float GetDensity(int3 localPosition)
-        {
-            return GetDensity(localPosition.x, localPosition.y, localPosition.z);
-        }
-
-        /// <summary>
-        /// Sets the density at a local-space position
-        /// </summary>
-        /// <param name="density">The new density value</param>
-        /// <param name="x">The density's x position inside the chunk (valid values: 0 to chunkSize+1)</param>
-        /// <param name="y">The density's y position inside the chunk (valid values: 0 to chunkSize+1)</param>
-        /// <param name="z">The density's z position inside the chunk (valid values: 0 to chunkSize+1)</param>
-        public void SetDensity(float density, int x, int y, int z)
-        {
-            _densityModifications.Add((x * (ChunkSize + 1) * (ChunkSize + 1) + y * (ChunkSize + 1) + z, density));
-        }
-
-        /// <summary>
-        /// Sets the density at a local-space position
-        /// </summary>
-        /// <param name="density">The new density value</param>
-        /// <param name="localPos">The density's position inside the chunk</param>
-        public void SetDensity(float density, int3 localPos)
-        {
-            SetDensity(density, localPos.x, localPos.y, localPos.z);
+            HasChanges = false;
         }
 
         /// <summary>

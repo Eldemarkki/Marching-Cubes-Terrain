@@ -1,8 +1,8 @@
-﻿using Eldemarkki.VoxelTerrain.Data;
-using Eldemarkki.VoxelTerrain.World;
+﻿using Eldemarkki.VoxelTerrain.World;
 using System.Runtime.CompilerServices;
 using Unity.Burst;
 using Unity.Collections;
+using Unity.Jobs;
 using Unity.Mathematics;
 
 namespace Eldemarkki.VoxelTerrain.Density
@@ -11,12 +11,12 @@ namespace Eldemarkki.VoxelTerrain.Density
     /// A procedural terrain density calculation job
     /// </summary>
     [BurstCompile]
-    struct ProceduralTerrainDensityCalculationJob : IDensityCalculationJob
+    struct ProceduralTerrainDensityCalculationJob : IJobParallelFor
     {
         /// <summary>
         /// The output densities
         /// </summary>
-        [WriteOnly] private DensityStorage densityStorage;
+        [WriteOnly] private DensityVolume densityVolume;
 
         /// <summary>
         /// The sampling point's offset
@@ -36,7 +36,7 @@ namespace Eldemarkki.VoxelTerrain.Density
         /// <summary>
         /// The chunk's density field
         /// </summary>
-        public DensityStorage DensityStorage { get => densityStorage; set => densityStorage = value; }
+        public DensityVolume DensityVolume { get => densityVolume; set => densityVolume = value; }
 
         /// <summary>
         /// The execute method required for Unity's IJobParallelFor job type
@@ -49,7 +49,7 @@ namespace Eldemarkki.VoxelTerrain.Density
             int worldPositionZ = index % chunkSize + offset.z;
 
             float density = CalculateDensity(worldPositionX, worldPositionY, worldPositionZ);
-            densityStorage.SetDensity(density, index);
+            densityVolume.SetDensity(density, index);
         }
 
         /// <summary>

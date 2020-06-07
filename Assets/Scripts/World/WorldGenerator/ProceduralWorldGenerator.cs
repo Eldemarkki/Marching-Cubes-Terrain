@@ -1,5 +1,5 @@
-﻿using Eldemarkki.VoxelTerrain.World.Chunks;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Eldemarkki.VoxelTerrain.Utilities;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -8,11 +8,15 @@ namespace Eldemarkki.VoxelTerrain.World
     /// <summary>
     /// A procedurally generated world
     /// </summary>
-    [RequireComponent(typeof(ProceduralChunkProvider))]
-    public class ProceduralWorld : VoxelWorld<ProceduralChunk>
+    public class ProceduralWorldGenerator : MonoBehaviour
     {
         /// <summary>
-        /// The "radius" of the chunks the player sees
+        /// A chunk provider which provides chunks with procedurally generated data
+        /// </summary>
+        [SerializeField] private ProceduralChunkProvider chunkProvider;
+
+        /// <summary>
+        /// The radius of the chunks the player sees
         /// </summary>
         [SerializeField] private int renderDistance = 4;
 
@@ -26,15 +30,9 @@ namespace Eldemarkki.VoxelTerrain.World
         /// </summary>
         private int3 _lastGenerationCoordinate;
 
-        protected override void Awake()
-        {
-            base.Awake();
-            _lastGenerationCoordinate = WorldPositionToCoordinate(player.position);
-        }
-
         private void Start()
         {
-            int3 playerCoordinate = WorldPositionToCoordinate(player.position);
+            int3 playerCoordinate = VectorUtilities.WorldPositionToCoordinate(player.position, chunkProvider.ChunkGenerationParams.ChunkSize);
             _lastGenerationCoordinate = playerCoordinate;
             for (int x = -renderDistance; x <= renderDistance; x++)
             {
@@ -43,7 +41,7 @@ namespace Eldemarkki.VoxelTerrain.World
                     for (int z = -renderDistance; z <= renderDistance; z++)
                     {
                         int3 chunkCoordinate = playerCoordinate + new int3(x, y, z);
-                        ChunkProvider.EnsureChunkExistsAtCoordinate(chunkCoordinate);
+                        chunkProvider.EnsureChunkExistsAtCoordinate(chunkCoordinate);
                     }
                 }
             }
@@ -51,11 +49,12 @@ namespace Eldemarkki.VoxelTerrain.World
 
         private void Update()
         {
-            int3 playerCoordinate = WorldPositionToCoordinate(player.position);
+            int3 playerCoordinate = VectorUtilities.WorldPositionToCoordinate(player.position, chunkProvider.ChunkGenerationParams.ChunkSize);
             if (!playerCoordinate.Equals(_lastGenerationCoordinate))
             {
                 List<int3> coordinatesToUnload = GetChunkCoordinatesOutsideOfRenderDistance(playerCoordinate);
-                ChunkProvider.UnloadCoordinates(coordinatesToUnload);
+
+                chunkProvider.UnloadCoordinates(coordinatesToUnload);
 
                 for (int x = -renderDistance; x <= renderDistance; x++)
                 {
@@ -64,7 +63,7 @@ namespace Eldemarkki.VoxelTerrain.World
                         for (int z = -renderDistance; z <= renderDistance; z++)
                         {
                             int3 chunkCoordinate = playerCoordinate + new int3(x, y, z);
-                            ChunkProvider.EnsureChunkExistsAtCoordinate(chunkCoordinate);
+                            chunkProvider.EnsureChunkExistsAtCoordinate(chunkCoordinate);
                         }
                     }
                 }
@@ -74,14 +73,14 @@ namespace Eldemarkki.VoxelTerrain.World
         }
 
         /// <summary>
-        /// Gets a list of chunk coordinates (from <see cref="ChunkProvider{T}.Chunks"/>) whose Manhattan Distance to the coordinate parameter is more than <see cref="renderDistance"/>
+        /// Gets a list of chunk coordinates whose Manhattan Distance to the coordinate parameter is more than <see cref="renderDistance"/>
         /// </summary>
         /// <param name="coordinate">Central coordinate</param>
         /// <returns>A list of chunk coordinates outside of the viewing range from the coordinate parameter</returns>
         private List<int3> GetChunkCoordinatesOutsideOfRenderDistance(int3 coordinate)
         {
             List<int3> chunkCoordinates = new List<int3>();
-            foreach(int3 chunkCoordinate in ChunkProvider.Chunks.Keys)
+            foreach(int3 chunkCoordinate in chunkProvider.Chunks.Keys)
             {
                 int dX = math.abs(coordinate.x - chunkCoordinate.x);
                 int dY = math.abs(coordinate.y - chunkCoordinate.y); 

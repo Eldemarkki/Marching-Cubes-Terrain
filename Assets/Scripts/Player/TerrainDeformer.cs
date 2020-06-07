@@ -1,6 +1,6 @@
-﻿using Eldemarkki.VoxelTerrain.Density;
-using Eldemarkki.VoxelTerrain.Utilities.Intersection;
+﻿using Eldemarkki.VoxelTerrain.Utilities.Intersection;
 using System.Linq;
+using Eldemarkki.VoxelTerrain.Density;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -39,15 +39,10 @@ namespace Eldemarkki.VoxelTerrain.Player
         [SerializeField] private KeyCode flatteningKey = KeyCode.LeftControl;
 
         /// <summary>
-        /// The world the will be deformed
+        /// The density store that will be deformed
         /// </summary>
         [Header("Player Settings")]
-        [SerializeField] private GameObject worldDensityProvider = null;
-
-        /// <summary>
-        /// Internal IDensityProvider that is gotten from <see cref="worldDensityProvider"/> because Unity doesn't support serialization of interfaces
-        /// </summary>
-        private IDensityProvider world;
+        [SerializeField] private VoxelDensityStore voxelDensityStore = null;
 
         /// <summary>
         /// The game object that the deformation raycast will be casted from
@@ -71,15 +66,6 @@ namespace Eldemarkki.VoxelTerrain.Player
 
         private void Awake()
         {
-            try
-            {
-                world = worldDensityProvider.GetComponent(typeof(IDensityProvider)) as IDensityProvider;
-            }
-            catch
-            {
-                Debug.LogError("You need to set the World Density Provider to the target world!");
-            }
-
             Cursor.lockState = CursorLockMode.Locked;
         }
 
@@ -185,10 +171,10 @@ namespace Eldemarkki.VoxelTerrain.Player
 
                         float modificationAmount = deformSpeed / distance * buildModifier;
 
-                        float oldDensity = world.GetDensity(offsetPoint);
+                        float oldDensity = voxelDensityStore.GetDensity(offsetPoint);
                         float newDensity = oldDensity - modificationAmount;
 
-                        world.SetDensity(newDensity, offsetPoint);
+                        voxelDensityStore.SetDensity(newDensity, offsetPoint);
                     }
                 }
             }
@@ -220,9 +206,9 @@ namespace Eldemarkki.VoxelTerrain.Player
 
                         int3 densityWorldPosition = (int3)offsetPoint;
                         float density = (math.dot(_flatteningNormal, densityWorldPosition) - math.dot(_flatteningNormal, _flatteningOrigin)) / deformRange;
-                        float oldDensity = world.GetDensity(densityWorldPosition);
+                        float oldDensity = voxelDensityStore.GetDensity(densityWorldPosition);
 
-                        world.SetDensity((density + oldDensity) * 0.8f, densityWorldPosition);
+                        voxelDensityStore.SetDensity((density + oldDensity) * 0.8f, densityWorldPosition);
                     }
                 }
             }

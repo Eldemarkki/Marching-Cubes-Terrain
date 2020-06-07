@@ -1,4 +1,5 @@
 ﻿using Eldemarkki.VoxelTerrain.Data;
+using Eldemarkki.VoxelTerrain.Density;
 using Eldemarkki.VoxelTerrain.Utilities;
 using Unity.Burst;
 using Unity.Collections;
@@ -16,7 +17,7 @@ namespace Eldemarkki.VoxelTerrain.MarchingCubes
         /// <summary>
         /// The densities to generate the mesh off of
         /// </summary>
-        [ReadOnly] public DensityStorage densityStorage;
+        [ReadOnly] public DensityVolume densityVolume;
         
         /// <summary>
         /// The density level where a surface will be created. Densities below this will be inside the surface (solid),
@@ -56,7 +57,7 @@ namespace Eldemarkki.VoxelTerrain.MarchingCubes
                 index / chunkSize % chunkSize,
                 index % chunkSize);
             
-            VoxelCorners<float> densities = densityStorage.GetCubeVolume(voxelLocalPosition);
+            VoxelCorners<float> densities = densityVolume.GetDensitiesUnitCube(voxelLocalPosition);
 
             int cubeIndex = MarchingCubesFunctions.CalculateCubeIndex(densities, isolevel);
             if (cubeIndex == 0 || cubeIndex == 255)
