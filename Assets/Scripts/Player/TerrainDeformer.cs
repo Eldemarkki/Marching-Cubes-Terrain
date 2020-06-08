@@ -11,11 +11,10 @@ namespace Eldemarkki.VoxelTerrain.Player
     /// </summary>
     public class TerrainDeformer : MonoBehaviour
     {
-        [Header("Terrain Deforming Settings")]
-
         /// <summary>
         /// The density store that will be deformed
         /// </summary>
+        [Header("Terrain Deforming Settings")]
         [SerializeField] private VoxelDensityStore voxelDensityStore = null;
         
         /// <summary>
@@ -42,14 +41,12 @@ namespace Eldemarkki.VoxelTerrain.Player
         /// Which key must be held down to flatten the terrain
         /// </summary>
         [Header("Flattening")]
-
         [SerializeField] private KeyCode flatteningKey = KeyCode.LeftControl;
-
-        [Header("Player Settings")]
 
         /// <summary>
         /// The game object that the deformation raycast will be casted from
         /// </summary>
+        [Header("Player Settings")]
         [SerializeField] private Transform playerCamera = null;
 
         /// <summary>

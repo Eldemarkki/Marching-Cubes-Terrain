@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using Eldemarkki.VoxelTerrain.Utilities;
-using Eldemarkki.VoxelTerrain.World;
-using Eldemarkki.VoxelTerrain.World.Chunks;
 using Unity.Collections;
 using Unity.Mathematics;
 

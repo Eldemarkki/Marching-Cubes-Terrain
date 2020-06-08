@@ -1,6 +1,5 @@
 ﻿using Eldemarkki.VoxelTerrain.MarchingCubes;
 using Eldemarkki.VoxelTerrain.Utilities;
-using System;
 using Eldemarkki.VoxelTerrain.Density;
 using Unity.Collections;
 using Unity.Jobs;
@@ -14,7 +13,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
     /// The base class for all chunks
     /// </summary>
     [RequireComponent(typeof(MeshRenderer), typeof(MeshFilter), typeof(MeshCollider))]
-    public class Chunk : MonoBehaviour, IDisposable
+    public class Chunk : MonoBehaviour
     {
         /// <summary>
         /// The layout of one vertex in memory
@@ -47,35 +46,9 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         private Mesh _mesh;
 
         /// <summary>
-        /// The vertices from the mesh generation job
-        /// </summary>
-        private NativeArray<MarchingCubesVertexData> _outputVertices;
-
-        /// <summary>
-        /// The triangles from the mesh generation job
-        /// </summary>
-        private NativeArray<ushort> _outputTriangles;
-
-        /// <summary>
-        /// An incremental counter that keeps track of a single integer inside the mesh generation job. This is because the jobs
-        /// can not modify a shared integer because of race conditions.
-        /// </summary>
-        private Counter _counter;
-
-        /// <summary>
-        /// Is the mesh being generated
-        /// </summary>
-        private bool _creatingMesh;
-
-        /// <summary>
         /// The submesh for this chunk
         /// </summary>
         private SubMeshDescriptor _subMesh;
-
-        /// <summary>
-        /// A temporary (lifespan from start to end of mesh generation) <see cref="DensityVolume"/> volume which contains the densities for this chunk
-        /// </summary>
-        private DensityVolume _densityVolume;
 
         /// <summary>
         /// The voxel density store where the densities will be gotten from
@@ -93,29 +66,13 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         public int ChunkSize { get; private set; }
 
         /// <summary>
-        /// Density Job Calculation job's handle
-        /// </summary>
-        public JobHandle DensityJobHandle { get; set; }
-
-        /// <summary>
-        /// Mesh generation job's handle
-        /// </summary>
-        public JobHandle MarchingCubesJobHandle { get; set; }
-
-        /// <summary>
         /// Have the densities of this chunk been changed during the last frame
         /// </summary>
         public bool HasChanges { get; set; }
 
-        /// <summary>
-        /// This chunk's mesh renderer
-        /// </summary>
-        public MeshRenderer MeshRenderer { get; private set; }
-
         protected virtual void Awake()
         {
             _meshFilter = GetComponent<MeshFilter>();
-            MeshRenderer = GetComponent<MeshRenderer>();
             _meshCollider = GetComponent<MeshCollider>();
             _mesh = new Mesh();
             _subMesh = new SubMeshDescriptor(0, 0, MeshTopology.Triangles);
@@ -123,32 +80,10 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
 
         protected virtual void Update()
         {
-            if (_creatingMesh)
-            {
-                CompleteMeshGeneration();
-            }
-
             if (HasChanges)
             {
                 StartMeshGeneration();
             }
-        }
-
-        protected virtual void OnDestroy()
-        {
-            Dispose();
-        }
-
-        /// <summary>
-        /// Disposes the NativeArrays that this chunk has.
-        /// </summary>
-        public void Dispose()
-        {
-            if (!DensityJobHandle.IsCompleted) { DensityJobHandle.Complete(); }
-            if (!MarchingCubesJobHandle.IsCompleted) { MarchingCubesJobHandle.Complete(); }
-
-            if (_outputVertices.IsCreated) { _outputVertices.Dispose(); }
-            if (_outputTriangles.IsCreated) { _outputTriangles.Dispose(); }
         }
 
         /// <summary>
@@ -172,59 +107,44 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         }
 
         /// <summary>
-        /// Starts the mesh generation job
+        /// Forces the regeneration of the mesh
         /// </summary>
         public void StartMeshGeneration()
         {
-            _counter = new Counter(Allocator.TempJob);
-            _outputVertices = new NativeArray<MarchingCubesVertexData>(15 * ChunkSize * ChunkSize * ChunkSize, Allocator.TempJob);
-            _outputTriangles = new NativeArray<ushort>(15 * ChunkSize * ChunkSize * ChunkSize, Allocator.TempJob);
+            Counter counter = new Counter(Allocator.TempJob);
+            var outputVertices = new NativeArray<MarchingCubesVertexData>(15 * ChunkSize * ChunkSize * ChunkSize, Allocator.TempJob);
+            var outputTriangles = new NativeArray<ushort>(15 * ChunkSize * ChunkSize * ChunkSize, Allocator.TempJob);
 
             var densities = _voxelDensityStore.GetDensityChunk(Coordinate);
-            if (!_densityVolume.IsCreated)
-            {
-                _densityVolume = new DensityVolume(densities.Width, densities.Height, densities.Depth);
-            }
-
-            _densityVolume.CopyFrom(densities);
 
             var marchingCubesJob = new MarchingCubesJob
             {
-                densityVolume = _densityVolume,
+                densityVolume = densities,
                 isolevel = _isolevel,
                 chunkSize = ChunkSize,
-                counter = _counter,
+                counter = counter,
 
-                vertices = _outputVertices,
-                triangles = _outputTriangles
+                vertices = outputVertices,
+                triangles = outputTriangles
             };
 
-            MarchingCubesJobHandle = marchingCubesJob.Schedule(ChunkSize * ChunkSize * ChunkSize, 128, DensityJobHandle);
-
-            _creatingMesh = true;
-        }
-
-        /// <summary>
-        /// Completes the mesh generation job and updates the MeshFilter's and the MeshCollider's meshes.
-        /// </summary>
-        private void CompleteMeshGeneration()
-        {
-            MarchingCubesJobHandle.Complete();
+            JobHandle jobHandle = marchingCubesJob.Schedule(ChunkSize * ChunkSize * ChunkSize, 128);
 
             _mesh.Clear();
 
-            int vertexCount = _counter.Count * 3;
-            _counter.Dispose();
+            jobHandle.Complete();
+
+            int vertexCount = counter.Count * 3;
+            counter.Dispose();
 
             _mesh.SetVertexBufferParams(vertexCount, VertexBufferMemoryLayout);
             _mesh.SetIndexBufferParams(vertexCount, IndexFormat.UInt16);
 
-            _mesh.SetVertexBufferData(_outputVertices, 0, 0, vertexCount, 0, MeshUpdateFlags.DontValidateIndices);
-            _mesh.SetIndexBufferData(_outputTriangles, 0, 0, vertexCount, MeshUpdateFlags.DontValidateIndices);
+            _mesh.SetVertexBufferData(outputVertices, 0, 0, vertexCount, 0, MeshUpdateFlags.DontValidateIndices);
+            _mesh.SetIndexBufferData(outputTriangles, 0, 0, vertexCount, MeshUpdateFlags.DontValidateIndices);
 
-            _outputVertices.Dispose();
-            _outputTriangles.Dispose();
-            _densityVolume.Dispose();
+            outputVertices.Dispose();
+            outputTriangles.Dispose();
 
             _mesh.subMeshCount = 1;
             _subMesh.indexCount = vertexCount;
@@ -233,11 +153,8 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
             _mesh.RecalculateBounds();
 
             _meshFilter.sharedMesh = _mesh;
-            MeshRenderer.enabled = true;
-
             _meshCollider.sharedMesh = _mesh;
 
-            _creatingMesh = false;
             HasChanges = false;
         }
 

@@ -464,12 +464,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b25c4f659e9d0f84d9897b9f38efef04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  voxelDensityStore: {fileID: 1498334139}
   leftClickAddsTerrain: 1
   deformSpeed: 0.1
   deformRange: 3
   maxReachDistance: Infinity
   flatteningKey: 306
-  voxelDensityStore: {fileID: 1498334139}
   playerCamera: {fileID: 534669905}
 --- !u!114 &534669907
 MonoBehaviour:
@@ -573,7 +573,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   chunkProvider: {fileID: 955049496}
-  renderDistance: 4
+  renderDistance: 5
   player: {fileID: 534669905}
 --- !u!4 &1281168101
 Transform:

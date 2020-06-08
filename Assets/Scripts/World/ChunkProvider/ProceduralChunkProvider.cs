@@ -161,7 +161,6 @@ namespace Eldemarkki.VoxelTerrain.World
             Chunks.Remove(fromCoordinate);
             Chunks.Add(toCoordinate, chunk);
 
-            chunk.MeshRenderer.enabled = false;
             chunk.Coordinate = toCoordinate;
             chunk.transform.position = toCoordinate.ToVectorInt() * ChunkGenerationParams.ChunkSize;
             chunk.name = Chunk.GetName(toCoordinate);
