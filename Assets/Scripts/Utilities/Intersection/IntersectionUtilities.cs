@@ -1,4 +1,5 @@
 ﻿using Unity.Mathematics;
+using UnityEngine;
 
 namespace Eldemarkki.VoxelTerrain.Utilities.Intersection
 {
@@ -32,6 +33,17 @@ namespace Eldemarkki.VoxelTerrain.Utilities.Intersection
             var t = -(d + lineOrigin.z * planeNormal.z + lineOrigin.y * planeNormal.y + lineOrigin.x * planeNormal.x) / (lineDirection.z * planeNormal.z + lineDirection.y * planeNormal.y + lineDirection.x * planeNormal.x);
             intersectionPoint = lineOrigin + t * lineDirection;
             return PlaneLineIntersectionResult.OneHit;
+        }
+
+        public static Bounds GetIntersectionArea(Bounds a, Bounds b)
+        {
+            Vector3 min = new Vector3(Mathf.Max(a.min.x, b.min.x), Mathf.Max(a.min.y, b.min.y), Mathf.Max(a.min.z, b.min.z));
+            Vector3 max = new Vector3(Mathf.Min(a.max.x, b.max.x), Mathf.Min(a.max.y, b.max.y), Mathf.Min(a.max.z, b.max.z));
+
+            Bounds intersection = new Bounds();
+            intersection.SetMinMax(min, max);
+
+            return intersection;
         }
     }
 }

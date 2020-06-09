@@ -53,9 +53,9 @@ namespace Eldemarkki.VoxelTerrain.MarchingCubes
         {
             // Voxel's position inside the chunk. Goes from (0, 0, 0) to (chunkSize-1, chunkSize-1, chunkSize-1)
             int3 voxelLocalPosition = new int3(
-                index / (chunkSize * chunkSize),
+                index % chunkSize,
                 index / chunkSize % chunkSize,
-                index % chunkSize);
+                index / (chunkSize * chunkSize));
             
             VoxelCorners<float> densities = densityVolume.GetDensitiesUnitCube(voxelLocalPosition);
 

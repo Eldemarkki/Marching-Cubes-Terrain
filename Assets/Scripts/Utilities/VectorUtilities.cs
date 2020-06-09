@@ -33,6 +33,17 @@ namespace Eldemarkki.VoxelTerrain.Utilities
         }
 
         /// <summary>
+        /// Converts a Vector3 to a int3 by casting the xyz values to ints
+        /// </summary>
+        /// <param name="n">The Vector3 to be converted</param>
+        /// <returns>The converted int3</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int3 ToInt3(this Vector3 n)
+        {
+            return new int3((int)n.x, (int)n.y, (int)n.z);
+        }
+
+        /// <summary>
         /// Calculates the remainder of a division operation for int3. Ensures that the returned value is positive
         /// </summary>
         /// <param name="n">The divident</param>
@@ -50,6 +61,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities
         /// <param name="worldPosition">The world-position that should be converted</param>
         /// <param name="chunkSize">The size of a chunk in the world</param>
         /// <returns>The chunk coordinate</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int3 WorldPositionToCoordinate(float3 worldPosition, int chunkSize)
         {
             return worldPosition.FloorToMultipleOfX(chunkSize) / chunkSize;

@@ -29,6 +29,8 @@ namespace Eldemarkki.VoxelTerrain.Density
         /// </summary>
         public int Depth { get; }
 
+        public int3 Size => new int3(Width, Height, Depth);
+
         /// <summary>
         /// Is the densities array allocated in memory
         /// </summary>
@@ -55,9 +57,7 @@ namespace Eldemarkki.VoxelTerrain.Density
         /// </summary>
         /// <param name="size">Amount of items in 1 dimension of this container</param>
         /// <param name="allocator">How the memory should be allocated</param>
-        public DensityVolume(int size, Allocator allocator = Allocator.Persistent) : this(size, size, size, allocator)
-        {
-        }
+        public DensityVolume(int size, Allocator allocator = Allocator.Persistent) : this(size, size, size, allocator) { }
 
         /// <summary>
         /// Disposes the native densities array
@@ -65,6 +65,11 @@ namespace Eldemarkki.VoxelTerrain.Density
         public void Dispose()
         {
             _densities.Dispose();
+        }
+
+        public void SetDensity(float density, int3 localPosition)
+        {
+            SetDensity(density, localPosition.x, localPosition.y, localPosition.z);
         }
 
         /// <summary>
@@ -88,6 +93,11 @@ namespace Eldemarkki.VoxelTerrain.Density
         public void SetDensity(float density, int index)
         {
             _densities[index] = (byte) (127.5 * (math.clamp(density, -1, 1) + 1));
+        }
+
+        public float GetDensity(int3 localPosition)
+        {
+            return GetDensity(localPosition.x, localPosition.y, localPosition.z);
         }
 
         /// <summary>
@@ -122,7 +132,7 @@ namespace Eldemarkki.VoxelTerrain.Density
         /// <returns>The 1D representation of the specified location</returns>
         private int XyzToIndex(int x, int y, int z)
         {
-            return x * Width * Height + y * Width + z;
+            return z * Width * Height + y * Width + x;
         }
 
         /// <summary>

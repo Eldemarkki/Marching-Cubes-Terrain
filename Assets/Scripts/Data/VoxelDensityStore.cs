@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Eldemarkki.VoxelTerrain.Utilities;
+using Eldemarkki.VoxelTerrain.Utilities.Intersection;
 using Eldemarkki.VoxelTerrain.World;
 using Eldemarkki.VoxelTerrain.World.Chunks;
 using Unity.Mathematics;
@@ -114,6 +115,61 @@ namespace Eldemarkki.VoxelTerrain.Density
             }
 
             chunkProvider.SetChunkHasChanges(chunkCoordinate);
+        }
+
+        /// <summary>
+        /// Sets the densities for a volume in the world
+        /// </summary>
+        /// <param name="densities">The new density volume</param>
+        /// <param name="originPosition">The world position of the bottom-left-front corner where the densities should be set</param>
+        public void SetDensityCustom(DensityVolume densities, int3 originPosition)
+        {
+            Bounds worldSpaceQuery = new Bounds();
+
+            worldSpaceQuery.SetMinMax(originPosition.ToVectorInt(), (originPosition + densities.Size - new int3(1, 1, 1)).ToVectorInt());
+
+            int chunkSize = chunkProvider.ChunkGenerationParams.ChunkSize;
+
+            int3 minChunkCoordinate = VectorUtilities.WorldPositionToCoordinate(worldSpaceQuery.min - Vector3Int.one, chunkSize);
+            int3 maxChunkCoordinate = VectorUtilities.WorldPositionToCoordinate(worldSpaceQuery.max + Vector3Int.one, chunkSize);
+
+            for (int chunkCoordinateX = minChunkCoordinate.x; chunkCoordinateX <= maxChunkCoordinate.x; chunkCoordinateX++)
+            {
+                for (int chunkCoordinateY = minChunkCoordinate.y; chunkCoordinateY <= maxChunkCoordinate.y; chunkCoordinateY++)
+                {
+                    for (int chunkCoordinateZ = minChunkCoordinate.z; chunkCoordinateZ <= maxChunkCoordinate.z; chunkCoordinateZ++)
+                    {
+                        int3 chunkCoordinate = new int3(chunkCoordinateX, chunkCoordinateY, chunkCoordinateZ);
+                        DensityVolume chunkDensities = GetDensityChunk(chunkCoordinate);
+
+                        Vector3 chunkBoundsSize = new Vector3(chunkDensities.Width - 1, chunkDensities.Height - 1, chunkDensities.Depth - 1);
+                        int3 chunkWorldSpaceOrigin = chunkCoordinate * chunkSize;
+
+                        Bounds chunkWorldSpaceBounds = new Bounds();
+                        chunkWorldSpaceBounds.SetMinMax(chunkWorldSpaceOrigin.ToVectorInt(), chunkWorldSpaceOrigin.ToVectorInt() + chunkBoundsSize);
+
+                        Bounds intersectionVolume = IntersectionUtilities.GetIntersectionArea(worldSpaceQuery, chunkWorldSpaceBounds);
+                        int3 intersectionVolumeMin = intersectionVolume.min.ToInt3();
+                        int3 intersectionVolumeMax = intersectionVolume.max.ToInt3();
+
+                        for (int densityWorldPositionX = intersectionVolumeMin.x; densityWorldPositionX <= intersectionVolumeMax.x; densityWorldPositionX++)
+                        {
+                            for (int densityWorldPositionY = intersectionVolumeMin.y; densityWorldPositionY <= intersectionVolumeMax.y; densityWorldPositionY++)
+                            {
+                                for (int densityWorldPositionZ = intersectionVolumeMin.z; densityWorldPositionZ <= intersectionVolumeMax.z; densityWorldPositionZ++)
+                                {
+                                    int3 densityWorldPosition = new int3(densityWorldPositionX, densityWorldPositionY, densityWorldPositionZ);
+
+                                    float density = densities.GetDensity(densityWorldPosition - intersectionVolumeMin);
+                                    chunkDensities.SetDensity(density, (densityWorldPosition - chunkWorldSpaceOrigin).Mod(chunkSize + 1));
+                                }
+                            }
+                        }
+
+                        chunkProvider.SetChunkHasChanges(chunkCoordinate);
+                    }
+                }
+            }
         }
 
         /// <summary>

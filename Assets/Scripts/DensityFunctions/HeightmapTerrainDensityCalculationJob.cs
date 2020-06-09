@@ -67,9 +67,9 @@ namespace Eldemarkki.VoxelTerrain.Density
         /// <param name="index">The iteration index provided by Unity's Job System</param>
         public void Execute(int index)
         {
-            int worldPositionX = index / (chunkSize * chunkSize) + offset.x;
+            int worldPositionZ = index / (chunkSize * chunkSize) + offset.z;
             int worldPositionY = index / chunkSize % chunkSize + offset.y;
-            int worldPositionZ = index % chunkSize + offset.z;
+            int worldPositionX = index % chunkSize + offset.x;
 
             float density = 1; // 1, because the default density should be air
             if (worldPositionX < heightmapWidth && worldPositionZ < heightmapHeight)
