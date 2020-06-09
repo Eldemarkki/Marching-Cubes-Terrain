@@ -4,6 +4,7 @@ using Eldemarkki.VoxelTerrain.Utilities;
 using Eldemarkki.VoxelTerrain.Utilities.Intersection;
 using Eldemarkki.VoxelTerrain.World;
 using Eldemarkki.VoxelTerrain.World.Chunks;
+using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -62,7 +63,7 @@ namespace Eldemarkki.VoxelTerrain.Density
         }
 
         /// <summary>
-        /// Gets the density volume for one chunk
+        /// Gets the density volume for one chunk with a persistent allocator
         /// </summary>
         /// <param name="chunkCoordinate">The coordinate of the chunk whose densities should be gotten</param>
         /// <returns>The densities for the chunk</returns>
@@ -75,6 +76,63 @@ namespace Eldemarkki.VoxelTerrain.Density
 
             // TODO: Load the chunk from disk and get the densities from it
             throw new Exception($"The chunk at coordinate {chunkCoordinate} is not loaded.");
+        }
+
+        /// <summary>
+        /// Gets the densities of a custom volume in the world
+        /// </summary>
+        /// <param name="bounds">The world-space volume to get the densities for</param>
+        /// <param name="allocator">How the new density volume should be allocated</param>
+        /// <returns>The density volume inside the bounds</returns>
+        public DensityVolume GetDensityCustom(Bounds bounds, Allocator allocator = Allocator.Persistent)
+        {
+            DensityVolume densityVolume = new DensityVolume(bounds.size.ToInt3(), allocator);
+
+            Bounds worldSpaceQuery = bounds;
+
+            int chunkSize = chunkProvider.ChunkGenerationParams.ChunkSize;
+
+            int3 minChunkCoordinate = VectorUtilities.WorldPositionToCoordinate(worldSpaceQuery.min - Vector3Int.one, chunkSize);
+            int3 maxChunkCoordinate = VectorUtilities.WorldPositionToCoordinate(worldSpaceQuery.max + Vector3Int.one, chunkSize);
+
+            for (int chunkCoordinateX = minChunkCoordinate.x; chunkCoordinateX <= maxChunkCoordinate.x; chunkCoordinateX++)
+            {
+                for (int chunkCoordinateY = minChunkCoordinate.y; chunkCoordinateY <= maxChunkCoordinate.y; chunkCoordinateY++)
+                {
+                    for (int chunkCoordinateZ = minChunkCoordinate.z; chunkCoordinateZ <= maxChunkCoordinate.z; chunkCoordinateZ++)
+                    {
+                        int3 chunkCoordinate = new int3(chunkCoordinateX, chunkCoordinateY, chunkCoordinateZ);
+                        DensityVolume chunkDensities = GetDensityChunk(chunkCoordinate);
+
+                        Vector3 chunkBoundsSize = new Vector3(chunkDensities.Width - 1, chunkDensities.Height - 1, chunkDensities.Depth - 1);
+                        int3 chunkWorldSpaceOrigin = chunkCoordinate * chunkSize;
+
+                        Bounds chunkWorldSpaceBounds = new Bounds();
+                        chunkWorldSpaceBounds.SetMinMax(chunkWorldSpaceOrigin.ToVectorInt(), chunkWorldSpaceOrigin.ToVectorInt() + chunkBoundsSize);
+
+                        Bounds intersectionVolume = IntersectionUtilities.GetIntersectionArea(worldSpaceQuery, chunkWorldSpaceBounds);
+                        int3 intersectionVolumeMin = intersectionVolume.min.ToInt3();
+                        int3 intersectionVolumeMax = intersectionVolume.max.ToInt3();
+
+                        for (int densityWorldPositionX = intersectionVolumeMin.x; densityWorldPositionX < intersectionVolumeMax.x; densityWorldPositionX++)
+                        {
+                            for (int densityWorldPositionY = intersectionVolumeMin.y; densityWorldPositionY < intersectionVolumeMax.y; densityWorldPositionY++)
+                            {
+                                for (int densityWorldPositionZ = intersectionVolumeMin.z; densityWorldPositionZ < intersectionVolumeMax.z; densityWorldPositionZ++)
+                                {
+                                    int3 densityWorldPosition = new int3(densityWorldPositionX, densityWorldPositionY, densityWorldPositionZ);
+                                    int3 densityLocalPosition = densityWorldPosition - chunkWorldSpaceOrigin;
+
+                                    float density = chunkDensities.GetDensity(densityLocalPosition);
+                                    densityVolume.SetDensity(density, densityWorldPosition - bounds.min.ToInt3());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return densityVolume;
         }
 
         /// <summary>
@@ -160,8 +218,8 @@ namespace Eldemarkki.VoxelTerrain.Density
                                 {
                                     int3 densityWorldPosition = new int3(densityWorldPositionX, densityWorldPositionY, densityWorldPositionZ);
 
-                                    float density = densities.GetDensity(densityWorldPosition - intersectionVolumeMin);
-                                    chunkDensities.SetDensity(density, (densityWorldPosition - chunkWorldSpaceOrigin).Mod(chunkSize + 1));
+                                    float density = densities.GetDensity(densityWorldPosition - worldSpaceQuery.min.ToInt3());
+                                    chunkDensities.SetDensity(density, densityWorldPosition - chunkWorldSpaceOrigin);
                                 }
                             }
                         }

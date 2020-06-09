@@ -59,6 +59,8 @@ namespace Eldemarkki.VoxelTerrain.Density
         /// <param name="allocator">How the memory should be allocated</param>
         public DensityVolume(int size, Allocator allocator = Allocator.Persistent) : this(size, size, size, allocator) { }
 
+        public DensityVolume(int3 size, Allocator allocator = Allocator.Persistent) : this(size.x, size.y, size.z, allocator) { }
+
         /// <summary>
         /// Disposes the native densities array
         /// </summary>
