@@ -84,7 +84,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         /// Initializes the chunk and starts generating the mesh.
         /// </summary>
         /// <param name="coordinate">The chunk's coordinate</param>
-        /// <param name="chunkGenerationParams">The parameters about how this chunk should be generated</param>
+        /// <param name="chunkProvider">The chunk provider for this chunk</param>
         /// <param name="voxelDensityStore">The voxel density store from where the densities should be gotten</param>
         public void Initialize(int3 coordinate, ChunkProvider chunkProvider, VoxelDensityStore voxelDensityStore)
         {
