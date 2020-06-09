@@ -42,21 +42,18 @@ namespace Eldemarkki.VoxelTerrain.World
 
             var job = new HeightmapTerrainDensityCalculationJob
             {
-                DensityVolume = densityVolume,
+                densityVolume = densityVolume,
                 heightmapData = heightmapTerrainSettings.HeightmapData,
                 offset = chunkCoordinate * ChunkGenerationParams.ChunkSize,
-                chunkSize = ChunkGenerationParams.ChunkSize + 1, // +1 because chunkSize is the amount of "voxels", and that +1 is the amount of density points
                 heightmapWidth = heightmapTerrainSettings.Width,
                 heightmapHeight = heightmapTerrainSettings.Height,
                 amplitude = heightmapTerrainSettings.Amplitude,
                 heightOffset = heightmapTerrainSettings.HeightOffset
             };
 
-            job.Schedule(
-                (ChunkGenerationParams.ChunkSize + 1) * (ChunkGenerationParams.ChunkSize + 1) *
-                (ChunkGenerationParams.ChunkSize + 1), 256).Complete();
+            job.Schedule(densityVolume.Length, 256).Complete();
 
-            return job.DensityVolume;
+            return job.densityVolume;
         }
     }
 }

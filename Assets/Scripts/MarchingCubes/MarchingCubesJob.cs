@@ -18,18 +18,18 @@ namespace Eldemarkki.VoxelTerrain.MarchingCubes
         /// The densities to generate the mesh off of
         /// </summary>
         [ReadOnly] public DensityVolume densityVolume;
-        
+
         /// <summary>
         /// The density level where a surface will be created. Densities below this will be inside the surface (solid),
         /// and densities above this will be outside the surface (air)
         /// </summary>
         [ReadOnly] public float isolevel;
-        
+
         /// <summary>
         /// The chunk's size. This represents the width, height and depth in Unity units.
         /// </summary>
         [ReadOnly] public int chunkSize;
-        
+
         /// <summary>
         /// The counter to keep track of the triangle index
         /// </summary>
@@ -39,7 +39,7 @@ namespace Eldemarkki.VoxelTerrain.MarchingCubes
         /// The generated vertices
         /// </summary>
         [NativeDisableParallelForRestriction, WriteOnly] public NativeArray<MarchingCubesVertexData> vertices;
-        
+
         /// <summary>
         /// The generated triangles
         /// </summary>
@@ -51,12 +51,9 @@ namespace Eldemarkki.VoxelTerrain.MarchingCubes
         /// <param name="index">The iteration index</param>
         public void Execute(int index)
         {
-            // Voxel's position inside the chunk. Goes from (0, 0, 0) to (chunkSize-1, chunkSize-1, chunkSize-1)
-            int3 voxelLocalPosition = new int3(
-                index % chunkSize,
-                index / chunkSize % chunkSize,
-                index / (chunkSize * chunkSize));
-            
+            // Voxel's position inside the chunk. Goes from (0, 0, 0) to (densityVolume.Width-1, densityVolume.Height-1, densityVolume.Depth-1). Both are inclusive.
+            int3 voxelLocalPosition = IndexUtilities.IndexToXyz(index, densityVolume.Width - 1, densityVolume.Height - 1);
+
             VoxelCorners<float> densities = densityVolume.GetDensitiesUnitCube(voxelLocalPosition);
 
             int cubeIndex = MarchingCubesFunctions.CalculateCubeIndex(densities, isolevel);

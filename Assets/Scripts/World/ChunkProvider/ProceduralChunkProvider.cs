@@ -53,18 +53,17 @@ namespace Eldemarkki.VoxelTerrain.World
         /// <returns>A density volume containing the densities. The volume's size is (chunkSize+1)^3</returns>
         protected override DensityVolume CalculateChunkDensities(int3 chunkCoordinate)
         {
-            DensityVolume chunk = new DensityVolume(ChunkGenerationParams.ChunkSize + 1);
+            DensityVolume densityVolume = new DensityVolume(ChunkGenerationParams.ChunkSize + 1);
             var job = new ProceduralTerrainDensityCalculationJob
             {
-                chunkSize = ChunkGenerationParams.ChunkSize + 1,
-                DensityVolume = chunk,
+                densityVolume = densityVolume,
                 offset = chunkCoordinate * ChunkGenerationParams.ChunkSize,
                 proceduralTerrainSettings = proceduralTerrainSettings
             };
 
-            job.Schedule((ChunkGenerationParams.ChunkSize + 1) * (ChunkGenerationParams.ChunkSize + 1) * (ChunkGenerationParams.ChunkSize + 1), 256).Complete();
+            job.Schedule(densityVolume.Length, 256).Complete();
 
-            return job.DensityVolume;
+            return job.densityVolume;
         }
 
         /// <summary>

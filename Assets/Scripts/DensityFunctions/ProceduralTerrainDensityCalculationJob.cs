@@ -1,5 +1,6 @@
 ﻿using Eldemarkki.VoxelTerrain.World;
 using System.Runtime.CompilerServices;
+using Eldemarkki.VoxelTerrain.Utilities;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
@@ -16,17 +17,12 @@ namespace Eldemarkki.VoxelTerrain.Density
         /// <summary>
         /// The output densities
         /// </summary>
-        [WriteOnly] private DensityVolume densityVolume;
+        [WriteOnly] public DensityVolume densityVolume;
 
         /// <summary>
         /// The sampling point's offset
         /// </summary>
         [ReadOnly] public int3 offset;
-        
-        /// <summary>
-        /// The chunk size
-        /// </summary>
-        [ReadOnly] public int chunkSize;
 
         /// <summary>
         /// The procedural terrain generation settings
@@ -34,19 +30,15 @@ namespace Eldemarkki.VoxelTerrain.Density
         [ReadOnly] public ProceduralTerrainSettings proceduralTerrainSettings;
 
         /// <summary>
-        /// The chunk's density field
-        /// </summary>
-        public DensityVolume DensityVolume { get => densityVolume; set => densityVolume = value; }
-
-        /// <summary>
         /// The execute method required for Unity's IJobParallelFor job type
         /// </summary>
         /// <param name="index">The iteration index provided by Unity's Job System</param>
         public void Execute(int index)
         {
-            int worldPositionZ = index / (chunkSize * chunkSize) + offset.z;
-            int worldPositionY = index / chunkSize % chunkSize + offset.y;
-            int worldPositionX = index % chunkSize + offset.x;
+            int3 worldPosition = IndexUtilities.IndexToXyz(index, densityVolume.Width, densityVolume.Height) + offset;
+            int worldPositionX = worldPosition.x;
+            int worldPositionY = worldPosition.y;
+            int worldPositionZ = worldPosition.z;
 
             float density = CalculateDensity(worldPositionX, worldPositionY, worldPositionZ);
             densityVolume.SetDensity(density, index);

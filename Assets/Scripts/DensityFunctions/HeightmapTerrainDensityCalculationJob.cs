@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using Eldemarkki.VoxelTerrain.Utilities;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
@@ -15,7 +16,7 @@ namespace Eldemarkki.VoxelTerrain.Density
         /// <summary>
         /// The output densities
         /// </summary>
-        [WriteOnly] private DensityVolume densityVolume;
+        [WriteOnly] public DensityVolume densityVolume;
 
         /// <summary>
         /// The height data from the heightmap
@@ -26,11 +27,6 @@ namespace Eldemarkki.VoxelTerrain.Density
         /// Offset the sampling point
         /// </summary>
         [ReadOnly] public int3 offset;
-
-        /// <summary>
-        /// The chunk size
-        /// </summary>
-        [ReadOnly] public int chunkSize;
 
         /// <summary>
         /// How wide the heightmap is (in pixels). 1 pixel = 1 Unity unit
@@ -53,23 +49,15 @@ namespace Eldemarkki.VoxelTerrain.Density
         [ReadOnly] public float heightOffset;
 
         /// <summary>
-        /// The chunk's density field
-        /// </summary>
-        public DensityVolume DensityVolume
-        {
-            get => densityVolume;
-            set => densityVolume = value;
-        }
-
-        /// <summary>
         /// The execute method required for Unity's IJobParallelFor job type
         /// </summary>
         /// <param name="index">The iteration index provided by Unity's Job System</param>
         public void Execute(int index)
         {
-            int worldPositionZ = index / (chunkSize * chunkSize) + offset.z;
-            int worldPositionY = index / chunkSize % chunkSize + offset.y;
-            int worldPositionX = index % chunkSize + offset.x;
+            int3 worldPosition = IndexUtilities.IndexToXyz(index, densityVolume.Width, densityVolume.Height) + offset;
+            int worldPositionX = worldPosition.x;
+            int worldPositionY = worldPosition.y;
+            int worldPositionZ = worldPosition.z;
 
             float density = 1; // 1, because the default density should be air
             if (worldPositionX < heightmapWidth && worldPositionZ < heightmapHeight)

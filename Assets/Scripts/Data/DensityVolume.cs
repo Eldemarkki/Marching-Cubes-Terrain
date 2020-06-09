@@ -1,4 +1,5 @@
 ﻿using System;
+using Eldemarkki.VoxelTerrain.Utilities;
 using Unity.Collections;
 using Unity.Mathematics;
 
@@ -29,7 +30,15 @@ namespace Eldemarkki.VoxelTerrain.Density
         /// </summary>
         public int Depth { get; }
 
+        /// <summary>
+        /// The size of this volume
+        /// </summary>
         public int3 Size => new int3(Width, Height, Depth);
+
+        /// <summary>
+        /// How many density values this volume contains
+        /// </summary>
+        public int Length => Width * Height * Depth;
 
         /// <summary>
         /// Is the densities array allocated in memory
@@ -55,10 +64,15 @@ namespace Eldemarkki.VoxelTerrain.Density
         /// <summary>
         /// Constructor to create a DensityVolume
         /// </summary>
-        /// <param name="size">Amount of items in 1 dimension of this container</param>
+        /// <param name="size">Amount of items in 1 dimension of this volume</param>
         /// <param name="allocator">How the memory should be allocated</param>
         public DensityVolume(int size, Allocator allocator = Allocator.Persistent) : this(size, size, size, allocator) { }
 
+        /// <summary>
+        /// Constructor to create a DensityVolume
+        /// </summary>
+        /// <param name="size">The 3-dimensional size of this volume</param>
+        /// <param name="allocator">How the memory should be allocated</param>
         public DensityVolume(int3 size, Allocator allocator = Allocator.Persistent) : this(size.x, size.y, size.z, allocator) { }
 
         /// <summary>
@@ -69,9 +83,15 @@ namespace Eldemarkki.VoxelTerrain.Density
             _densities.Dispose();
         }
 
+        /// <summary>
+        /// Sets the density in the specified location. Density is clamped to go from -1 to 1
+        /// </summary>
+        /// <param name="density">The new density</param>
+        /// <param name="localPosition">The density location</param>
         public void SetDensity(float density, int3 localPosition)
         {
-            SetDensity(density, localPosition.x, localPosition.y, localPosition.z);
+            int index = IndexUtilities.XyzToIndex(localPosition, Width, Height);
+            SetDensity(density, index);
         }
 
         /// <summary>
@@ -83,7 +103,7 @@ namespace Eldemarkki.VoxelTerrain.Density
         /// <param name="z">The z value of the density location</param>
         public void SetDensity(float density, int x, int y, int z)
         {
-            int index = XyzToIndex(x, y, z);
+            int index = IndexUtilities.XyzToIndex(x, y, z, Width, Height);
             SetDensity(density, index);
         }
 
@@ -97,6 +117,11 @@ namespace Eldemarkki.VoxelTerrain.Density
             _densities[index] = (byte) (127.5 * (math.clamp(density, -1, 1) + 1));
         }
 
+        /// <summary>
+        /// Gets the density value from the local position (x,y,z) in the range from -1 to 1
+        /// </summary>
+        /// <param name="localPosition"></param>
+        /// <returns></returns>
         public float GetDensity(int3 localPosition)
         {
             return GetDensity(localPosition.x, localPosition.y, localPosition.z);
@@ -111,7 +136,7 @@ namespace Eldemarkki.VoxelTerrain.Density
         /// <returns>A density value in the range from -1 to 1 in the specified location</returns>
         public float GetDensity(int x, int y, int z)
         {
-            int index = XyzToIndex(x, y, z);
+            int index = IndexUtilities.XyzToIndex(x, y, z, Width, Height);
             return GetDensity(index);
         }
 
@@ -123,18 +148,6 @@ namespace Eldemarkki.VoxelTerrain.Density
         public float GetDensity(int index)
         {
             return _densities[index] / 127.5f - 1;
-        }
-
-        /// <summary>
-        /// Converts a 3D location to a 1D index
-        /// </summary>
-        /// <param name="x">The x value of the location</param>
-        /// <param name="y">The y value of the location</param>
-        /// <param name="z">The z value of the location</param>
-        /// <returns>The 1D representation of the specified location</returns>
-        private int XyzToIndex(int x, int y, int z)
-        {
-            return z * Width * Height + y * Width + x;
         }
 
         /// <summary>
