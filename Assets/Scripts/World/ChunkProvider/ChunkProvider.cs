@@ -62,7 +62,7 @@ namespace Eldemarkki.VoxelTerrain.World
             DensityVolume chunkDensities = CalculateChunkDensities(chunkCoordinate);
             voxelDensityStore.SetDensityChunk(chunkDensities, chunkCoordinate);
 
-            chunk.Initialize(chunkCoordinate, ChunkGenerationParams, VoxelDensityStore);
+            chunk.Initialize(chunkCoordinate, this, VoxelDensityStore);
             return chunk;
         }
 

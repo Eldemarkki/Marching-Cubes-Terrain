@@ -25,12 +25,6 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         };
 
         /// <summary>
-        /// The density level where a surface will be created. Densities below this will be inside the surface (solid),
-        /// and densities above this will be outside the surface (air)
-        /// </summary>
-        private float _isolevel;
-
-        /// <summary>
         /// The chunk's MeshFilter
         /// </summary>
         private MeshFilter _meshFilter;
@@ -56,14 +50,14 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         private VoxelDensityStore _voxelDensityStore;
 
         /// <summary>
+        /// This world's chunk provider
+        /// </summary>
+        private ChunkProvider _chunkProvider;
+
+        /// <summary>
         /// The chunk's coordinate
         /// </summary>
         public int3 Coordinate { get; set; }
-
-        /// <summary>
-        /// The chunk's size. This represents the width, height and depth in Unity units.
-        /// </summary>
-        public int ChunkSize { get; private set; }
 
         /// <summary>
         /// Have the densities of this chunk been changed during the last frame
@@ -92,14 +86,13 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         /// <param name="coordinate">The chunk's coordinate</param>
         /// <param name="chunkGenerationParams">The parameters about how this chunk should be generated</param>
         /// <param name="voxelDensityStore">The voxel density store from where the densities should be gotten</param>
-        public void Initialize(int3 coordinate, ChunkGenerationParams chunkGenerationParams, VoxelDensityStore voxelDensityStore)
+        public void Initialize(int3 coordinate, ChunkProvider chunkProvider, VoxelDensityStore voxelDensityStore)
         {
-            transform.position = coordinate.ToVectorInt() * chunkGenerationParams.ChunkSize;
+            _chunkProvider = chunkProvider;
+            transform.position = coordinate.ToVectorInt() * _chunkProvider.ChunkGenerationParams.ChunkSize;
             name = GetName(coordinate);
 
-            _isolevel = chunkGenerationParams.Isolevel;
             Coordinate = coordinate;
-            ChunkSize = chunkGenerationParams.ChunkSize;
 
             _voxelDensityStore = voxelDensityStore;
 
@@ -112,23 +105,23 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         public void StartMeshGeneration()
         {
             Counter counter = new Counter(Allocator.TempJob);
-            var outputVertices = new NativeArray<MarchingCubesVertexData>(15 * ChunkSize * ChunkSize * ChunkSize, Allocator.TempJob);
-            var outputTriangles = new NativeArray<ushort>(15 * ChunkSize * ChunkSize * ChunkSize, Allocator.TempJob);
+            var outputVertices = new NativeArray<MarchingCubesVertexData>(15 * _chunkProvider.ChunkGenerationParams.ChunkSize * _chunkProvider.ChunkGenerationParams.ChunkSize * _chunkProvider.ChunkGenerationParams.ChunkSize, Allocator.TempJob);
+            var outputTriangles = new NativeArray<ushort>(15 * _chunkProvider.ChunkGenerationParams.ChunkSize * _chunkProvider.ChunkGenerationParams.ChunkSize * _chunkProvider.ChunkGenerationParams.ChunkSize, Allocator.TempJob);
 
             var densities = _voxelDensityStore.GetDensityChunk(Coordinate);
 
             var marchingCubesJob = new MarchingCubesJob
             {
                 densityVolume = densities,
-                isolevel = _isolevel,
-                chunkSize = ChunkSize,
+                isolevel = _chunkProvider.ChunkGenerationParams.Isolevel,
+                chunkSize = _chunkProvider.ChunkGenerationParams.ChunkSize,
                 counter = counter,
 
                 vertices = outputVertices,
                 triangles = outputTriangles
             };
 
-            JobHandle jobHandle = marchingCubesJob.Schedule(ChunkSize * ChunkSize * ChunkSize, 128);
+            JobHandle jobHandle = marchingCubesJob.Schedule(_chunkProvider.ChunkGenerationParams.ChunkSize * _chunkProvider.ChunkGenerationParams.ChunkSize * _chunkProvider.ChunkGenerationParams.ChunkSize, 128);
 
             _mesh.Clear();
 
