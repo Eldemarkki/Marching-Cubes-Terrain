@@ -150,7 +150,6 @@ namespace Eldemarkki.VoxelTerrain.Density
                 var densityVolume = GetDensityChunk(chunkCoordinate);
                 int3 localPos = (worldPosition - chunkCoordinate * chunkProvider.ChunkGenerationParams.ChunkSize).Mod(chunkProvider.ChunkGenerationParams.ChunkSize + 1);
                 densityVolume.SetDensity(density, localPos.x, localPos.y, localPos.z);
-                SetDensityChunk(densityVolume, chunkCoordinate);
             }
 
             chunkProvider.SetChunksHaveChanges(affectedChunks);
