@@ -15,7 +15,7 @@ namespace Eldemarkki.VoxelTerrain.Player
         /// The density store that will be deformed
         /// </summary>
         [Header("Terrain Deforming Settings")]
-        [SerializeField] private VoxelDensityStore voxelDensityStore = null;
+        [SerializeField] private VoxelDataStore voxelDataStore = null;
         
         /// <summary>
         /// Does the left mouse button add or remove terrain
@@ -171,10 +171,10 @@ namespace Eldemarkki.VoxelTerrain.Player
 
                         float modificationAmount = deformSpeed / distance * buildModifier;
 
-                        float oldDensity = voxelDensityStore.GetDensity(offsetPoint);
+                        float oldDensity = voxelDataStore.GetDensity(offsetPoint);
                         float newDensity = oldDensity - modificationAmount;
 
-                        voxelDensityStore.SetDensity(newDensity, offsetPoint);
+                        voxelDataStore.SetDensity(newDensity, offsetPoint);
                     }
                 }
             }
@@ -206,9 +206,9 @@ namespace Eldemarkki.VoxelTerrain.Player
 
                         int3 densityWorldPosition = (int3)offsetPoint;
                         float density = (math.dot(_flatteningNormal, densityWorldPosition) - math.dot(_flatteningNormal, _flatteningOrigin)) / deformRange;
-                        float oldDensity = voxelDensityStore.GetDensity(densityWorldPosition);
+                        float oldDensity = voxelDataStore.GetDensity(densityWorldPosition);
 
-                        voxelDensityStore.SetDensity((density + oldDensity) * 0.8f, densityWorldPosition);
+                        voxelDataStore.SetDensity((density + oldDensity) * 0.8f, densityWorldPosition);
                     }
                 }
             }
