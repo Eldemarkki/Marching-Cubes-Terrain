@@ -11,7 +11,7 @@ namespace Eldemarkki.VoxelTerrain.Density
     /// A heightmap terrain density calculation job
     /// </summary>
     [BurstCompile]
-    struct HeightmapTerrainDensityCalculationJob : VoxelDataGenerationJob
+    struct HeightmapTerrainDensityCalculationJob : IVoxelDataGenerationJob
     {
         /// <summary>
         /// The output densities

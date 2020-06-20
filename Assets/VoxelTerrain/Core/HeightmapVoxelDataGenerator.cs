@@ -11,11 +11,11 @@ namespace Eldemarkki.VoxelTerrain.World
     {
         [SerializeField] private HeightmapWorldGenerator heightmapWorldGenerator;
 
-        public override DensityVolume GenerateVoxelData(Bounds bounds, Allocator allocator = Allocator.Persistent)
+        public override JobHandleWithData<IVoxelDataGenerationJob> GenerateVoxelData(Bounds bounds, Allocator allocator = Allocator.Persistent)
         {
             DensityVolume voxelData = new DensityVolume(bounds.size.ToInt3(), allocator);
 
-            JobHandle jobHandle = new HeightmapTerrainDensityCalculationJob
+            HeightmapTerrainDensityCalculationJob job = new HeightmapTerrainDensityCalculationJob
             {
                 WorldPositionOffset = bounds.min.ToInt3(),
                 OutputVoxelData = voxelData,
@@ -24,11 +24,15 @@ namespace Eldemarkki.VoxelTerrain.World
                 heightmapHeight = heightmapWorldGenerator.HeightmapTerrainSettings.Height,
                 amplitude = heightmapWorldGenerator.HeightmapTerrainSettings.Amplitude,
                 heightOffset = heightmapWorldGenerator.HeightmapTerrainSettings.HeightOffset
-            }.Schedule(voxelData.Length, 256);
+            };
 
-            jobHandle.Complete();
+            var jobHandle = job.Schedule(voxelData.Length, 256);
 
-            return voxelData;
+            JobHandleWithData<IVoxelDataGenerationJob> jobHandleWithData = new JobHandleWithData<IVoxelDataGenerationJob>();
+            jobHandleWithData.JobHandle = jobHandle;
+            jobHandleWithData.JobData = job;
+
+            return jobHandleWithData;
         }
     }
 }

@@ -2,6 +2,7 @@
 using Eldemarkki.VoxelTerrain.Utilities;
 using Unity.Collections;
 using Unity.Mathematics;
+using UnityEngine;
 
 namespace Eldemarkki.VoxelTerrain.Density
 {
@@ -80,6 +81,7 @@ namespace Eldemarkki.VoxelTerrain.Density
         /// </summary>
         public void Dispose()
         {
+            Debug.Log("Disposing density volume!");
             _densities.Dispose();
         }
 

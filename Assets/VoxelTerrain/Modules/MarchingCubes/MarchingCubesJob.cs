@@ -27,7 +27,7 @@ namespace Eldemarkki.VoxelTerrain.MarchingCubes
         /// <summary>
         /// The counter to keep track of the triangle index
         /// </summary>
-        [WriteOnly] public Counter counter;
+        [WriteOnly] private NativeCounter _vertexCountCounter;
 
         /// <summary>
         /// The generated vertices
@@ -39,6 +39,7 @@ namespace Eldemarkki.VoxelTerrain.MarchingCubes
         /// </summary>
         [NativeDisableParallelForRestriction, WriteOnly] private NativeArray<ushort> _triangles;
 
+        public NativeCounter VertexCountCounter { get => _vertexCountCounter; set => _vertexCountCounter = value; }
         public DensityVolume VoxelData { get => _voxelData; set => _voxelData = value; }
         public NativeArray<MarchingCubesVertexData> OutputVertices { get => _vertices; set => _vertices = value; }
         public NativeArray<ushort> OutputTriangles { get => _triangles; set => _triangles = value; }
@@ -71,7 +72,7 @@ namespace Eldemarkki.VoxelTerrain.MarchingCubes
 
             for (int i = 0; MarchingCubesLookupTables.TriangleTable[rowIndex+i] != -1 && i < 15; i += 3)
             {
-                int triangleIndex = counter.Increment() * 3;
+                int triangleIndex = _vertexCountCounter.Increment() * 3;
 
                 float3 vertex1 = vertexList[MarchingCubesLookupTables.TriangleTable[rowIndex + i + 0]];
                 float3 vertex2 = vertexList[MarchingCubesLookupTables.TriangleTable[rowIndex + i + 1]];

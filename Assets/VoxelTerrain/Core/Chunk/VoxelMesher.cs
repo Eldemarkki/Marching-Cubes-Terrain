@@ -12,7 +12,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
             new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3),
             new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.Float32, 3)
         };
-
-        public abstract Mesh CreateMesh(VoxelDataStore voxelDataStore, int3 chunkCoordinate);
+        
+        public abstract JobHandleWithData<IMesherJob> CreateMesh(VoxelDataStore voxelDataStore, int3 chunkCoordinate);
     }
 }

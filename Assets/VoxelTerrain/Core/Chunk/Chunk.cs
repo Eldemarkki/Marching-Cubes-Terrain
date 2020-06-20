@@ -1,6 +1,7 @@
 ﻿using Eldemarkki.VoxelTerrain.Utilities;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Eldemarkki.VoxelTerrain.World.Chunks
 {
@@ -70,7 +71,32 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         /// </summary>
         public void GenerateMesh()
         {
-            Mesh mesh = _voxelWorld.VoxelMesher.CreateMesh(_voxelWorld.VoxelDataStore, Coordinate);
+            JobHandleWithData<IMesherJob> jobHandleWithData = _voxelWorld.VoxelMesher.CreateMesh(_voxelWorld.VoxelDataStore, Coordinate);
+
+            IMesherJob job = jobHandleWithData.JobData;
+
+            Mesh mesh = new Mesh();
+            var subMesh = new SubMeshDescriptor(0, 0, MeshTopology.Triangles);
+
+            jobHandleWithData.JobHandle.Complete();
+
+            int vertexCount = job.VertexCountCounter.Count * 3;
+            job.VertexCountCounter.Dispose();
+
+            mesh.SetVertexBufferParams(vertexCount, VoxelMesher.VertexBufferMemoryLayout);
+            mesh.SetIndexBufferParams(vertexCount, IndexFormat.UInt16);
+
+            mesh.SetVertexBufferData(job.OutputVertices, 0, 0, vertexCount, 0, MeshUpdateFlags.DontValidateIndices);
+            mesh.SetIndexBufferData(job.OutputTriangles, 0, 0, vertexCount, MeshUpdateFlags.DontValidateIndices);
+
+            job.OutputVertices.Dispose();
+            job.OutputTriangles.Dispose();
+
+            mesh.subMeshCount = 1;
+            subMesh.indexCount = vertexCount;
+            mesh.SetSubMesh(0, subMesh);
+
+            mesh.RecalculateBounds();
 
             _meshFilter.sharedMesh = mesh;
             _meshCollider.sharedMesh = mesh;
@@ -85,7 +111,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         /// <returns></returns>
         public static string GetName(int3 coordinate)
         {
-            return $"Chunk_{coordinate.x}_{coordinate.y}_{coordinate.z}";
+            return $"Chunk_{coordinate.x.ToString()}_{coordinate.y.ToString()}_{coordinate.z.ToString()}";
         }
     }
 }

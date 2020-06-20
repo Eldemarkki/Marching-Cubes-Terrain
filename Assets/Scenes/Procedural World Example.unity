@@ -659,7 +659,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   chunkProvider: {fileID: 1704700582}
-  renderDistance: 2
+  renderDistance: 4
   player: {fileID: 534669905}
 --- !u!4 &939123577
 Transform:
@@ -836,7 +836,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   proceduralTerrainSettings:
     noiseFrequency: 1
-    noiseOctaveCount: 5
+    noiseOctaveCount: 9
     amplitude: 120
     heightOffset: 0
 --- !u!4 &1822846709

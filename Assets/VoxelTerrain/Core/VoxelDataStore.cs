@@ -22,9 +22,12 @@ namespace Eldemarkki.VoxelTerrain.Density
 
         public VoxelWorld VoxelWorld { get; set; }
 
+        private Dictionary<int3, JobHandleWithData<IVoxelDataGenerationJob>> _generationJobHandles;
+
         void Awake()
         {
             _chunks = new Dictionary<int3, DensityVolume>();
+            _generationJobHandles = new Dictionary<int3, JobHandleWithData<IVoxelDataGenerationJob>>();
         }
 
         void OnApplicationQuit()
@@ -46,6 +49,7 @@ namespace Eldemarkki.VoxelTerrain.Density
         public float GetDensity(int3 worldPosition)
         {
             int3 chunkCoordinate = VectorUtilities.WorldPositionToCoordinate(worldPosition, VoxelWorld.WorldSettings.ChunkSize);
+            //ApplyChunkChanges(chunkCoordinate);
             if (_chunks.TryGetValue(chunkCoordinate, out DensityVolume chunk))
             {
                 int3 densityLocalPosition = worldPosition.Mod(VoxelWorld.WorldSettings.ChunkSize);
@@ -55,7 +59,7 @@ namespace Eldemarkki.VoxelTerrain.Density
 
             // TODO: Load the chunk from disk and get the density from that.
             // TODO: If the chunk doesn't exist, call the density function to calculate
-            Debug.LogWarning($"The chunk which contains the world position {worldPosition} is not loaded.");
+            Debug.LogWarning($"The chunk which contains the world position {worldPosition.ToString()} is not loaded.");
             return 0;
         }
 
@@ -66,13 +70,14 @@ namespace Eldemarkki.VoxelTerrain.Density
         /// <returns>The densities for the chunk</returns>
         public DensityVolume GetDensityChunk(int3 chunkCoordinate)
         {
+            //ApplyChunkChanges(chunkCoordinate);
             if (_chunks.TryGetValue(chunkCoordinate, out DensityVolume chunk))
             {
                 return chunk;
             }
 
             // TODO: Load the chunk from disk and get the densities from it
-            throw new Exception($"The chunk at coordinate {chunkCoordinate} is not loaded.");
+            throw new Exception($"The chunk at coordinate {chunkCoordinate.ToString()} is not loaded.");
         }
 
         /// <summary>
@@ -130,6 +135,23 @@ namespace Eldemarkki.VoxelTerrain.Density
             }
 
             return densityVolume;
+        }
+
+        public void SetDensityChunkJobHandle(JobHandleWithData<IVoxelDataGenerationJob> generationJobHandle, int3 chunkCoordinate)
+        {
+            if (!_generationJobHandles.ContainsKey(chunkCoordinate))
+            {
+                _generationJobHandles.Add(chunkCoordinate, generationJobHandle);
+            }
+        }
+
+        private void ApplyChunkChanges(int3 chunkCoordinate)
+        {
+            if(_generationJobHandles.TryGetValue(chunkCoordinate, out JobHandleWithData<IVoxelDataGenerationJob> jobHandle))
+            {
+                jobHandle.JobHandle.Complete();
+                SetDensityChunk(jobHandle.JobData.OutputVoxelData, chunkCoordinate);
+            }
         }
 
         /// <summary>

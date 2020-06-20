@@ -10,19 +10,23 @@ namespace Eldemarkki.VoxelTerrain.World
     {
         [SerializeField] private ProceduralTerrainSettings proceduralTerrainSettings = new ProceduralTerrainSettings(1, 9, 120, 0);
 
-        public override DensityVolume GenerateVoxelData(Bounds bounds, Allocator allocator = Allocator.Persistent)
+        public override JobHandleWithData<IVoxelDataGenerationJob> GenerateVoxelData(Bounds bounds, Allocator allocator = Allocator.Persistent)
         {
             DensityVolume voxelData = new DensityVolume(bounds.size.ToInt3(), allocator);
-            JobHandle jobHandle = new ProceduralTerrainDensityCalculationJob()
+            var job = new ProceduralTerrainDensityCalculationJob()
             {
                 WorldPositionOffset = bounds.min.ToInt3(),
                 OutputVoxelData = voxelData,
                 proceduralTerrainSettings = proceduralTerrainSettings
-            }.Schedule(voxelData.Length, 256);
+            };
+            
+            var jobHandle = job.Schedule(voxelData.Length, 256);
 
-            jobHandle.Complete();
+            JobHandleWithData<IVoxelDataGenerationJob> jobHandleWithData = new JobHandleWithData<IVoxelDataGenerationJob>();
+            jobHandleWithData.JobHandle = jobHandle;
+            jobHandleWithData.JobData = job;
 
-            return voxelData;
+            return jobHandleWithData;
         }
     }
 }

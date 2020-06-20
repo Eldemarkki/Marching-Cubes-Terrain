@@ -1,4 +1,5 @@
-﻿using Eldemarkki.VoxelTerrain.World.Chunks;
+﻿using Eldemarkki.VoxelTerrain.Density;
+using Eldemarkki.VoxelTerrain.World.Chunks;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
@@ -32,41 +33,25 @@ namespace Eldemarkki.VoxelTerrain.World
             _generationQueue = new List<int3>();
         }
 
-        private void Start()
+        void Update()
         {
-            StartCoroutine(GenerateChunks());
-        }
-
-        /// <summary>
-        /// Kind of like Unity's Update() function, generates chunks but not all at once
-        /// </summary>
-        /// <returns></returns>
-        private IEnumerator GenerateChunks()
-        {
-            while (true)
+            int chunksGenerated = 0;
+            while (_generationQueue.Count > 0 && chunksGenerated < chunkGenerationRate)
             {
-                // This loop represents Unity's update function
+                int3 chunkCoordinate = _generationQueue[0];
+                _generationQueue.RemoveAt(0);
 
-                int chunksGenerated = 0;
-                while (_generationQueue.Count > 0 && chunksGenerated < chunkGenerationRate)
+                if (_availableChunkCoordinates.Count == 0)
                 {
-                    int3 chunkCoordinate = _generationQueue[0];
-                    _generationQueue.RemoveAt(0);
-
-                    if (_availableChunkCoordinates.Count == 0)
-                    {
-                        VoxelWorld.ChunkLoader.LoadChunkToCoordinate(chunkCoordinate);
-                    }
-                    else
-                    {
-                        int3 availableChunkCoordinate = _availableChunkCoordinates.Dequeue();
-                        MoveChunk(availableChunkCoordinate, chunkCoordinate);
-                    }
-
-                    chunksGenerated++;
+                    VoxelWorld.ChunkLoader.LoadChunkToCoordinate(chunkCoordinate);
+                }
+                else
+                {
+                    int3 availableChunkCoordinate = _availableChunkCoordinates.Dequeue();
+                    MoveChunk(availableChunkCoordinate, chunkCoordinate);
                 }
 
-                yield return null;
+                chunksGenerated++;
             }
         }
 
@@ -115,18 +100,19 @@ namespace Eldemarkki.VoxelTerrain.World
         {
             if (!VoxelWorld.ChunkStore.TryGetChunkAtCoordinate(fromCoordinate, out Chunk chunk))
             {
-                Debug.LogWarning($"No chunk at {fromCoordinate}, exiting the function");
+                Debug.LogWarning($"No chunk at {fromCoordinate.ToString()}, exiting the function");
                 return;
             }
 
             if (VoxelWorld.ChunkStore.DoesChunkExistAtCoordinate(toCoordinate))
             {
-                Debug.LogWarning($"A chunk already exists at {toCoordinate}, exiting the function");
+                Debug.LogWarning($"A chunk already exists at {toCoordinate.ToString()}, exiting the function");
                 return;
             }
 
-            var chunkDensities = VoxelWorld.VoxelDataGenerator.GenerateVoxelData(toCoordinate);
-            VoxelWorld.VoxelDataStore.SetDensityChunk(chunkDensities, toCoordinate);
+            JobHandleWithData<IVoxelDataGenerationJob> jobHandleWithData = VoxelWorld.VoxelDataGenerator.GenerateVoxelData(toCoordinate);
+            jobHandleWithData.JobHandle.Complete();
+            VoxelWorld.VoxelDataStore.SetDensityChunk(jobHandleWithData.JobData.OutputVoxelData, toCoordinate);
 
             VoxelWorld.ChunkStore.RemoveChunk(fromCoordinate);
             VoxelWorld.ChunkStore.AddChunk(toCoordinate, chunk);

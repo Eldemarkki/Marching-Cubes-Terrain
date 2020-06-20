@@ -23,10 +23,10 @@ namespace Eldemarkki.VoxelTerrain.MarchingCubes
         /// </summary>
         public float Isolevel => isolevel;
 
-        public override Mesh CreateMesh(VoxelDataStore voxelDataStore, int3 chunkCoordinate)
+        public override JobHandleWithData<IMesherJob> CreateMesh(VoxelDataStore voxelDataStore, int3 chunkCoordinate)
         {
             DensityVolume boundsVoxelData = voxelDataStore.GetDensityChunk(chunkCoordinate);
-            Counter counter = new Counter(Allocator.TempJob);
+            NativeCounter vertexCountCounter = new NativeCounter(Allocator.TempJob);
 
             int voxelCount = (boundsVoxelData.Width - 1) * (boundsVoxelData.Height - 1) * (boundsVoxelData.Depth - 1);
             int maxLength = 15 * voxelCount;
@@ -38,7 +38,7 @@ namespace Eldemarkki.VoxelTerrain.MarchingCubes
             {
                 VoxelData = boundsVoxelData,
                 isolevel = Isolevel,
-                counter = counter,
+                VertexCountCounter = vertexCountCounter,
 
                 OutputVertices = outputVertices,
                 OutputTriangles = outputTriangles
@@ -46,30 +46,11 @@ namespace Eldemarkki.VoxelTerrain.MarchingCubes
 
             JobHandle jobHandle = marchingCubesJob.Schedule(voxelCount, 128);
 
-            Mesh mesh = new Mesh();
-            var subMesh = new SubMeshDescriptor(0, 0, MeshTopology.Triangles);
+            JobHandleWithData<IMesherJob> jobHandleWithData = new JobHandleWithData<IMesherJob>();
+            jobHandleWithData.JobHandle = jobHandle;
+            jobHandleWithData.JobData = marchingCubesJob;
 
-            jobHandle.Complete();
-
-            int vertexCount = counter.Count * 3;
-            counter.Dispose();
-
-            mesh.SetVertexBufferParams(vertexCount, VertexBufferMemoryLayout);
-            mesh.SetIndexBufferParams(vertexCount, IndexFormat.UInt16);
-
-            mesh.SetVertexBufferData(outputVertices, 0, 0, vertexCount, 0, MeshUpdateFlags.DontValidateIndices);
-            mesh.SetIndexBufferData(outputTriangles, 0, 0, vertexCount, MeshUpdateFlags.DontValidateIndices);
-
-            outputVertices.Dispose();
-            outputTriangles.Dispose();
-
-            mesh.subMeshCount = 1;
-            subMesh.indexCount = vertexCount;
-            mesh.SetSubMesh(0, subMesh);
-
-            mesh.RecalculateBounds();
-
-            return mesh;
+            return jobHandleWithData;
         }
     }
 }

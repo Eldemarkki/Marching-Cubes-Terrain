@@ -8,7 +8,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities
     /// <summary>
     /// An incremental counter made for the Unity Job System
     /// </summary>
-    public unsafe struct Counter : IDisposable
+    public unsafe struct NativeCounter : IDisposable
     {
         /// <summary>
         /// The allocator for the counter
@@ -33,7 +33,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities
         /// The constructor
         /// </summary>
         /// <param name="allocator">What type of allocator to use</param>
-        public Counter(Allocator allocator)
+        public NativeCounter(Allocator allocator)
         {
             this.allocator = allocator;
             _counter = (int*)UnsafeUtility.Malloc(sizeof(int), 4, allocator);
