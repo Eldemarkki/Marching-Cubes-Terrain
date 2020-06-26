@@ -6,8 +6,9 @@ namespace Eldemarkki.VoxelTerrain.World
     /// <summary>
     /// A procedurally generated world
     /// </summary>
-    public class HeightmapWorldGenerator : WorldGenerator
+    public class HeightmapWorldGenerator : MonoBehaviour
     {
+        [SerializeField] private VoxelWorld voxelWorld;
         [SerializeField] private HeightmapTerrainSettings heightmapTerrainSettings;
 
         public HeightmapTerrainSettings HeightmapTerrainSettings => heightmapTerrainSettings;
@@ -32,9 +33,9 @@ namespace Eldemarkki.VoxelTerrain.World
         /// </summary>
         private void CreateHeightmapTerrain()
         {
-            int chunkCountX = Mathf.CeilToInt((float)(heightmapTerrainSettings.Width - 1) / VoxelWorld.WorldSettings.ChunkSize);
-            int chunkCountZ = Mathf.CeilToInt((float)(heightmapTerrainSettings.Height - 1) / VoxelWorld.WorldSettings.ChunkSize);
-            int chunkCountY = Mathf.CeilToInt(heightmapTerrainSettings.Amplitude / VoxelWorld.WorldSettings.ChunkSize);
+            int chunkCountX = Mathf.CeilToInt((float)(heightmapTerrainSettings.Width - 1) / voxelWorld.WorldSettings.ChunkSize);
+            int chunkCountZ = Mathf.CeilToInt((float)(heightmapTerrainSettings.Height - 1) / voxelWorld.WorldSettings.ChunkSize);
+            int chunkCountY = Mathf.CeilToInt(heightmapTerrainSettings.Amplitude / voxelWorld.WorldSettings.ChunkSize);
 
             for (int x = 0; x < chunkCountX; x++)
             {
@@ -42,7 +43,7 @@ namespace Eldemarkki.VoxelTerrain.World
                 {
                     for (int z = 0; z < chunkCountZ; z++)
                     {
-                        VoxelWorld.ChunkProvider.EnsureChunkExistsAtCoordinate(new int3(x, y, z));
+                        voxelWorld.ChunkProvider.EnsureChunkExistsAtCoordinate(new int3(x, y, z));
                     }
                 }
             }

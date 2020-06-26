@@ -21,9 +21,6 @@ namespace Eldemarkki.VoxelTerrain.World
         [SerializeField] private ChunkProvider chunkProvider;
         public ChunkProvider ChunkProvider => chunkProvider;
 
-        [SerializeField] private WorldGenerator worldGenerator;
-        public WorldGenerator WorldGenerator => worldGenerator;
-
         [SerializeField] private ChunkStore chunkStore;
         public ChunkStore ChunkStore => chunkStore;
 
@@ -35,7 +32,6 @@ namespace Eldemarkki.VoxelTerrain.World
             voxelDataStore.VoxelWorld = this;
             voxelDataGenerator.VoxelWorld = this;
             chunkProvider.VoxelWorld = this;
-            worldGenerator.VoxelWorld = this;
             chunkLoader.VoxelWorld = this;
         }
     }

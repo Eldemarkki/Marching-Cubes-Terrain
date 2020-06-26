@@ -8,8 +8,9 @@ namespace Eldemarkki.VoxelTerrain.World
     /// <summary>
     /// A procedurally generated world
     /// </summary>
-    public class ProceduralWorldGenerator : WorldGenerator
+    public class ProceduralWorldGenerator : MonoBehaviour
     {
+        [SerializeField] private VoxelWorld voxelWorld;
         /// <summary>
         /// A chunk provider which provides chunks with procedurally generated data
         /// </summary>
@@ -32,7 +33,7 @@ namespace Eldemarkki.VoxelTerrain.World
 
         private void Start()
         {
-            int3 playerCoordinate = VectorUtilities.WorldPositionToCoordinate(player.position, VoxelWorld.WorldSettings.ChunkSize);
+            int3 playerCoordinate = VectorUtilities.WorldPositionToCoordinate(player.position, voxelWorld.WorldSettings.ChunkSize);
             _lastGenerationCoordinate = playerCoordinate;
             for (int x = -renderDistance; x <= renderDistance; x++)
             {
@@ -49,10 +50,10 @@ namespace Eldemarkki.VoxelTerrain.World
 
         private void Update()
         {
-            int3 playerCoordinate = VectorUtilities.WorldPositionToCoordinate(player.position, VoxelWorld.WorldSettings.ChunkSize);
+            int3 playerCoordinate = VectorUtilities.WorldPositionToCoordinate(player.position, voxelWorld.WorldSettings.ChunkSize);
             if (!playerCoordinate.Equals(_lastGenerationCoordinate))
             {
-                List<int3> coordinatesToUnload = VoxelWorld.ChunkStore.GetChunkCoordinatesOutsideOfRenderDistance(playerCoordinate, renderDistance);
+                List<int3> coordinatesToUnload = voxelWorld.ChunkStore.GetChunkCoordinatesOutsideOfRenderDistance(playerCoordinate, renderDistance);
 
                 chunkProvider.UnloadCoordinates(coordinatesToUnload);
 
