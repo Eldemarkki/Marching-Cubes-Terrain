@@ -1,6 +1,5 @@
 ﻿using Eldemarkki.VoxelTerrain.Density;
 using Eldemarkki.VoxelTerrain.World.Chunks;
-using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;

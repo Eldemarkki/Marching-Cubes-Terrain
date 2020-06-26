@@ -1,5 +1,4 @@
 ﻿using Eldemarkki.VoxelTerrain.World.Chunks;
-using System;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;

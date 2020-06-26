@@ -14,22 +14,12 @@ namespace Eldemarkki.VoxelTerrain.Density
     struct ProceduralTerrainDensityCalculationJob : IVoxelDataGenerationJob
     {
         /// <summary>
-        /// The output densities
-        /// </summary>
-        [WriteOnly] private DensityVolume _voxelData;
-
-        /// <summary>
-        /// The sampling point's offset
-        /// </summary>
-        [ReadOnly] private int3 _worldPositionOffset;
-
-        /// <summary>
         /// The procedural terrain generation settings
         /// </summary>
         [ReadOnly] public ProceduralTerrainSettings proceduralTerrainSettings;
 
-        public int3 WorldPositionOffset { get => _worldPositionOffset; set => _worldPositionOffset = value; }
-        public DensityVolume OutputVoxelData { get => _voxelData; set => _voxelData = value; }
+        public int3 WorldPositionOffset { get; set; }
+        public DensityVolume OutputVoxelData { get; set; }
 
         /// <summary>
         /// The execute method required for Unity's IJobParallelFor job type
@@ -37,13 +27,13 @@ namespace Eldemarkki.VoxelTerrain.Density
         /// <param name="index">The iteration index provided by Unity's Job System</param>
         public void Execute(int index)
         {
-            int3 worldPosition = IndexUtilities.IndexToXyz(index, _voxelData.Width, _voxelData.Height) + _worldPositionOffset;
+            int3 worldPosition = IndexUtilities.IndexToXyz(index, OutputVoxelData.Width, OutputVoxelData.Height) + WorldPositionOffset;
             int worldPositionX = worldPosition.x;
             int worldPositionY = worldPosition.y;
             int worldPositionZ = worldPosition.z;
 
             float density = CalculateDensity(worldPositionX, worldPositionY, worldPositionZ);
-            _voxelData.SetDensity(density, index);
+            OutputVoxelData.SetDensity(density, index);
         }
 
         /// <summary>

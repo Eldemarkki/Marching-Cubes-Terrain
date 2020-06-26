@@ -3,7 +3,6 @@ using Eldemarkki.VoxelTerrain.Utilities;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
-using UnityEngine.Jobs;
 
 namespace Eldemarkki.VoxelTerrain.World
 {

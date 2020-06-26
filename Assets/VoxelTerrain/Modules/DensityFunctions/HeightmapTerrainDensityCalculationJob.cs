@@ -3,7 +3,6 @@ using Eldemarkki.VoxelTerrain.Utilities;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
-using UnityEngine;
 
 namespace Eldemarkki.VoxelTerrain.Density
 {
@@ -14,16 +13,9 @@ namespace Eldemarkki.VoxelTerrain.Density
     struct HeightmapTerrainDensityCalculationJob : IVoxelDataGenerationJob
     {
         /// <summary>
-        /// The output densities
-        /// </summary>
-        [WriteOnly] private DensityVolume _voxelData;
-
-        /// <summary>
         /// The height data from the heightmap
         /// </summary>
         [ReadOnly] public NativeArray<float> heightmapData;
-
-        [ReadOnly] private int3 _worldPositionOffset;
 
         /// <summary>
         /// How wide the heightmap is (in pixels). 1 pixel = 1 Unity unit
@@ -45,8 +37,8 @@ namespace Eldemarkki.VoxelTerrain.Density
         /// </summary>
         [ReadOnly] public float heightOffset;
 
-        public int3 WorldPositionOffset { get => _worldPositionOffset; set => _worldPositionOffset = value; }
-        public DensityVolume OutputVoxelData { get => _voxelData; set => _voxelData = value; }
+        public int3 WorldPositionOffset { get; set; }
+        public DensityVolume OutputVoxelData { get; set; }
 
         /// <summary>
         /// The execute method required for Unity's IJobParallelFor job type
@@ -54,7 +46,7 @@ namespace Eldemarkki.VoxelTerrain.Density
         /// <param name="index">The iteration index provided by Unity's Job System</param>
         public void Execute(int index)
         {
-            int3 worldPosition = IndexUtilities.IndexToXyz(index, _voxelData.Width, _voxelData.Height) + _worldPositionOffset;
+            int3 worldPosition = IndexUtilities.IndexToXyz(index, OutputVoxelData.Width, OutputVoxelData.Height) + WorldPositionOffset;
             int worldPositionX = worldPosition.x;
             int worldPositionY = worldPosition.y;
             int worldPositionZ = worldPosition.z;
@@ -65,7 +57,7 @@ namespace Eldemarkki.VoxelTerrain.Density
                 density = CalculateDensity(worldPositionX, worldPositionY, worldPositionZ);
             }
 
-            _voxelData.SetDensity(density, index);
+            OutputVoxelData.SetDensity(density, index);
         }
 
         /// <summary>

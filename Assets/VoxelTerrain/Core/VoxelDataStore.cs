@@ -49,7 +49,7 @@ namespace Eldemarkki.VoxelTerrain.Density
         public float GetDensity(int3 worldPosition)
         {
             int3 chunkCoordinate = VectorUtilities.WorldPositionToCoordinate(worldPosition, VoxelWorld.WorldSettings.ChunkSize);
-            //ApplyChunkChanges(chunkCoordinate);
+            ApplyChunkChanges(chunkCoordinate);
             if (_chunks.TryGetValue(chunkCoordinate, out DensityVolume chunk))
             {
                 int3 densityLocalPosition = worldPosition.Mod(VoxelWorld.WorldSettings.ChunkSize);
@@ -70,7 +70,7 @@ namespace Eldemarkki.VoxelTerrain.Density
         /// <returns>The densities for the chunk</returns>
         public DensityVolume GetDensityChunk(int3 chunkCoordinate)
         {
-            //ApplyChunkChanges(chunkCoordinate);
+            ApplyChunkChanges(chunkCoordinate);
             if (_chunks.TryGetValue(chunkCoordinate, out DensityVolume chunk))
             {
                 return chunk;
@@ -151,6 +151,7 @@ namespace Eldemarkki.VoxelTerrain.Density
             {
                 jobHandle.JobHandle.Complete();
                 SetDensityChunk(jobHandle.JobData.OutputVoxelData, chunkCoordinate);
+                _generationJobHandles.Remove(chunkCoordinate);
             }
         }
 

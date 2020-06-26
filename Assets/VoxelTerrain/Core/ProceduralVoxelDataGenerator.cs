@@ -13,7 +13,7 @@ namespace Eldemarkki.VoxelTerrain.World
         public override JobHandleWithData<IVoxelDataGenerationJob> GenerateVoxelData(Bounds bounds, Allocator allocator = Allocator.Persistent)
         {
             DensityVolume voxelData = new DensityVolume(bounds.size.ToInt3(), allocator);
-            var job = new ProceduralTerrainDensityCalculationJob()
+            var job = new ProceduralTerrainDensityCalculationJob
             {
                 WorldPositionOffset = bounds.min.ToInt3(),
                 OutputVoxelData = voxelData,
