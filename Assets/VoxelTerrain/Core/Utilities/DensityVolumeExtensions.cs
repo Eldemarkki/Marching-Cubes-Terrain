@@ -10,12 +10,12 @@ namespace Eldemarkki.VoxelTerrain.Utilities
     public static class DensityVolumeExtensions
     {
         /// <summary>
-        /// Gets a cube-shaped volume of densities from <paramref name="densityVolume"/>. The size of the cube is 1 unit. 
+        /// Gets a cube-shaped volume of voxel data from <paramref name="densityVolume"/>. The size of the cube is 1 unit. 
         /// </summary>
-        /// <param name="densityVolume">The density volume to get the densities from</param>
+        /// <param name="densityVolume">The density volume to get the voxel data from</param>
         /// <param name="localPosition">The origin of the cube</param>
-        /// <returns>A cube-shaped volume of densities. The size of the cube is 1 unit.</returns>
-        public static VoxelCorners<float> GetDensitiesUnitCube(this DensityVolume densityVolume, int3 localPosition)
+        /// <returns>A cube-shaped volume of voxel data. The size of the cube is 1 unit.</returns>
+        public static VoxelCorners<float> GetVoxelDataUnitCube(this DensityVolume densityVolume, int3 localPosition)
         {
             VoxelCorners<float> densities = new VoxelCorners<float>();
             for (int i = 0; i < 8; i++)

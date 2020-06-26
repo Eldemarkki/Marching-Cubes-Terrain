@@ -6,10 +6,21 @@ using UnityEngine;
 
 namespace Eldemarkki.VoxelTerrain.World
 {
+    /// <summary>
+    /// A class for loading and initializing chunks
+    /// </summary>
     public class ChunkLoader : MonoBehaviour
     {
+        /// <summary>
+        /// The world for which to generate the chunk for
+        /// </summary>
         public VoxelWorld VoxelWorld { get; set; }
 
+        /// <summary>
+        /// Loads a chunk to a specific coordinate
+        /// </summary>
+        /// <param name="chunkCoordinate">The coordinate of the chunk to load</param>
+        /// <returns>The newly loaded chunk</returns>
         public Chunk LoadChunkToCoordinate(int3 chunkCoordinate)
         {
             int3 worldPosition = chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize;
@@ -21,7 +32,7 @@ namespace Eldemarkki.VoxelTerrain.World
 
             chunk.Initialize(chunkCoordinate, VoxelWorld);
 
-            VoxelWorld.ChunkStore.AddChunk(chunkCoordinate, chunk);
+            VoxelWorld.ChunkStore.AddChunk(chunk);
 
             return chunk;
         }

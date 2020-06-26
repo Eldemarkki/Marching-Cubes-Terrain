@@ -39,9 +39,24 @@ namespace Eldemarkki.VoxelTerrain.MarchingCubes
         /// </summary>
         [NativeDisableParallelForRestriction, WriteOnly] private NativeArray<ushort> _triangles;
 
+        /// <summary>
+        /// A counter that keeps track of how many vertices there are
+        /// </summary>
         public NativeCounter VertexCountCounter { get => _vertexCountCounter; set => _vertexCountCounter = value; }
+
+        /// <summary>
+        /// The voxel data to generate the mesh from
+        /// </summary>
         public DensityVolume VoxelData { get => _voxelData; set => _voxelData = value; }
+
+        /// <summary>
+        /// The generated vertices
+        /// </summary>
         public NativeArray<MarchingCubesVertexData> OutputVertices { get => _vertices; set => _vertices = value; }
+
+        /// <summary>
+        /// The generated triangles
+        /// </summary>
         public NativeArray<ushort> OutputTriangles { get => _triangles; set => _triangles = value; }
 
         /// <summary>
@@ -53,7 +68,7 @@ namespace Eldemarkki.VoxelTerrain.MarchingCubes
             // Voxel's position inside the chunk. Goes from (0, 0, 0) to (densityVolume.Width-1, densityVolume.Height-1, densityVolume.Depth-1). Both are inclusive.
             int3 voxelLocalPosition = IndexUtilities.IndexToXyz(index, _voxelData.Width - 1, _voxelData.Height - 1);
 
-            VoxelCorners<float> densities = _voxelData.GetDensitiesUnitCube(voxelLocalPosition);
+            VoxelCorners<float> densities = _voxelData.GetVoxelDataUnitCube(voxelLocalPosition);
 
             int cubeIndex = MarchingCubesFunctions.CalculateCubeIndex(densities, isolevel);
             if (cubeIndex == 0 || cubeIndex == 255)

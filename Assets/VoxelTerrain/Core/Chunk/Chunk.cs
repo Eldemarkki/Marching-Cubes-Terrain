@@ -6,30 +6,24 @@ using UnityEngine.Rendering;
 namespace Eldemarkki.VoxelTerrain.World.Chunks
 {
     /// <summary>
-    /// The base class for all chunks
+    /// A component used for visualizing a chunk of the world 
     /// </summary>
     [RequireComponent(typeof(MeshRenderer), typeof(MeshFilter), typeof(MeshCollider))]
     public class Chunk : MonoBehaviour
     {
         /// <summary>
-        /// The chunk's MeshFilter
+        /// The world that "owns" this chunk
         /// </summary>
-        private MeshFilter _meshFilter;
-
-        /// <summary>
-        /// The chunk's MeshCollider
-        /// </summary>
-        private MeshCollider _meshCollider;
-
         private VoxelWorld _voxelWorld;
 
-        /// <summary>
-        /// The chunk's coordinate
-        /// </summary>
-        public int3 Coordinate { get; set; }
+        private MeshFilter _meshFilter;
+
+        private MeshCollider _meshCollider;
+
+        public int3 ChunkCoordinate { get; set; }
 
         /// <summary>
-        /// Have the densities of this chunk been changed during the last frame
+        /// Has the voxel data of this chunk been changed during the last frame
         /// </summary>
         public bool HasChanges { get; set; }
 
@@ -48,11 +42,10 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         }
 
         /// <summary>
-        /// Initializes the chunk and starts generating the mesh.
+        /// Initializes the chunk and generates the mesh.
         /// </summary>
-        /// <param name="coordinate">The chunk's coordinate</param>
-        /// <param name="chunkProvider">The chunk provider for this chunk</param>
-        /// <param name="voxelDensityStore">The voxel density store from where the densities should be gotten</param>
+        /// <param name="coordinate">The coordinate of this chunk</param>
+        /// <param name="voxelWorld">The world that "owns" this chunk</param>
         public void Initialize(int3 coordinate, VoxelWorld voxelWorld)
         {
             _voxelWorld = voxelWorld;
@@ -60,18 +53,17 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
             transform.position = coordinate.ToVectorInt() * voxelWorld.WorldSettings.ChunkSize;
             name = GetName(coordinate);
 
-            Coordinate = coordinate;
+            ChunkCoordinate = coordinate;
 
             GenerateMesh();
         }
-
 
         /// <summary>
         /// Forces the regeneration of the mesh
         /// </summary>
         public void GenerateMesh()
         {
-            JobHandleWithData<IMesherJob> jobHandleWithData = _voxelWorld.VoxelMesher.CreateMesh(_voxelWorld.VoxelDataStore, Coordinate);
+            JobHandleWithData<IMesherJob> jobHandleWithData = _voxelWorld.VoxelMesher.CreateMesh(_voxelWorld.VoxelDataStore, ChunkCoordinate);
 
             IMesherJob job = jobHandleWithData.JobData;
 
@@ -107,11 +99,11 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         /// <summary>
         /// Generates a chunk name from a chunk coordinate
         /// </summary>
-        /// <param name="coordinate"></param>
-        /// <returns></returns>
-        public static string GetName(int3 coordinate)
+        /// <param name="chunkCoordinate">The coordinate of the chunk</param>
+        /// <returns>The name of the chunk</returns>
+        public static string GetName(int3 chunkCoordinate)
         {
-            return $"Chunk_{coordinate.x.ToString()}_{coordinate.y.ToString()}_{coordinate.z.ToString()}";
+            return $"Chunk_{chunkCoordinate.x.ToString()}_{chunkCoordinate.y.ToString()}_{chunkCoordinate.z.ToString()}";
         }
     }
 }

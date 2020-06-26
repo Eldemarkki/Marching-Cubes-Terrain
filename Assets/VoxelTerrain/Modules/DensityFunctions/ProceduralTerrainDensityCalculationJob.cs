@@ -8,7 +8,7 @@ using Unity.Mathematics;
 namespace Eldemarkki.VoxelTerrain.Density
 {
     /// <summary>
-    /// A procedural terrain density calculation job
+    /// A procedural terrain voxel data calculation job
     /// </summary>
     [BurstCompile]
     struct ProceduralTerrainDensityCalculationJob : IVoxelDataGenerationJob
@@ -18,7 +18,14 @@ namespace Eldemarkki.VoxelTerrain.Density
         /// </summary>
         [ReadOnly] public ProceduralTerrainSettings proceduralTerrainSettings;
 
+        /// <summary>
+        /// The sampling point's world position offset
+        /// </summary>
         public int3 WorldPositionOffset { get; set; }
+
+        /// <summary>
+        /// The generated voxel data
+        /// </summary>
         public DensityVolume OutputVoxelData { get; set; }
 
         /// <summary>

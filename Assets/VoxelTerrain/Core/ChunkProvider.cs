@@ -6,14 +6,17 @@ using UnityEngine;
 namespace Eldemarkki.VoxelTerrain.World
 {
     /// <summary>
-    /// A base class for providing chunks to the world
+    /// A class for providing chunks to the world
     /// </summary>
-    public abstract class ChunkProvider : MonoBehaviour
+    public class ChunkProvider : MonoBehaviour
     {
+        /// <summary>
+        /// The world for which to provide chunks for
+        /// </summary>
         public VoxelWorld VoxelWorld { get; set; }
 
         /// <summary>
-        /// Ensures that a chunk exists at a coordinate, if there is not, a new chunk is created in the next frame
+        /// Ensures that a chunk exists at a coordinate, if there is not, a new chunk is created
         /// </summary>
         /// <param name="chunkCoordinate">The chunk's coordinate</param>
         public virtual void EnsureChunkExistsAtCoordinate(int3 chunkCoordinate)
@@ -28,6 +31,7 @@ namespace Eldemarkki.VoxelTerrain.World
         /// Gets a list of chunks that contain a world position. For a chunk to contain a position, the position has to be inside of the chunk or on the chunk's edge
         /// </summary>
         /// <param name="worldPosition">The world position to check for</param>
+        /// <param name="chunkSize">The size of the chunks</param>
         /// <returns>A list of chunks that contain the world position</returns>
         public static List<int3> GetChunkCoordinatesContainingPoint(int3 worldPosition, int chunkSize)
         {

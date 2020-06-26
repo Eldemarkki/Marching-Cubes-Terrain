@@ -1,4 +1,5 @@
 ﻿using Eldemarkki.VoxelTerrain.Density;
+using Eldemarkki.VoxelTerrain.Utilities;
 using Eldemarkki.VoxelTerrain.World.Chunks;
 using System.Collections.Generic;
 using Unity.Mathematics;
@@ -17,7 +18,7 @@ namespace Eldemarkki.VoxelTerrain.World
         [SerializeField] private int chunkGenerationRate = 10;
 
         /// <summary>
-        /// A queue that contains the chunks' coordinates that are out of view and thus ready to be moved anywhere
+        /// A queue that contains the chunks' coordinates that are out of view and thus ready to be moved elsewhere
         /// </summary>
         private Queue<int3> _availableChunkCoordinates;
 
@@ -55,7 +56,7 @@ namespace Eldemarkki.VoxelTerrain.World
         }
 
         /// <summary>
-        /// Ensures that a chunk exists at a coordinate, if there is not, a new chunk is created in the next frame
+        /// Ensures that a chunk exists at a coordinate, if there is not, a new chunk is created later
         /// </summary>
         /// <param name="chunkCoordinate">The chunk's coordinate</param>
         public override void EnsureChunkExistsAtCoordinate(int3 chunkCoordinate)
@@ -67,7 +68,7 @@ namespace Eldemarkki.VoxelTerrain.World
         }
 
         /// <summary>
-        /// Unloads the Chunks whose coordinate is in the coordinatesToUnload parameter
+        /// Unloads every coordinate in the list
         /// </summary>
         /// <param name="coordinatesToUnload">A list of the coordinates to unload</param>
         public void UnloadCoordinates(List<int3> coordinatesToUnload)
@@ -109,14 +110,15 @@ namespace Eldemarkki.VoxelTerrain.World
                 return;
             }
 
-            JobHandleWithData<IVoxelDataGenerationJob> jobHandleWithData = VoxelWorld.VoxelDataGenerator.GenerateVoxelData(toCoordinate);
+            Bounds generationBounds = BoundsUtilities.GetChunkBounds(toCoordinate, VoxelWorld.WorldSettings.ChunkSize);
+            JobHandleWithData<IVoxelDataGenerationJob> jobHandleWithData = VoxelWorld.VoxelDataGenerator.GenerateVoxelData(generationBounds);
             jobHandleWithData.JobHandle.Complete();
             VoxelWorld.VoxelDataStore.SetDensityChunk(jobHandleWithData.JobData.OutputVoxelData, toCoordinate);
 
             VoxelWorld.ChunkStore.RemoveChunk(fromCoordinate);
-            VoxelWorld.ChunkStore.AddChunk(toCoordinate, chunk);
 
             chunk.Initialize(toCoordinate, VoxelWorld);
+            VoxelWorld.ChunkStore.AddChunk(chunk);
         }
     }
 }

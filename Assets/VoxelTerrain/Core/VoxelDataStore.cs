@@ -11,7 +11,7 @@ using UnityEngine;
 namespace Eldemarkki.VoxelTerrain.Density
 {
     /// <summary>
-    /// A store which handles getting and setting densities for the world
+    /// A store which handles getting and setting the voxel data for the world
     /// </summary>
     public class VoxelDataStore : MonoBehaviour
     {
@@ -20,9 +20,15 @@ namespace Eldemarkki.VoxelTerrain.Density
         /// </summary>
         private Dictionary<int3, DensityVolume> _chunks;
 
-        public VoxelWorld VoxelWorld { get; set; }
-
+        /// <summary>
+        /// A dictionary of all the ongoing voxel data generation jobs. Key is the chunk's coordinate, and the value is the ongoing job for that chunk
+        /// </summary>
         private Dictionary<int3, JobHandleWithData<IVoxelDataGenerationJob>> _generationJobHandles;
+
+        /// <summary>
+        /// The world that "owns" this voxel data store
+        /// </summary>
+        public VoxelWorld VoxelWorld { get; set; }
 
         void Awake()
         {
@@ -57,8 +63,6 @@ namespace Eldemarkki.VoxelTerrain.Density
                 return density;
             }
 
-            // TODO: Load the chunk from disk and get the density from that.
-            // TODO: If the chunk doesn't exist, call the density function to calculate
             Debug.LogWarning($"The chunk which contains the world position {worldPosition.ToString()} is not loaded.");
             return 0;
         }
@@ -76,7 +80,6 @@ namespace Eldemarkki.VoxelTerrain.Density
                 return chunk;
             }
 
-            // TODO: Load the chunk from disk and get the densities from it
             throw new Exception($"The chunk at coordinate {chunkCoordinate.ToString()} is not loaded.");
         }
 
@@ -112,7 +115,7 @@ namespace Eldemarkki.VoxelTerrain.Density
                         Bounds chunkWorldSpaceBounds = new Bounds();
                         chunkWorldSpaceBounds.SetMinMax(chunkWorldSpaceOrigin.ToVectorInt(), chunkWorldSpaceOrigin.ToVectorInt() + chunkBoundsSize);
 
-                        Bounds intersectionVolume = IntersectionUtilities.GetIntersectionArea(worldSpaceQuery, chunkWorldSpaceBounds);
+                        Bounds intersectionVolume = IntersectionUtilities.GetIntersectionVolume(worldSpaceQuery, chunkWorldSpaceBounds);
                         int3 intersectionVolumeMin = intersectionVolume.min.ToInt3();
                         int3 intersectionVolumeMax = intersectionVolume.max.ToInt3();
 
@@ -135,24 +138,6 @@ namespace Eldemarkki.VoxelTerrain.Density
             }
 
             return densityVolume;
-        }
-
-        public void SetDensityChunkJobHandle(JobHandleWithData<IVoxelDataGenerationJob> generationJobHandle, int3 chunkCoordinate)
-        {
-            if (!_generationJobHandles.ContainsKey(chunkCoordinate))
-            {
-                _generationJobHandles.Add(chunkCoordinate, generationJobHandle);
-            }
-        }
-
-        private void ApplyChunkChanges(int3 chunkCoordinate)
-        {
-            if(_generationJobHandles.TryGetValue(chunkCoordinate, out JobHandleWithData<IVoxelDataGenerationJob> jobHandle))
-            {
-                jobHandle.JobHandle.Complete();
-                SetDensityChunk(jobHandle.JobData.OutputVoxelData, chunkCoordinate);
-                _generationJobHandles.Remove(chunkCoordinate);
-            }
         }
 
         /// <summary>
@@ -235,7 +220,7 @@ namespace Eldemarkki.VoxelTerrain.Density
                         Bounds chunkWorldSpaceBounds = new Bounds();
                         chunkWorldSpaceBounds.SetMinMax(chunkWorldSpaceOrigin.ToVectorInt(), chunkWorldSpaceOrigin.ToVectorInt() + chunkBoundsSize);
 
-                        Bounds intersectionVolume = IntersectionUtilities.GetIntersectionArea(worldSpaceQuery, chunkWorldSpaceBounds);
+                        Bounds intersectionVolume = IntersectionUtilities.GetIntersectionVolume(worldSpaceQuery, chunkWorldSpaceBounds);
                         int3 intersectionVolumeMin = intersectionVolume.min.ToInt3();
                         int3 intersectionVolumeMax = intersectionVolume.max.ToInt3();
 
@@ -259,6 +244,33 @@ namespace Eldemarkki.VoxelTerrain.Density
                         }
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Sets the job handle for a chunk coordinate
+        /// </summary>
+        /// <param name="generationJobHandle">The job handle with data</param>
+        /// <param name="chunkCoordinate">The coordinate of the chunk to set the job handle for</param>
+        public void SetDensityChunkJobHandle(JobHandleWithData<IVoxelDataGenerationJob> generationJobHandle, int3 chunkCoordinate)
+        {
+            if (!_generationJobHandles.ContainsKey(chunkCoordinate))
+            {
+                _generationJobHandles.Add(chunkCoordinate, generationJobHandle);
+            }
+        }
+
+        /// <summary>
+        /// If the chunk coordinate has an ongoing voxel data generation job, it will get completed and it's result will be applied to the chunk
+        /// </summary>
+        /// <param name="chunkCoordinate">The coordinate of the chunk to apply changes for</param>
+        private void ApplyChunkChanges(int3 chunkCoordinate)
+        {
+            if (_generationJobHandles.TryGetValue(chunkCoordinate, out JobHandleWithData<IVoxelDataGenerationJob> jobHandle))
+            {
+                jobHandle.JobHandle.Complete();
+                SetDensityChunk(jobHandle.JobData.OutputVoxelData, chunkCoordinate);
+                _generationJobHandles.Remove(chunkCoordinate);
             }
         }
 

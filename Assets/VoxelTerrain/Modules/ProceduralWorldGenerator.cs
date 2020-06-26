@@ -10,7 +10,11 @@ namespace Eldemarkki.VoxelTerrain.World
     /// </summary>
     public class ProceduralWorldGenerator : MonoBehaviour
     {
+        /// <summary>
+        /// The voxel world that "owns" this world generator
+        /// </summary>
         [SerializeField] private VoxelWorld voxelWorld;
+
         /// <summary>
         /// A chunk provider which provides chunks with procedurally generated data
         /// </summary>

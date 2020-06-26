@@ -8,9 +8,19 @@ namespace Eldemarkki.VoxelTerrain.World
     /// </summary>
     public class HeightmapWorldGenerator : MonoBehaviour
     {
+        /// <summary>
+        /// The voxel world the "owns" this world generator
+        /// </summary>
         [SerializeField] private VoxelWorld voxelWorld;
+
+        /// <summary>
+        /// The settings for generating the heightmap terrain
+        /// </summary>
         [SerializeField] private HeightmapTerrainSettings heightmapTerrainSettings;
 
+        /// <summary>
+        /// The settings for generating the heightmap terrain
+        /// </summary>
         public HeightmapTerrainSettings HeightmapTerrainSettings => heightmapTerrainSettings;
 
         private void Awake()

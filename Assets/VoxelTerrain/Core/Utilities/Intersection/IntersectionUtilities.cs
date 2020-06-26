@@ -35,7 +35,13 @@ namespace Eldemarkki.VoxelTerrain.Utilities.Intersection
             return PlaneLineIntersectionResult.OneHit;
         }
 
-        public static Bounds GetIntersectionArea(Bounds a, Bounds b)
+        /// <summary>
+        /// Gets the volume where the bounds intersect
+        /// </summary>
+        /// <param name="a">The first bounds</param>
+        /// <param name="b">The second bounds</param>
+        /// <returns>The volume that is contained in both bounds</returns>
+        public static Bounds GetIntersectionVolume(Bounds a, Bounds b)
         {
             Vector3 min = new Vector3(Mathf.Max(a.min.x, b.min.x), Mathf.Max(a.min.y, b.min.y), Mathf.Max(a.min.z, b.min.z));
             Vector3 max = new Vector3(Mathf.Min(a.max.x, b.max.x), Mathf.Min(a.max.y, b.max.y), Mathf.Min(a.max.z, b.max.z));

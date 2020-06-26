@@ -5,8 +5,12 @@ using UnityEngine;
 
 namespace Eldemarkki.VoxelTerrain.World
 {
+    /// <summary>
+    /// A container for all of the chunks in the world
+    /// </summary>
     public class ChunkStore : MonoBehaviour
     {
+        /// A dictionary of all the chunks currently in the world. The key is the chunk's coordinate, and the value is the chunk
         private Dictionary<int3, Chunk> _chunks;
 
         private void Awake()
@@ -14,6 +18,11 @@ namespace Eldemarkki.VoxelTerrain.World
             _chunks = new Dictionary<int3, Chunk>();
         }
 
+        /// <summary>
+        /// Gets whether or not a chunk exists at a coordinate
+        /// </summary>
+        /// <param name="chunkCoordinate">The coordinate of the chunk to check</param>
+        /// <returns>Is there a chunk at the coordinate</returns>
         public bool DoesChunkExistAtCoordinate(int3 chunkCoordinate)
         {
             return _chunks.ContainsKey(chunkCoordinate);
@@ -30,19 +39,11 @@ namespace Eldemarkki.VoxelTerrain.World
             return _chunks.TryGetValue(chunkCoordinate, out chunk);
         }
 
-        public void UnloadChunk(int3 chunkCoordinate)
-        {
-            if(TryGetChunkAtCoordinate(chunkCoordinate, out Chunk chunk))
-            {
-                Destroy(chunk.gameObject);
-                _chunks.Remove(chunkCoordinate);
-            }
-        }
-
         /// <summary>
         /// Gets a list of chunk coordinates whose Manhattan Distance to the coordinate parameter is more than <see cref="renderDistance"/>
         /// </summary>
         /// <param name="coordinate">Central coordinate</param>
+        /// <param name="renderDistance">The radius of the chunks the player can see</param>
         /// <returns>A list of chunk coordinates outside of the viewing range from the coordinate parameter</returns>
         public List<int3> GetChunkCoordinatesOutsideOfRenderDistance(int3 coordinate, int renderDistance)
         {
@@ -62,17 +63,25 @@ namespace Eldemarkki.VoxelTerrain.World
             return chunkCoordinates;
         }
 
-        public void AddChunk(int3 chunkCoordinate, Chunk chunk)
+        /// <summary>
+        /// Adds a chunk to the chunk store
+        /// </summary>
+        /// <param name="chunk">The chunk to add</param>
+        public void AddChunk(Chunk chunk)
         {
-            if (!_chunks.ContainsKey(chunkCoordinate))
+            if (!_chunks.ContainsKey(chunk.ChunkCoordinate))
             {
-                _chunks.Add(chunkCoordinate, chunk);
+                _chunks.Add(chunk.ChunkCoordinate, chunk);
             }
         }
 
-        public void RemoveChunk(int3 fromCoordinate)
+        /// <summary>
+        /// Removes a chunk from a coordinate
+        /// </summary>
+        /// <param name="chunkCoordinate">The coordinate of the chunk to remove</param>
+        public void RemoveChunk(int3 chunkCoordinate)
         {
-            _chunks.Remove(fromCoordinate);
+            _chunks.Remove(chunkCoordinate);
         }
     }
 }

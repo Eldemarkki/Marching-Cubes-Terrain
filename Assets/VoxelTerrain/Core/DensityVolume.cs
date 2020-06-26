@@ -121,7 +121,7 @@ namespace Eldemarkki.VoxelTerrain.Density
         /// Gets the density value from the local position (x,y,z) in the range from -1 to 1
         /// </summary>
         /// <param name="localPosition"></param>
-        /// <returns></returns>
+        /// <returns>The density at the given local position</returns>
         public float GetDensity(int3 localPosition)
         {
             return GetDensity(localPosition.x, localPosition.y, localPosition.z);

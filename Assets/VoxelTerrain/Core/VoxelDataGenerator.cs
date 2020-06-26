@@ -1,19 +1,20 @@
 ﻿using Eldemarkki.VoxelTerrain.Density;
-using Eldemarkki.VoxelTerrain.Utilities;
 using Unity.Collections;
-using Unity.Mathematics;
 using UnityEngine;
 
 namespace Eldemarkki.VoxelTerrain.World
 {
+    /// <summary>
+    /// A base class for all voxel data generators
+    /// </summary>
     public abstract class VoxelDataGenerator : MonoBehaviour
     {
-        public VoxelWorld VoxelWorld { get; set; }
+        /// <summary>
+        /// Starts generating the voxel data for a specified volume
+        /// </summary>
+        /// <param name="bounds">The volume to generate the voxel data for</param>
+        /// <param name="allocator">The allocator for the new DensityVolume</param>
+        /// <returns>The job handle and the voxel data generation job</returns>
         public abstract JobHandleWithData<IVoxelDataGenerationJob> GenerateVoxelData(Bounds bounds, Allocator allocator = Allocator.Persistent);
-        public virtual JobHandleWithData<IVoxelDataGenerationJob> GenerateVoxelData(int3 chunkCoordinate, Allocator allocator = Allocator.Persistent)
-        {
-            Bounds bounds = BoundsUtilities.GetChunkBounds(chunkCoordinate, VoxelWorld.WorldSettings.ChunkSize);
-            return GenerateVoxelData(bounds, allocator);
-        }
     }
 }

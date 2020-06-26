@@ -4,10 +4,31 @@ using Eldemarkki.VoxelTerrain.Utilities;
 using Unity.Collections;
 using Unity.Jobs;
 
-public interface IMesherJob : IJobParallelFor
+namespace Eldemarkki.VoxelTerrain
 {
-    NativeCounter VertexCountCounter { get; set; }
-    DensityVolume VoxelData { get; set; }
-    NativeArray<MarchingCubesVertexData> OutputVertices { get; set; }
-    NativeArray<ushort> OutputTriangles { get; set; }
+    /// <summary>
+    /// An interface for all the jobs that can extract a surface from voxel data
+    /// </summary>
+    public interface IMesherJob : IJobParallelFor
+    {
+        /// <summary>
+        /// A counter that keeps track of how many vertices there are
+        /// </summary>
+        NativeCounter VertexCountCounter { get; set; }
+
+        /// <summary>
+        /// The voxel data to generate the mesh from
+        /// </summary>
+        DensityVolume VoxelData { get; set; }
+
+        /// <summary>
+        /// The generated vertices
+        /// </summary>
+        NativeArray<MarchingCubesVertexData> OutputVertices { get; set; }
+
+        /// <summary>
+        /// The generated triangles
+        /// </summary>
+        NativeArray<ushort> OutputTriangles { get; set; }
+    }
 }

@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace Eldemarkki.VoxelTerrain.World
 {
+    /// <summary>
+    /// The main entry point for interacting with the voxel world
+    /// </summary>
     public class VoxelWorld : MonoBehaviour
     {
         [SerializeField] private WorldSettings worldSettings;
@@ -30,7 +33,6 @@ namespace Eldemarkki.VoxelTerrain.World
         void Awake()
         {
             voxelDataStore.VoxelWorld = this;
-            voxelDataGenerator.VoxelWorld = this;
             chunkProvider.VoxelWorld = this;
             chunkLoader.VoxelWorld = this;
         }

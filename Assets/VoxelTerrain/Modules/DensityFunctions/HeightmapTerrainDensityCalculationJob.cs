@@ -7,7 +7,7 @@ using Unity.Mathematics;
 namespace Eldemarkki.VoxelTerrain.Density
 {
     /// <summary>
-    /// A heightmap terrain density calculation job
+    /// A heightmap terrain voxel data calculation job
     /// </summary>
     [BurstCompile]
     struct HeightmapTerrainDensityCalculationJob : IVoxelDataGenerationJob
@@ -37,7 +37,14 @@ namespace Eldemarkki.VoxelTerrain.Density
         /// </summary>
         [ReadOnly] public float heightOffset;
 
+        /// <summary>
+        /// The sampling point's world position offset
+        /// </summary>
         public int3 WorldPositionOffset { get; set; }
+
+        /// <summary>
+        /// The generated voxel data
+        /// </summary>
         public DensityVolume OutputVoxelData { get; set; }
 
         /// <summary>
