@@ -1,11 +1,11 @@
-﻿using Eldemarkki.VoxelTerrain.Data;
+﻿using Eldemarkki.VoxelTerrain.Meshing.Data;
 using Eldemarkki.VoxelTerrain.VoxelData;
 using Eldemarkki.VoxelTerrain.Utilities;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
 
-namespace Eldemarkki.VoxelTerrain.MarchingCubes
+namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
 {
     /// <summary>
     /// A marching cubes mesh generation job
@@ -32,7 +32,7 @@ namespace Eldemarkki.VoxelTerrain.MarchingCubes
         /// <summary>
         /// The generated vertices
         /// </summary>
-        [NativeDisableParallelForRestriction, WriteOnly] private NativeArray<MarchingCubesVertexData> _vertices;
+        [NativeDisableParallelForRestriction, WriteOnly] private NativeArray<MeshingVertexData> _vertices;
 
         /// <summary>
         /// The generated triangles
@@ -52,7 +52,7 @@ namespace Eldemarkki.VoxelTerrain.MarchingCubes
         /// <summary>
         /// The generated vertices
         /// </summary>
-        public NativeArray<MarchingCubesVertexData> OutputVertices { get => _vertices; set => _vertices = value; }
+        public NativeArray<MeshingVertexData> OutputVertices { get => _vertices; set => _vertices = value; }
 
         /// <summary>
         /// The generated triangles
@@ -95,13 +95,13 @@ namespace Eldemarkki.VoxelTerrain.MarchingCubes
 
                 float3 normal = math.normalize(math.cross(vertex2 - vertex1, vertex3 - vertex1));
 
-                _vertices[triangleIndex + 0] = new MarchingCubesVertexData(vertex1, normal);
+                _vertices[triangleIndex + 0] = new MeshingVertexData(vertex1, normal);
                 _triangles[triangleIndex + 0] = (ushort)(triangleIndex + 0);
 
-                _vertices[triangleIndex + 1] = new MarchingCubesVertexData(vertex2, normal);
+                _vertices[triangleIndex + 1] = new MeshingVertexData(vertex2, normal);
                 _triangles[triangleIndex + 1] = (ushort)(triangleIndex + 1);
 
-                _vertices[triangleIndex + 2] = new MarchingCubesVertexData(vertex3, normal);
+                _vertices[triangleIndex + 2] = new MeshingVertexData(vertex3, normal);
                 _triangles[triangleIndex + 2] = (ushort)(triangleIndex + 2);
             }
         }

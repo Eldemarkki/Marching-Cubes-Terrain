@@ -1,10 +1,10 @@
 ﻿using Eldemarkki.VoxelTerrain.VoxelData;
-using Eldemarkki.VoxelTerrain.MarchingCubes;
+using Eldemarkki.VoxelTerrain.Meshing.Data;
 using Eldemarkki.VoxelTerrain.Utilities;
 using Unity.Collections;
 using Unity.Jobs;
 
-namespace Eldemarkki.VoxelTerrain
+namespace Eldemarkki.VoxelTerrain.Meshing
 {
     /// <summary>
     /// An interface for all the jobs that can extract a surface from voxel data
@@ -24,7 +24,7 @@ namespace Eldemarkki.VoxelTerrain
         /// <summary>
         /// The generated vertices
         /// </summary>
-        NativeArray<MarchingCubesVertexData> OutputVertices { get; set; }
+        NativeArray<MeshingVertexData> OutputVertices { get; set; }
 
         /// <summary>
         /// The generated triangles

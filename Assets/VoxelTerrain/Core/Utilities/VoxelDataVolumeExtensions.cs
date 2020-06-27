@@ -1,4 +1,4 @@
-﻿using Eldemarkki.VoxelTerrain.Data;
+﻿using Eldemarkki.VoxelTerrain.Meshing.Data;
 using Eldemarkki.VoxelTerrain.VoxelData;
 using Unity.Mathematics;
 

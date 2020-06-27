@@ -1,10 +1,9 @@
 ﻿using Eldemarkki.VoxelTerrain.Utilities;
 using Eldemarkki.VoxelTerrain.VoxelData;
-using Eldemarkki.VoxelTerrain.World.Chunks;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace Eldemarkki.VoxelTerrain.World
+namespace Eldemarkki.VoxelTerrain.World.Chunks
 {
     /// <summary>
     /// A class for loading and initializing chunks

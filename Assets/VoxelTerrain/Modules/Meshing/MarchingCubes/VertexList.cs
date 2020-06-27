@@ -1,6 +1,6 @@
 using Unity.Mathematics;
 
-namespace Eldemarkki.VoxelTerrain.Data
+namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
 {
     /// <summary>
     /// A container for a vertex list with 12 vertices

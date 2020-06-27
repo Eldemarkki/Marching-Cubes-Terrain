@@ -2,7 +2,7 @@
 using Unity.Collections;
 using UnityEngine;
 
-namespace Eldemarkki.VoxelTerrain.World
+namespace Eldemarkki.VoxelTerrain.Settings
 {
     /// <summary>
     /// A class that contains information about how the heightmap world should be generated

@@ -1,8 +1,8 @@
-﻿using Eldemarkki.VoxelTerrain.VoxelData;
+﻿using Eldemarkki.VoxelTerrain.Utilities;
 using Unity.Collections;
 using UnityEngine;
 
-namespace Eldemarkki.VoxelTerrain.World
+namespace Eldemarkki.VoxelTerrain.VoxelData
 {
     /// <summary>
     /// A base class for all voxel data generators

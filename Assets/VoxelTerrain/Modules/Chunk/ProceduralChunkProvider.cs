@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace Eldemarkki.VoxelTerrain.World
+namespace Eldemarkki.VoxelTerrain.Chunks
 {
     /// <summary>
     /// Provider for procedurally generated chunks

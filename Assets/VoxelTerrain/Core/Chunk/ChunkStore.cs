@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace Eldemarkki.VoxelTerrain.World
+namespace Eldemarkki.VoxelTerrain.World.Chunks
 {
     /// <summary>
     /// A container for all of the chunks in the world

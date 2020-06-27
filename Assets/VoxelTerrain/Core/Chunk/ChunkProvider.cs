@@ -3,7 +3,7 @@ using Eldemarkki.VoxelTerrain.Utilities;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace Eldemarkki.VoxelTerrain.World
+namespace Eldemarkki.VoxelTerrain.World.Chunks
 {
     /// <summary>
     /// A class for providing chunks to the world

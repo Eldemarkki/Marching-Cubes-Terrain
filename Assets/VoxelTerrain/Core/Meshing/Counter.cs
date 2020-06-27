@@ -3,7 +3,7 @@ using System.Threading;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
-namespace Eldemarkki.VoxelTerrain.Utilities
+namespace Eldemarkki.VoxelTerrain.Meshing
 {
     /// <summary>
     /// An incremental counter made for the Unity Job System

@@ -1,4 +1,4 @@
-﻿namespace Eldemarkki.VoxelTerrain.Data
+﻿namespace Eldemarkki.VoxelTerrain.Meshing.Data
 {
     /// <summary>
     /// A container for the corners of a voxel

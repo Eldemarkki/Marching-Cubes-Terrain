@@ -1,6 +1,7 @@
-﻿using UnityEngine;
+﻿using Eldemarkki.VoxelTerrain.World.Chunks;
+using UnityEngine;
 
-namespace Eldemarkki.VoxelTerrain.World.Chunks
+namespace Eldemarkki.VoxelTerrain.Settings
 {
     /// <summary>
     /// Parameters that specify how the world will be generated

@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Eldemarkki.VoxelTerrain.World
+namespace Eldemarkki.VoxelTerrain.Settings
 {
     /// <summary>
     /// The procedural terrain generation settings

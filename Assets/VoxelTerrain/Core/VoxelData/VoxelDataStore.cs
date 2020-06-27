@@ -153,8 +153,8 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
             {
                 int3 chunkCoordinate = affectedChunkCoordinates[i];
 
-                if (!_chunks.ContainsKey(chunkCoordinate)) continue;
-                
+                if (!_chunks.ContainsKey(chunkCoordinate)) { continue; }
+
                 VoxelDataVolume voxelDataVolume = GetVoxelDataChunk(chunkCoordinate);
                 int3 localPos = (worldPosition - chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize).Mod(VoxelWorld.WorldSettings.ChunkSize + 1);
                 voxelDataVolume.SetVoxelData(voxelData, localPos.x, localPos.y, localPos.z);

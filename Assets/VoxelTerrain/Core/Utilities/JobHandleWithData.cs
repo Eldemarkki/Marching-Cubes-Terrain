@@ -1,6 +1,6 @@
 ﻿using Unity.Jobs;
 
-namespace Eldemarkki.VoxelTerrain
+namespace Eldemarkki.VoxelTerrain.Utilities
 {
     /// <summary>
     /// A class that associates a JobHandle to some data

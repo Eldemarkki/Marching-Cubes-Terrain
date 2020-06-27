@@ -1,12 +1,12 @@
-﻿using Eldemarkki.VoxelTerrain.VoxelData;
+﻿using Eldemarkki.VoxelTerrain.Meshing.Data;
+using Eldemarkki.VoxelTerrain.VoxelData;
 using Eldemarkki.VoxelTerrain.Utilities;
-using Eldemarkki.VoxelTerrain.World.Chunks;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace Eldemarkki.VoxelTerrain.MarchingCubes
+namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
 {
     /// <summary>
     /// A mesher for the marching cubes algorithm
@@ -39,7 +39,7 @@ namespace Eldemarkki.VoxelTerrain.MarchingCubes
             int voxelCount = (boundsVoxelData.Width - 1) * (boundsVoxelData.Height - 1) * (boundsVoxelData.Depth - 1);
             int maxLength = 15 * voxelCount;
 
-            NativeArray<MarchingCubesVertexData> outputVertices = new NativeArray<MarchingCubesVertexData>(maxLength, Allocator.TempJob);
+            NativeArray<MeshingVertexData> outputVertices = new NativeArray<MeshingVertexData>(maxLength, Allocator.TempJob);
             NativeArray<ushort> outputTriangles = new NativeArray<ushort>(maxLength, Allocator.TempJob);
 
             MarchingCubesJob marchingCubesJob = new MarchingCubesJob

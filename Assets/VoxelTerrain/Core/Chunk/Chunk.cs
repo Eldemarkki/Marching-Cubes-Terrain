@@ -1,4 +1,6 @@
-﻿using Eldemarkki.VoxelTerrain.Utilities;
+﻿using Eldemarkki.VoxelTerrain.Meshing;
+using Eldemarkki.VoxelTerrain.Meshing.Data;
+using Eldemarkki.VoxelTerrain.Utilities;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -75,7 +77,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
             int vertexCount = job.VertexCountCounter.Count * 3;
             job.VertexCountCounter.Dispose();
 
-            mesh.SetVertexBufferParams(vertexCount, VoxelMesher.VertexBufferMemoryLayout);
+            mesh.SetVertexBufferParams(vertexCount, MeshingVertexData.VertexBufferMemoryLayout);
             mesh.SetIndexBufferParams(vertexCount, IndexFormat.UInt16);
 
             mesh.SetVertexBufferData(job.OutputVertices, 0, 0, vertexCount, 0, MeshUpdateFlags.DontValidateIndices);

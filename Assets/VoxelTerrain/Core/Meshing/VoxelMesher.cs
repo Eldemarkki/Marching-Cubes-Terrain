@@ -1,21 +1,12 @@
-﻿using Eldemarkki.VoxelTerrain.VoxelData;
+﻿using Eldemarkki.VoxelTerrain.Utilities;
+using Eldemarkki.VoxelTerrain.VoxelData;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.Rendering;
 
-namespace Eldemarkki.VoxelTerrain.World.Chunks
+namespace Eldemarkki.VoxelTerrain.Meshing
 {
     public abstract class VoxelMesher : MonoBehaviour
     {
-        /// <summary>
-        /// The memory layout of a single vertex in memory
-        /// </summary>
-        public static readonly VertexAttributeDescriptor[] VertexBufferMemoryLayout =
-        {
-            new VertexAttributeDescriptor(VertexAttribute.Position),
-            new VertexAttributeDescriptor(VertexAttribute.Normal)
-        };
-        
         /// <summary>
         /// Starts a mesh generation job
         /// </summary>

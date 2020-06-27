@@ -1,4 +1,5 @@
-﻿using Unity.Mathematics;
+﻿using Eldemarkki.VoxelTerrain.Settings;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace Eldemarkki.VoxelTerrain.World

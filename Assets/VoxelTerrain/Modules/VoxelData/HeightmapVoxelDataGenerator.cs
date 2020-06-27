@@ -1,10 +1,10 @@
-﻿using Eldemarkki.VoxelTerrain.VoxelData;
-using Eldemarkki.VoxelTerrain.Utilities;
+﻿using Eldemarkki.VoxelTerrain.Utilities;
+using Eldemarkki.VoxelTerrain.World;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 
-namespace Eldemarkki.VoxelTerrain.World
+namespace Eldemarkki.VoxelTerrain.VoxelData
 {
     /// <summary>
     /// A generator that creates voxel data from a heightmap

@@ -1,5 +1,5 @@
-﻿using Eldemarkki.VoxelTerrain.World;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
+using Eldemarkki.VoxelTerrain.Settings;
 using Eldemarkki.VoxelTerrain.Utilities;
 using Unity.Burst;
 using Unity.Collections;

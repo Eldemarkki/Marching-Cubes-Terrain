@@ -1,9 +1,9 @@
-﻿using Eldemarkki.VoxelTerrain.Data;
-using Eldemarkki.VoxelTerrain.Utilities;
+﻿using Eldemarkki.VoxelTerrain.Utilities;
 using System.Runtime.CompilerServices;
+using Eldemarkki.VoxelTerrain.Meshing.Data;
 using Unity.Mathematics;
 
-namespace Eldemarkki.VoxelTerrain.MarchingCubes
+namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
 {
     /// <summary>
     /// A collection of Marching Cubes -related functions
