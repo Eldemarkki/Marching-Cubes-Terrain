@@ -29,8 +29,8 @@ namespace Eldemarkki.VoxelTerrain.Utilities.Intersection
                 return (planeOrigin - lineOrigin).Equals(float3.zero) ? PlaneLineIntersectionResult.ParallelInsidePlane : PlaneLineIntersectionResult.NoHit;
             }
 
-            var d = math.dot(planeOrigin, -planeNormal);
-            var t = -(d + lineOrigin.z * planeNormal.z + lineOrigin.y * planeNormal.y + lineOrigin.x * planeNormal.x) / (lineDirection.z * planeNormal.z + lineDirection.y * planeNormal.y + lineDirection.x * planeNormal.x);
+            float d = math.dot(planeOrigin, -planeNormal);
+            float t = -(d + lineOrigin.z * planeNormal.z + lineOrigin.y * planeNormal.y + lineOrigin.x * planeNormal.x) / (lineDirection.z * planeNormal.z + lineDirection.y * planeNormal.y + lineDirection.x * planeNormal.x);
             intersectionPoint = lineOrigin + t * lineDirection;
             return PlaneLineIntersectionResult.OneHit;
         }

@@ -39,10 +39,10 @@ namespace Eldemarkki.VoxelTerrain.MarchingCubes
             int voxelCount = (boundsVoxelData.Width - 1) * (boundsVoxelData.Height - 1) * (boundsVoxelData.Depth - 1);
             int maxLength = 15 * voxelCount;
 
-            var outputVertices = new NativeArray<MarchingCubesVertexData>(maxLength, Allocator.TempJob);
-            var outputTriangles = new NativeArray<ushort>(maxLength, Allocator.TempJob);
+            NativeArray<MarchingCubesVertexData> outputVertices = new NativeArray<MarchingCubesVertexData>(maxLength, Allocator.TempJob);
+            NativeArray<ushort> outputTriangles = new NativeArray<ushort>(maxLength, Allocator.TempJob);
 
-            var marchingCubesJob = new MarchingCubesJob
+            MarchingCubesJob marchingCubesJob = new MarchingCubesJob
             {
                 VoxelData = boundsVoxelData,
                 isolevel = Isolevel,

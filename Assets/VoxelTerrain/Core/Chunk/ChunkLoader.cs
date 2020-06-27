@@ -1,6 +1,6 @@
 ﻿using Eldemarkki.VoxelTerrain.Utilities;
+using Eldemarkki.VoxelTerrain.VoxelData;
 using Eldemarkki.VoxelTerrain.World.Chunks;
-using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -27,7 +27,7 @@ namespace Eldemarkki.VoxelTerrain.World
             Chunk chunk = Instantiate(VoxelWorld.WorldSettings.ChunkPrefab, worldPosition.ToVectorInt(), Quaternion.identity);
 
             Bounds chunkBounds = BoundsUtilities.GetChunkBounds(chunkCoordinate, VoxelWorld.WorldSettings.ChunkSize);
-            var jobHandleWithData = VoxelWorld.VoxelDataGenerator.GenerateVoxelData(chunkBounds, Allocator.Persistent);
+            JobHandleWithData<IVoxelDataGenerationJob> jobHandleWithData = VoxelWorld.VoxelDataGenerator.GenerateVoxelData(chunkBounds);
             VoxelWorld.VoxelDataStore.SetVoxelDataJobHandle(jobHandleWithData, chunkCoordinate);
 
             chunk.Initialize(chunkCoordinate, VoxelWorld);

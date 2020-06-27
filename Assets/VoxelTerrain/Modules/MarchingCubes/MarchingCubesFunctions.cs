@@ -13,8 +13,8 @@ namespace Eldemarkki.VoxelTerrain.MarchingCubes
         /// <summary>
         /// Gets the corners for the voxel at a position
         /// </summary>
-        /// <param name="position">The voxel's position</param>
-        /// <returns>The voxel's corners</returns>
+        /// <param name="position">The position of the voxel</param>
+        /// <returns>The corners of the voxel</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static VoxelCorners<int3> GetCorners(int3 position)
         {
@@ -46,7 +46,7 @@ namespace Eldemarkki.VoxelTerrain.MarchingCubes
         /// <summary>
         /// Calculates the cube index of a single voxel
         /// </summary>
-        /// <param name="voxelDensities">The voxel's densities</param>
+        /// <param name="voxelDensities">The densities of the voxel</param>
         /// <param name="isolevel">The density level where a surface will be created. Densities below this will be inside the surface (solid),
         /// and densities above this will be outside the surface (air)</param>
         /// <returns>The calculated cube index</returns>
@@ -70,8 +70,8 @@ namespace Eldemarkki.VoxelTerrain.MarchingCubes
         /// <summary>
         /// Generates the vertex list for a single voxel
         /// </summary>
-        /// <param name="voxelDensities">The voxel's densities</param>
-        /// <param name="voxelCorners">The voxel's corners</param>
+        /// <param name="voxelDensities">The densities of the voxel</param>
+        /// <param name="voxelCorners">The corners of the voxel</param>
         /// <param name="edgeIndex">The edge index</param>
         /// <param name="isolevel">The density level where a surface will be created. Densities below this will be inside the surface (solid),
         /// and densities above this will be outside the surface (air)</param>
@@ -80,7 +80,7 @@ namespace Eldemarkki.VoxelTerrain.MarchingCubes
         public static VertexList GenerateVertexList(VoxelCorners<float> voxelDensities, VoxelCorners<int3> voxelCorners,
             int edgeIndex, float isolevel)
         {
-            var vertexList = new VertexList();
+            VertexList vertexList = new VertexList();
 
             for (int i = 0; i < 12; i++)
             {

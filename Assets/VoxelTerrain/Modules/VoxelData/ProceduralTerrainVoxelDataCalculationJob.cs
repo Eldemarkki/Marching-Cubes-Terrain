@@ -11,7 +11,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
     /// A procedural terrain voxel data calculation job
     /// </summary>
     [BurstCompile]
-    struct ProceduralTerrainVoxelDataCalculationJob : IVoxelDataGenerationJob
+    public struct ProceduralTerrainVoxelDataCalculationJob : IVoxelDataGenerationJob
     {
         /// <summary>
         /// The procedural terrain generation settings

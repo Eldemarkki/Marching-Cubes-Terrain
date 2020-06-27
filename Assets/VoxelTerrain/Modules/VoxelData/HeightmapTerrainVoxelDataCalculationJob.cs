@@ -10,7 +10,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
     /// A heightmap terrain voxel data calculation job
     /// </summary>
     [BurstCompile]
-    struct HeightmapTerrainVoxelDataCalculationJob : IVoxelDataGenerationJob
+    public struct HeightmapTerrainVoxelDataCalculationJob : IVoxelDataGenerationJob
     {
         /// <summary>
         /// The height data from the heightmap

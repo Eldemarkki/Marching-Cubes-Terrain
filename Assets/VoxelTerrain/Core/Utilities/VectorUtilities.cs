@@ -46,7 +46,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities
         /// <summary>
         /// Calculates the remainder of a division operation for int3. Ensures that the returned value is positive
         /// </summary>
-        /// <param name="n">The divident</param>
+        /// <param name="n">The dividend</param>
         /// <param name="x">The divisor</param>
         /// <returns>The remainder of n/x</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

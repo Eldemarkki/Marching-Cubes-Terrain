@@ -25,14 +25,14 @@ namespace Eldemarkki.VoxelTerrain.World
         public override JobHandleWithData<IVoxelDataGenerationJob> GenerateVoxelData(Bounds bounds, Allocator allocator = Allocator.Persistent)
         {
             VoxelDataVolume voxelData = new VoxelDataVolume(bounds.size.ToInt3(), allocator);
-            var job = new ProceduralTerrainVoxelDataCalculationJob
+            ProceduralTerrainVoxelDataCalculationJob job = new ProceduralTerrainVoxelDataCalculationJob
             {
                 WorldPositionOffset = bounds.min.ToInt3(),
                 OutputVoxelData = voxelData,
                 proceduralTerrainSettings = proceduralTerrainSettings
             };
             
-            var jobHandle = job.Schedule(voxelData.Length, 256);
+            JobHandle jobHandle = job.Schedule(voxelData.Length, 256);
 
             JobHandleWithData<IVoxelDataGenerationJob> jobHandleWithData = new JobHandleWithData<IVoxelDataGenerationJob>();
             jobHandleWithData.JobHandle = jobHandle;

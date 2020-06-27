@@ -11,12 +11,12 @@ namespace Eldemarkki.VoxelTerrain.World
         /// <summary>
         /// The voxel world the "owns" this world generator
         /// </summary>
-        [SerializeField] private VoxelWorld voxelWorld;
+        [SerializeField] private VoxelWorld voxelWorld = null;
 
         /// <summary>
         /// The settings for generating the heightmap terrain
         /// </summary>
-        [SerializeField] private HeightmapTerrainSettings heightmapTerrainSettings;
+        [SerializeField] private HeightmapTerrainSettings heightmapTerrainSettings = null;
 
         /// <summary>
         /// The settings for generating the heightmap terrain

@@ -12,8 +12,8 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         /// </summary>
         public static readonly VertexAttributeDescriptor[] VertexBufferMemoryLayout =
         {
-            new VertexAttributeDescriptor(VertexAttribute.Position, VertexAttributeFormat.Float32, 3),
-            new VertexAttributeDescriptor(VertexAttribute.Normal, VertexAttributeFormat.Float32, 3)
+            new VertexAttributeDescriptor(VertexAttribute.Position),
+            new VertexAttributeDescriptor(VertexAttribute.Normal)
         };
         
         /// <summary>

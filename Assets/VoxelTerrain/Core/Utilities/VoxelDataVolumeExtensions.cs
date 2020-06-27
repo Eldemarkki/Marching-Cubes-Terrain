@@ -17,14 +17,14 @@ namespace Eldemarkki.VoxelTerrain.Utilities
         /// <returns>A cube-shaped volume of voxel data. The size of the cube is 1 unit.</returns>
         public static VoxelCorners<float> GetVoxelDataUnitCube(this VoxelDataVolume voxelDataVolume, int3 localPosition)
         {
-            VoxelCorners<float> voxelDatas = new VoxelCorners<float>();
+            VoxelCorners<float> voxelDataCorners = new VoxelCorners<float>();
             for (int i = 0; i < 8; i++)
             {
                 int3 voxelCorner = localPosition + LookupTables.CubeCorners[i];
-                voxelDatas[i] = voxelDataVolume.GetVoxelData(voxelCorner.x, voxelCorner.y, voxelCorner.z);
+                voxelDataCorners[i] = voxelDataVolume.GetVoxelData(voxelCorner.x, voxelCorner.y, voxelCorner.z);
             }
 
-            return voxelDatas;
+            return voxelDataCorners;
         }
     }
 }

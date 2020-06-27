@@ -68,7 +68,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
             IMesherJob job = jobHandleWithData.JobData;
 
             Mesh mesh = new Mesh();
-            var subMesh = new SubMeshDescriptor(0, 0, MeshTopology.Triangles);
+            SubMeshDescriptor subMesh = new SubMeshDescriptor(0, 0);
 
             jobHandleWithData.JobHandle.Complete();
 

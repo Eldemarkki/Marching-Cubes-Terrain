@@ -44,7 +44,7 @@ namespace Eldemarkki.VoxelTerrain.Player
         [SerializeField] private KeyCode flatteningKey = KeyCode.LeftControl;
 
         /// <summary>
-        /// The game object that the deformation raycast will be casted from
+        /// The game object that the deformation raycast will be cast from
         /// </summary>
         [Header("Player Settings")]
         [SerializeField] private Transform playerCamera = null;
@@ -79,7 +79,7 @@ namespace Eldemarkki.VoxelTerrain.Player
                     Vector3 destP = startP + playerCamera.forward;
                     Vector3 direction = destP - startP;
 
-                    var ray = new Ray(startP, direction);
+                    Ray ray = new Ray(startP, direction);
 
                     if (!Physics.Raycast(ray, out RaycastHit hit, maxReachDistance)) { return; }
                     _isFlattening = true;
@@ -121,7 +121,7 @@ namespace Eldemarkki.VoxelTerrain.Player
         /// <param name="addTerrain">Should terrain be added or removed</param>
         private void RaycastToTerrain(bool addTerrain)
         {
-            var ray = new Ray(playerCamera.position, playerCamera.forward);
+            Ray ray = new Ray(playerCamera.position, playerCamera.forward);
 
             if (!Physics.Raycast(ray, out RaycastHit hit, maxReachDistance)) { return; }
             Vector3 hitPoint = hit.point;
@@ -162,7 +162,7 @@ namespace Eldemarkki.VoxelTerrain.Player
                         int offsetY = hitY - y;
                         int offsetZ = hitZ - z;
 
-                        var offsetPoint = new int3(offsetX, offsetY, offsetZ);
+                        int3 offsetPoint = new int3(offsetX, offsetY, offsetZ);
                         float distance = math.distance(offsetPoint, point);
                         if (distance > range)
                         {
@@ -185,7 +185,7 @@ namespace Eldemarkki.VoxelTerrain.Player
         /// </summary>
         private void FlattenTerrain()
         {
-            var result = IntersectionUtilities.PlaneLineIntersection(_flatteningOrigin, _flatteningNormal, playerCamera.position, playerCamera.forward, out float3 intersectionPoint);
+            PlaneLineIntersectionResult result = IntersectionUtilities.PlaneLineIntersection(_flatteningOrigin, _flatteningNormal, playerCamera.position, playerCamera.forward, out float3 intersectionPoint);
             if (result != PlaneLineIntersectionResult.OneHit) { return; }
 
             int intRange = (int)math.ceil(deformRange);

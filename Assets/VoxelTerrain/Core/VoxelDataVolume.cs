@@ -11,7 +11,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
     public struct VoxelDataVolume : IDisposable
     {
         /// <summary>
-        /// The native array which contains the voxel data. Voxel datas are stored as bytes (0 to 255), and later mapped to go from -1 to 1
+        /// The native array which contains the voxel data. Voxel data is stored as bytes (0 to 255), and later mapped to go from -1 to 1
         /// </summary>
         private NativeArray<byte> _voxelData;
 

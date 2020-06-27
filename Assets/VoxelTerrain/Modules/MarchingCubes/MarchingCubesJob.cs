@@ -65,7 +65,7 @@ namespace Eldemarkki.VoxelTerrain.MarchingCubes
         /// <param name="index">The iteration index</param>
         public void Execute(int index)
         {
-            // Voxel's position inside the chunk. Goes from (0, 0, 0) to (densityVolume.Width-1, densityVolume.Height-1, densityVolume.Depth-1). Both are inclusive.
+            // The position of the voxel Voxel inside the chunk. Goes from (0, 0, 0) to (densityVolume.Width-1, densityVolume.Height-1, densityVolume.Depth-1). Both are inclusive.
             int3 voxelLocalPosition = IndexUtilities.IndexToXyz(index, _voxelData.Width - 1, _voxelData.Height - 1);
 
             VoxelCorners<float> densities = _voxelData.GetVoxelDataUnitCube(voxelLocalPosition);

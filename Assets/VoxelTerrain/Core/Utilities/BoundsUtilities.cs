@@ -15,8 +15,8 @@ namespace Eldemarkki.VoxelTerrain.Utilities
         {
             Bounds bounds = new Bounds();
 
-            var min = chunkCoordinate * chunkSize;
-            var max = chunkCoordinate.ToVectorInt() * chunkSize + Vector3.one * (chunkSize + 1);
+            int3 min = chunkCoordinate * chunkSize;
+            Vector3 max = chunkCoordinate.ToVectorInt() * chunkSize + Vector3.one * (chunkSize + 1);
             bounds.SetMinMax(min.ToVectorInt(), max);
 
             return bounds;

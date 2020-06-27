@@ -33,7 +33,7 @@ namespace Eldemarkki.VoxelTerrain.World
             _generationQueue = new List<int3>();
         }
 
-        void Update()
+        private void Update()
         {
             int chunksGenerated = 0;
             while (_generationQueue.Count > 0 && chunksGenerated < chunkGenerationRate)
@@ -74,7 +74,7 @@ namespace Eldemarkki.VoxelTerrain.World
         public void UnloadCoordinates(List<int3> coordinatesToUnload)
         {
             // Mark coordinates as available
-            for (var i = 0; i < coordinatesToUnload.Count; i++)
+            for (int i = 0; i < coordinatesToUnload.Count; i++)
             {
                 int3 coordinateToUnload = coordinatesToUnload[i];
                 if (!_availableChunkCoordinates.Contains(coordinateToUnload))

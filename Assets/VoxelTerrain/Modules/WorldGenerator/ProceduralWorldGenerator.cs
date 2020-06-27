@@ -13,12 +13,12 @@ namespace Eldemarkki.VoxelTerrain.World
         /// <summary>
         /// The voxel world that "owns" this world generator
         /// </summary>
-        [SerializeField] private VoxelWorld voxelWorld;
+        [SerializeField] private VoxelWorld voxelWorld = null;
 
         /// <summary>
         /// A chunk provider which provides chunks with procedurally generated data
         /// </summary>
-        [SerializeField] private ProceduralChunkProvider chunkProvider;
+        [SerializeField] private ProceduralChunkProvider chunkProvider = null;
 
         /// <summary>
         /// The radius of the chunks the player sees

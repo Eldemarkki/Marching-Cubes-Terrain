@@ -13,7 +13,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities
         /// <summary>
         /// The allocator for the counter
         /// </summary>
-        private Allocator allocator;
+        private Allocator _allocator;
         
         /// <summary>
         /// The pointer to the value
@@ -35,7 +35,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities
         /// <param name="allocator">What type of allocator to use</param>
         public NativeCounter(Allocator allocator)
         {
-            this.allocator = allocator;
+            _allocator = allocator;
             _counter = (int*)UnsafeUtility.Malloc(sizeof(int), 4, allocator);
             Count = 0;
         }
@@ -54,7 +54,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities
         /// </summary>
         public void Dispose()
         {
-            UnsafeUtility.Free(_counter, allocator);
+            UnsafeUtility.Free(_counter, _allocator);
         }
     }
 }

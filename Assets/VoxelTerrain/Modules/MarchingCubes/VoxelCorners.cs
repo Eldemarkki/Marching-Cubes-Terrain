@@ -1,7 +1,7 @@
 ﻿namespace Eldemarkki.VoxelTerrain.Data
 {
     /// <summary>
-    /// A container for the voxel's corners
+    /// A container for the corners of a voxel
     /// </summary>
     /// <typeparam name="T">The element's type to hold in the corners</typeparam>
     public struct VoxelCorners<T>

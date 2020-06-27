@@ -30,19 +30,19 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// </summary>
         public VoxelWorld VoxelWorld { get; set; }
 
-        void Awake()
+        private void Awake()
         {
             _chunks = new Dictionary<int3, VoxelDataVolume>();
             _generationJobHandles = new Dictionary<int3, JobHandleWithData<IVoxelDataGenerationJob>>();
         }
 
-        void OnApplicationQuit()
+        private void OnApplicationQuit()
         {
-            foreach (var chunk in _chunks)
+            foreach (VoxelDataVolume chunk in _chunks.Values)
             {
-                if (chunk.Value.IsCreated)
+                if (chunk.IsCreated)
                 {
-                    chunk.Value.Dispose();
+                    chunk.Dispose();
                 }
             }
         }
@@ -123,9 +123,9 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                         {
                             for (int voxelDataWorldPositionY = intersectionVolumeMin.y; voxelDataWorldPositionY < intersectionVolumeMax.y; voxelDataWorldPositionY++)
                             {
-                                for (int oxelDataWorldPositionZ = intersectionVolumeMin.z; oxelDataWorldPositionZ < intersectionVolumeMax.z; oxelDataWorldPositionZ++)
+                                for (int voxelDataWorldPositionZ = intersectionVolumeMin.z; voxelDataWorldPositionZ < intersectionVolumeMax.z; voxelDataWorldPositionZ++)
                                 {
-                                    int3 voxelDataWorldPosition = new int3(voxelDataWorldPositionX, voxelDataWorldPositionY, oxelDataWorldPositionZ);
+                                    int3 voxelDataWorldPosition = new int3(voxelDataWorldPositionX, voxelDataWorldPositionY, voxelDataWorldPositionZ);
                                     int3 voxelDataLocalPosition = voxelDataWorldPosition - chunkWorldSpaceOrigin;
 
                                     float voxelData = voxelDataChunk.GetVoxelData(voxelDataLocalPosition);
@@ -144,7 +144,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// Sets the voxel data for a world position
         /// </summary>
         /// <param name="voxelData">The new voxel data</param>
-        /// <param name="worldPosition">The voxel data's world position</param>
+        /// <param name="worldPosition">The world position of the voxel data</param>
         public void SetVoxelData(float voxelData, int3 worldPosition)
         {
             List<int3> affectedChunkCoordinates = ChunkProvider.GetChunkCoordinatesContainingPoint(worldPosition, VoxelWorld.WorldSettings.ChunkSize);
@@ -153,16 +153,15 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
             {
                 int3 chunkCoordinate = affectedChunkCoordinates[i];
 
-                if (_chunks.ContainsKey(chunkCoordinate))
-                {
-                    var voxelDataVolume = GetVoxelDataChunk(chunkCoordinate);
-                    int3 localPos = (worldPosition - chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize).Mod(VoxelWorld.WorldSettings.ChunkSize + 1);
-                    voxelDataVolume.SetVoxelData(voxelData, localPos.x, localPos.y, localPos.z);
+                if (!_chunks.ContainsKey(chunkCoordinate)) continue;
+                
+                VoxelDataVolume voxelDataVolume = GetVoxelDataChunk(chunkCoordinate);
+                int3 localPos = (worldPosition - chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize).Mod(VoxelWorld.WorldSettings.ChunkSize + 1);
+                voxelDataVolume.SetVoxelData(voxelData, localPos.x, localPos.y, localPos.z);
 
-                    if (VoxelWorld.ChunkStore.TryGetChunkAtCoordinate(chunkCoordinate, out Chunk chunk))
-                    {
-                        chunk.HasChanges = true;
-                    }
+                if (VoxelWorld.ChunkStore.TryGetChunkAtCoordinate(chunkCoordinate, out Chunk chunk))
+                {
+                    chunk.HasChanges = true;
                 }
             }
         }
@@ -192,7 +191,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <summary>
         /// Sets the voxel data for a volume in the world
         /// </summary>
-        /// <param name="voxelData">The new voxel data volume</param>
+        /// <param name="voxelDataVolume">The new voxel data volume</param>
         /// <param name="originPosition">The world position of the origin where the voxel data should be set</param>
         public void SetVoxelDataCustom(VoxelDataVolume voxelDataVolume, int3 originPosition)
         {
