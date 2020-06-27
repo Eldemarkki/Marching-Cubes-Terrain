@@ -1,4 +1,4 @@
-﻿using Eldemarkki.VoxelTerrain.Density;
+﻿using Eldemarkki.VoxelTerrain.VoxelData;
 using Eldemarkki.VoxelTerrain.Utilities;
 using Eldemarkki.VoxelTerrain.World.Chunks;
 using System.Collections.Generic;
@@ -113,7 +113,7 @@ namespace Eldemarkki.VoxelTerrain.World
             Bounds generationBounds = BoundsUtilities.GetChunkBounds(toCoordinate, VoxelWorld.WorldSettings.ChunkSize);
             JobHandleWithData<IVoxelDataGenerationJob> jobHandleWithData = VoxelWorld.VoxelDataGenerator.GenerateVoxelData(generationBounds);
             jobHandleWithData.JobHandle.Complete();
-            VoxelWorld.VoxelDataStore.SetDensityChunk(jobHandleWithData.JobData.OutputVoxelData, toCoordinate);
+            VoxelWorld.VoxelDataStore.SetVoxelDataChunk(jobHandleWithData.JobData.OutputVoxelData, toCoordinate);
 
             VoxelWorld.ChunkStore.RemoveChunk(fromCoordinate);
 

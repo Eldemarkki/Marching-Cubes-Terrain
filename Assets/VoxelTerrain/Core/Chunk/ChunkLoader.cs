@@ -28,7 +28,7 @@ namespace Eldemarkki.VoxelTerrain.World
 
             Bounds chunkBounds = BoundsUtilities.GetChunkBounds(chunkCoordinate, VoxelWorld.WorldSettings.ChunkSize);
             var jobHandleWithData = VoxelWorld.VoxelDataGenerator.GenerateVoxelData(chunkBounds, Allocator.Persistent);
-            VoxelWorld.VoxelDataStore.SetDensityChunkJobHandle(jobHandleWithData, chunkCoordinate);
+            VoxelWorld.VoxelDataStore.SetVoxelDataJobHandle(jobHandleWithData, chunkCoordinate);
 
             chunk.Initialize(chunkCoordinate, VoxelWorld);
 

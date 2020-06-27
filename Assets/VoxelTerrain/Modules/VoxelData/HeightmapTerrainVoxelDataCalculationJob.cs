@@ -4,13 +4,13 @@ using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
 
-namespace Eldemarkki.VoxelTerrain.Density
+namespace Eldemarkki.VoxelTerrain.VoxelData
 {
     /// <summary>
     /// A heightmap terrain voxel data calculation job
     /// </summary>
     [BurstCompile]
-    struct HeightmapTerrainDensityCalculationJob : IVoxelDataGenerationJob
+    struct HeightmapTerrainVoxelDataCalculationJob : IVoxelDataGenerationJob
     {
         /// <summary>
         /// The height data from the heightmap
@@ -45,7 +45,7 @@ namespace Eldemarkki.VoxelTerrain.Density
         /// <summary>
         /// The generated voxel data
         /// </summary>
-        public DensityVolume OutputVoxelData { get; set; }
+        public VoxelDataVolume OutputVoxelData { get; set; }
 
         /// <summary>
         /// The execute method required for Unity's IJobParallelFor job type
@@ -58,24 +58,24 @@ namespace Eldemarkki.VoxelTerrain.Density
             int worldPositionY = worldPosition.y;
             int worldPositionZ = worldPosition.z;
 
-            float density = 1; // 1, because the default density should be air
+            float voxelData = 1; // 1, because the default voxel data should be air
             if (worldPositionX < heightmapWidth && worldPositionZ < heightmapHeight)
             {
-                density = CalculateDensity(worldPositionX, worldPositionY, worldPositionZ);
+                voxelData = CalculateVoxelData(worldPositionX, worldPositionY, worldPositionZ);
             }
 
-            OutputVoxelData.SetDensity(density, index);
+            OutputVoxelData.SetVoxelData(voxelData, index);
         }
 
         /// <summary>
-        /// Calculates the density at the world-space position
+        /// Calculates the voxel data at the world-space position
         /// </summary>
         /// <param name="worldPositionX">Sampling point's world-space x position</param>
         /// <param name="worldPositionY">Sampling point's world-space y position</param>
         /// <param name="worldPositionZ">Sampling point's world-space z position</param>
-        /// <returns>The density sampled from the world-space position</returns>
+        /// <returns>The voxel data sampled from the world-space position</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public float CalculateDensity(int worldPositionX, int worldPositionY, int worldPositionZ)
+        public float CalculateVoxelData(int worldPositionX, int worldPositionY, int worldPositionZ)
         {
             float heightmapValue = heightmapData[worldPositionX + worldPositionZ * heightmapWidth];
             float h = amplitude * heightmapValue;

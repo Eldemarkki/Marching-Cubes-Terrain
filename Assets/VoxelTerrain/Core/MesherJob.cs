@@ -1,4 +1,4 @@
-﻿using Eldemarkki.VoxelTerrain.Density;
+﻿using Eldemarkki.VoxelTerrain.VoxelData;
 using Eldemarkki.VoxelTerrain.MarchingCubes;
 using Eldemarkki.VoxelTerrain.Utilities;
 using Unity.Collections;
@@ -19,7 +19,7 @@ namespace Eldemarkki.VoxelTerrain
         /// <summary>
         /// The voxel data to generate the mesh from
         /// </summary>
-        DensityVolume VoxelData { get; set; }
+        VoxelDataVolume VoxelData { get; set; }
 
         /// <summary>
         /// The generated vertices

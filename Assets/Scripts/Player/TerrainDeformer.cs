@@ -1,6 +1,6 @@
 ﻿using Eldemarkki.VoxelTerrain.Utilities.Intersection;
 using System.Linq;
-using Eldemarkki.VoxelTerrain.Density;
+using Eldemarkki.VoxelTerrain.VoxelData;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -12,7 +12,7 @@ namespace Eldemarkki.VoxelTerrain.Player
     public class TerrainDeformer : MonoBehaviour
     {
         /// <summary>
-        /// The density store that will be deformed
+        /// The voxel data store that will be deformed
         /// </summary>
         [Header("Terrain Deforming Settings")]
         [SerializeField] private VoxelDataStore voxelDataStore = null;
@@ -171,10 +171,10 @@ namespace Eldemarkki.VoxelTerrain.Player
 
                         float modificationAmount = deformSpeed / distance * buildModifier;
 
-                        float oldDensity = voxelDataStore.GetDensity(offsetPoint);
-                        float newDensity = oldDensity - modificationAmount;
+                        float oldVoxelData = voxelDataStore.GetVoxelData(offsetPoint);
+                        float newVoxelData = oldVoxelData - modificationAmount;
 
-                        voxelDataStore.SetDensity(newDensity, offsetPoint);
+                        voxelDataStore.SetVoxelData(newVoxelData, offsetPoint);
                     }
                 }
             }
@@ -204,11 +204,11 @@ namespace Eldemarkki.VoxelTerrain.Player
                             continue;
                         }
 
-                        int3 densityWorldPosition = (int3)offsetPoint;
-                        float density = (math.dot(_flatteningNormal, densityWorldPosition) - math.dot(_flatteningNormal, _flatteningOrigin)) / deformRange;
-                        float oldDensity = voxelDataStore.GetDensity(densityWorldPosition);
+                        int3 voxelDataWorldPosition = (int3)offsetPoint;
+                        float voxelDataChange = (math.dot(_flatteningNormal, voxelDataWorldPosition) - math.dot(_flatteningNormal, _flatteningOrigin)) / deformRange;
+                        float oldVoxelData = voxelDataStore.GetVoxelData(voxelDataWorldPosition);
 
-                        voxelDataStore.SetDensity((density + oldDensity) * 0.8f, densityWorldPosition);
+                        voxelDataStore.SetVoxelData((voxelDataChange + oldVoxelData) * 0.8f, voxelDataWorldPosition);
                     }
                 }
             }

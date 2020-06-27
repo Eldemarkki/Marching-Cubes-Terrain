@@ -1,4 +1,4 @@
-﻿using Eldemarkki.VoxelTerrain.Density;
+﻿using Eldemarkki.VoxelTerrain.VoxelData;
 using Unity.Collections;
 using UnityEngine;
 
@@ -13,7 +13,7 @@ namespace Eldemarkki.VoxelTerrain.World
         /// Starts generating the voxel data for a specified volume
         /// </summary>
         /// <param name="bounds">The volume to generate the voxel data for</param>
-        /// <param name="allocator">The allocator for the new DensityVolume</param>
+        /// <param name="allocator">The allocator for the new <see cref="VoxelDataVolume"/></param>
         /// <returns>The job handle and the voxel data generation job</returns>
         public abstract JobHandleWithData<IVoxelDataGenerationJob> GenerateVoxelData(Bounds bounds, Allocator allocator = Allocator.Persistent);
     }

@@ -1,4 +1,4 @@
-﻿using Eldemarkki.VoxelTerrain.Density;
+﻿using Eldemarkki.VoxelTerrain.VoxelData;
 using Eldemarkki.VoxelTerrain.World.Chunks;
 using UnityEngine;
 

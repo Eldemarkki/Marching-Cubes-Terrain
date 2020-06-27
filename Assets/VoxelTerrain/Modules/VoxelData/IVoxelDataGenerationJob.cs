@@ -1,7 +1,7 @@
 ﻿using Unity.Jobs;
 using Unity.Mathematics;
 
-namespace Eldemarkki.VoxelTerrain.Density
+namespace Eldemarkki.VoxelTerrain.VoxelData
 {
     /// <summary>
     /// An interface for voxel data generation jobs
@@ -16,6 +16,6 @@ namespace Eldemarkki.VoxelTerrain.Density
         /// <summary>
         /// The generated voxel data
         /// </summary>
-        DensityVolume OutputVoxelData { get; set; }
+        VoxelDataVolume OutputVoxelData { get; set; }
     }
 }

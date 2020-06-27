@@ -1,4 +1,4 @@
-﻿using Eldemarkki.VoxelTerrain.Density;
+﻿using Eldemarkki.VoxelTerrain.VoxelData;
 using Eldemarkki.VoxelTerrain.Utilities;
 using Eldemarkki.VoxelTerrain.World.Chunks;
 using Unity.Collections;
@@ -33,7 +33,7 @@ namespace Eldemarkki.VoxelTerrain.MarchingCubes
         /// <returns>The job handle and the actual mesh generation job</returns>
         public override JobHandleWithData<IMesherJob> CreateMesh(VoxelDataStore voxelDataStore, int3 chunkCoordinate)
         {
-            DensityVolume boundsVoxelData = voxelDataStore.GetDensityChunk(chunkCoordinate);
+            VoxelDataVolume boundsVoxelData = voxelDataStore.GetVoxelDataChunk(chunkCoordinate);
             NativeCounter vertexCountCounter = new NativeCounter(Allocator.TempJob);
 
             int voxelCount = (boundsVoxelData.Width - 1) * (boundsVoxelData.Height - 1) * (boundsVoxelData.Depth - 1);
