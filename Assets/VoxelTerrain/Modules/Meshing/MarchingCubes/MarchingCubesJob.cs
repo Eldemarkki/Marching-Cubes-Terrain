@@ -87,22 +87,25 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
 
             for (int i = 0; MarchingCubesLookupTables.TriangleTable[rowIndex+i] != -1 && i < 15; i += 3)
             {
-                int triangleIndex = _vertexCountCounter.Increment() * 3;
-
                 float3 vertex1 = vertexList[MarchingCubesLookupTables.TriangleTable[rowIndex + i + 0]];
                 float3 vertex2 = vertexList[MarchingCubesLookupTables.TriangleTable[rowIndex + i + 1]];
                 float3 vertex3 = vertexList[MarchingCubesLookupTables.TriangleTable[rowIndex + i + 2]];
 
-                float3 normal = math.normalize(math.cross(vertex2 - vertex1, vertex3 - vertex1));
+                if (!vertex1.Equals(vertex2) && !vertex1.Equals(vertex3) && !vertex2.Equals(vertex3))
+                {
+                    float3 normal = math.normalize(math.cross(vertex2 - vertex1, vertex3 - vertex1));
 
-                _vertices[triangleIndex + 0] = new MeshingVertexData(vertex1, normal);
-                _triangles[triangleIndex + 0] = (ushort)(triangleIndex + 0);
+                    int triangleIndex = _vertexCountCounter.Increment() * 3;
+                    
+                    _vertices[triangleIndex + 0] = new MeshingVertexData(vertex1, normal);
+                    _triangles[triangleIndex + 0] = (ushort)(triangleIndex + 0);
 
-                _vertices[triangleIndex + 1] = new MeshingVertexData(vertex2, normal);
-                _triangles[triangleIndex + 1] = (ushort)(triangleIndex + 1);
+                    _vertices[triangleIndex + 1] = new MeshingVertexData(vertex2, normal);
+                    _triangles[triangleIndex + 1] = (ushort)(triangleIndex + 1);
 
-                _vertices[triangleIndex + 2] = new MeshingVertexData(vertex3, normal);
-                _triangles[triangleIndex + 2] = (ushort)(triangleIndex + 2);
+                    _vertices[triangleIndex + 2] = new MeshingVertexData(vertex3, normal);
+                    _triangles[triangleIndex + 2] = (ushort)(triangleIndex + 2);
+                }
             }
         }
     }
