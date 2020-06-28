@@ -126,12 +126,6 @@ namespace Eldemarkki.VoxelTerrain.Player
             if (!Physics.Raycast(ray, out RaycastHit hit, maxReachDistance)) { return; }
             Vector3 hitPoint = hit.point;
 
-            if (addTerrain)
-            {
-                Collider[] hits = Physics.OverlapSphere(hitPoint, deformRange / 2f * 0.8f);
-                if (hits.Any(h => h.CompareTag("Player"))) { return; }
-            }
-
             EditTerrain(hitPoint, addTerrain, deformSpeed, deformRange);
         }
 
