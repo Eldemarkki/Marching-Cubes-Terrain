@@ -51,9 +51,9 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         /// and densities above this will be outside the surface (air)</param>
         /// <returns>The calculated cube index</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int CalculateCubeIndex(VoxelCorners<float> voxelDensities, float isolevel)
+        public static byte CalculateCubeIndex(VoxelCorners<float> voxelDensities, float isolevel)
         {
-            int cubeIndex = 0;
+            byte cubeIndex = 0;
 
             if (voxelDensities.Corner1 < isolevel) { cubeIndex |= 1; }
             if (voxelDensities.Corner2 < isolevel) { cubeIndex |= 2; }

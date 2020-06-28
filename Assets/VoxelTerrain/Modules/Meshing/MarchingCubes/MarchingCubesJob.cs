@@ -70,7 +70,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
 
             VoxelCorners<float> densities = _voxelData.GetVoxelDataUnitCube(voxelLocalPosition);
 
-            int cubeIndex = MarchingCubesFunctions.CalculateCubeIndex(densities, isolevel);
+            byte cubeIndex = MarchingCubesFunctions.CalculateCubeIndex(densities, isolevel);
             if (cubeIndex == 0 || cubeIndex == 255)
             {
                 return;
