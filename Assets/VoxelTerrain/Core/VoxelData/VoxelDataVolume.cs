@@ -11,7 +11,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
     public struct VoxelDataVolume : IDisposable
     {
         /// <summary>
-        /// The native array which contains the voxel data. Voxel data is stored as bytes (0 to 255), and later mapped to go from -1 to 1
+        /// The native array which contains the voxel data. Voxel data is stored as bytes (0 to 255), and later mapped to go from 0 to 1
         /// </summary>
         private NativeArray<byte> _voxelData;
 
@@ -24,7 +24,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// The height of the volume
         /// </summary>
         public int Height { get; }
-
+        
         /// <summary>
         /// The depth of the volume
         /// </summary>
@@ -84,7 +84,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         }
 
         /// <summary>
-        /// Sets the voxel data in the specified location. Voxel data is clamped to go from -1 to 1
+        /// Sets the voxel data in the specified location. Voxel data is clamped to go from 0 to 1
         /// </summary>
         /// <param name="voxelData">The new voxel data</param>
         /// <param name="localPosition">The location of that voxel data</param>
@@ -95,7 +95,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         }
 
         /// <summary>
-        /// Stores the voxel data in the specified location. Voxel data is clamped to go from -1 to 1
+        /// Stores the voxel data in the specified location. Voxel data is clamped to go from 0 to 1
         /// </summary>
         /// <param name="voxelData">The new voxel data</param>
         /// <param name="x">The x value of the voxel data location</param>
@@ -108,32 +108,32 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         }
 
         /// <summary>
-        /// Stores the voxel data to the specified index. Voxel data is clamped to go from -1 to 1
+        /// Stores the voxel data to the specified index. Voxel data is clamped to go from 0 to 1
         /// </summary>
         /// <param name="voxelData">The new voxel data</param>
         /// <param name="index">The index in the native array</param>
         public void SetVoxelData(float voxelData, int index)
         {
-            _voxelData[index] = (byte) (127.5 * (math.clamp(voxelData, -1, 1) + 1));
+            _voxelData[index] = (byte) (255f * math.saturate(voxelData));
         }
 
         /// <summary>
-        /// Gets the voxel data from the local position (x,y,z), voxel data is in range from -1 to 1
+        /// Gets the voxel data from the local position (x,y,z), voxel data is in range from 0 to 1
         /// </summary>
         /// <param name="localPosition">The local position of the voxel data to get</param>
-        /// <returns>A voxel data in the range from -1 to 1 in the specified location</returns>
+        /// <returns>A voxel data in the range from 0 to 1 in the specified location</returns>
         public float GetVoxelData(int3 localPosition)
         {
             return GetVoxelData(localPosition.x, localPosition.y, localPosition.z);
         }
 
         /// <summary>
-        /// Gets the voxel data from the local position (x,y,z), voxel data is in range from -1 to 1
+        /// Gets the voxel data from the local position (x,y,z), voxel data is in range from 0 to 1
         /// </summary>
         /// <param name="x">The x value of the voxel data location</param>
         /// <param name="y">The y value of the voxel data location</param>
         /// <param name="z">The z value of the voxel data location</param>
-        /// <returns>A voxel data in the range from -1 to 1 in the specified location</returns>
+        /// <returns>A voxel data in the range from 0 to 1 in the specified location</returns>
         public float GetVoxelData(int x, int y, int z)
         {
             int index = IndexUtilities.XyzToIndex(x, y, z, Width, Height);
@@ -141,13 +141,13 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         }
 
         /// <summary>
-        /// Gets the voxel data from an index in the native array, voxel data is in range from -1 to 1
+        /// Gets the voxel data from an index in the native array, voxel data is in range from 0 to 1
         /// </summary>
         /// <param name="index">The index in the native array</param>
-        /// <returns>A voxel data in the range from -1 to 1 at the specified index</returns>
+        /// <returns>A voxel data in the range from 0 to 1 at the specified index</returns>
         public float GetVoxelData(int index)
         {
-            return _voxelData[index] / 127.5f - 1;
+            return _voxelData[index] / 255f;
         }
 
         /// <summary>

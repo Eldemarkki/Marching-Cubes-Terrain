@@ -53,7 +53,11 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public float CalculateVoxelData(int worldPositionX, int worldPositionY, int worldPositionZ)
         {
-            return worldPositionY - OctaveNoise(worldPositionX, worldPositionZ, proceduralTerrainSettings.NoiseFrequency * 0.001f, proceduralTerrainSettings.NoiseOctaveCount) * proceduralTerrainSettings.Amplitude - proceduralTerrainSettings.HeightOffset;
+            float voxelData = worldPositionY;
+            voxelData -= OctaveNoise(worldPositionX, worldPositionZ, proceduralTerrainSettings.NoiseFrequency * 0.001f, proceduralTerrainSettings.NoiseOctaveCount) * proceduralTerrainSettings.Amplitude;
+            voxelData -= proceduralTerrainSettings.HeightOffset;
+            voxelData *= 0.5f;
+            return voxelData;
         }
 
         /// <summary>

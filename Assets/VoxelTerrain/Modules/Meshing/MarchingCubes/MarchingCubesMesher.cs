@@ -17,7 +17,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         /// The density level where a surface will be created. Densities below this will be inside the surface (solid),
         /// and densities above this will be outside the surface (air)
         /// </summary>
-        [SerializeField] private float isolevel = 0;
+        [SerializeField, Range(0, 1)] private float isolevel = 0.5f;
 
         /// <summary>
         /// The density level where a surface will be created. Densities below this will be inside the surface (solid),

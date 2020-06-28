@@ -219,7 +219,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   voxelWorld: {fileID: 35699114}
   chunkProvider: {fileID: 35699119}
-  renderDistance: 6
+  renderDistance: 5
   player: {fileID: 534669905}
 --- !u!114 &35699119
 MonoBehaviour:
@@ -275,7 +275,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ef462ca49da6db4d89a0aaa43a026c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isolevel: 0
+  isolevel: 0.5
 --- !u!1 &86590905
 GameObject:
   m_ObjectHideFlags: 0
