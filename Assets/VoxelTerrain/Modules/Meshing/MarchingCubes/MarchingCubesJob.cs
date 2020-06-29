@@ -22,12 +22,12 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         /// The density level where a surface will be created. Densities below this will be inside the surface (solid),
         /// and densities above this will be outside the surface (air)
         /// </summary>
-        [ReadOnly] public float isolevel;
+        public float Isolevel { get; set; }
 
         /// <summary>
         /// The counter to keep track of the triangle index
         /// </summary>
-        [WriteOnly] private NativeCounter _vertexCountCounter;
+        public NativeCounter VertexCountCounter { get; set; }
 
         /// <summary>
         /// The generated vertices
@@ -38,11 +38,6 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         /// The generated triangles
         /// </summary>
         [NativeDisableParallelForRestriction, WriteOnly] private NativeArray<ushort> _triangles;
-
-        /// <summary>
-        /// A counter that keeps track of how many vertices there are
-        /// </summary>
-        public NativeCounter VertexCountCounter { get => _vertexCountCounter; set => _vertexCountCounter = value; }
 
         /// <summary>
         /// The voxel data to generate the mesh from
@@ -70,7 +65,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
 
             VoxelCorners<float> densities = _voxelData.GetVoxelDataUnitCube(voxelLocalPosition);
 
-            byte cubeIndex = MarchingCubesFunctions.CalculateCubeIndex(densities, isolevel);
+            byte cubeIndex = MarchingCubesFunctions.CalculateCubeIndex(densities, Isolevel);
             if (cubeIndex == 0 || cubeIndex == 255)
             {
                 return;
@@ -80,7 +75,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
 
             int edgeIndex = MarchingCubesLookupTables.EdgeTable[cubeIndex];
 
-            VertexList vertexList = MarchingCubesFunctions.GenerateVertexList(densities, corners, edgeIndex, isolevel);
+            VertexList vertexList = MarchingCubesFunctions.GenerateVertexList(densities, corners, edgeIndex, Isolevel);
 
             // Index at the beginning of the row
             int rowIndex = 15 * cubeIndex;
@@ -95,7 +90,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
                 {
                     float3 normal = math.normalize(math.cross(vertex2 - vertex1, vertex3 - vertex1));
 
-                    int triangleIndex = _vertexCountCounter.Increment() * 3;
+                    int triangleIndex = VertexCountCounter.Increment() * 3;
                     
                     _vertices[triangleIndex + 0] = new MeshingVertexData(vertex1, normal);
                     _triangles[triangleIndex + 0] = (ushort)(triangleIndex + 0);

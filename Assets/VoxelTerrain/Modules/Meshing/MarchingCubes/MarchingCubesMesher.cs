@@ -49,7 +49,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
             MarchingCubesJob marchingCubesJob = new MarchingCubesJob
             {
                 VoxelData = boundsVoxelData,
-                isolevel = Isolevel,
+                Isolevel = Isolevel,
                 VertexCountCounter = vertexCountCounter,
 
                 OutputVertices = outputVertices,
