@@ -38,44 +38,51 @@ namespace Eldemarkki.VoxelTerrain.World
 
         private void Start()
         {
-            int3 playerCoordinate = VectorUtilities.WorldPositionToCoordinate(player.position, voxelWorld.WorldSettings.ChunkSize);
-            _lastGenerationCoordinate = playerCoordinate;
+            int3 playerCoordinate = GetPlayerCoordinate();
+            GenerateTerrainAroundCoordinate(playerCoordinate);
+
+        }
+
+        private void Update()
+        {
+            int3 playerCoordinate = GetPlayerCoordinate();
+            if (!playerCoordinate.Equals(_lastGenerationCoordinate))
+            {
+                List<int3> coordinatesToUnload = voxelWorld.ChunkStore.GetChunkCoordinatesOutsideOfRenderDistance(playerCoordinate, renderDistance);
+                chunkProvider.UnloadCoordinates(coordinatesToUnload);
+
+                GenerateTerrainAroundCoordinate(playerCoordinate);
+            }
+        }
+
+        /// <summary>
+        /// Get's the current coordinate of <see cref="player"/>
+        /// </summary>
+        /// <returns>The coordinate of <see cref="player"/></returns>
+        private int3 GetPlayerCoordinate()
+        {
+            return VectorUtilities.WorldPositionToCoordinate(player.position, voxelWorld.WorldSettings.ChunkSize);
+        }
+
+        /// <summary>
+        /// Generates terrain around <paramref name="coordinate"/> with a radius of <paramref name="coordinate"/>
+        /// </summary>
+        /// <param name="coordinate">The coordinate to generate the terrain around</param>
+        private void GenerateTerrainAroundCoordinate(int3 coordinate)
+        {
             for (int x = -renderDistance; x <= renderDistance; x++)
             {
                 for (int y = -renderDistance; y <= renderDistance; y++)
                 {
                     for (int z = -renderDistance; z <= renderDistance; z++)
                     {
-                        int3 chunkCoordinate = playerCoordinate + new int3(x, y, z);
+                        int3 chunkCoordinate = coordinate + new int3(x, y, z);
                         chunkProvider.EnsureChunkExistsAtCoordinate(chunkCoordinate);
                     }
                 }
             }
-        }
 
-        private void Update()
-        {
-            int3 playerCoordinate = VectorUtilities.WorldPositionToCoordinate(player.position, voxelWorld.WorldSettings.ChunkSize);
-            if (!playerCoordinate.Equals(_lastGenerationCoordinate))
-            {
-                List<int3> coordinatesToUnload = voxelWorld.ChunkStore.GetChunkCoordinatesOutsideOfRenderDistance(playerCoordinate, renderDistance);
-
-                chunkProvider.UnloadCoordinates(coordinatesToUnload);
-
-                for (int x = -renderDistance; x <= renderDistance; x++)
-                {
-                    for (int y = -renderDistance; y <= renderDistance; y++)
-                    {
-                        for (int z = -renderDistance; z <= renderDistance; z++)
-                        {
-                            int3 chunkCoordinate = playerCoordinate + new int3(x, y, z);
-                            chunkProvider.EnsureChunkExistsAtCoordinate(chunkCoordinate);
-                        }
-                    }
-                }
-
-                _lastGenerationCoordinate = playerCoordinate;
-            }
+            _lastGenerationCoordinate = coordinate;
         }
     }
 }

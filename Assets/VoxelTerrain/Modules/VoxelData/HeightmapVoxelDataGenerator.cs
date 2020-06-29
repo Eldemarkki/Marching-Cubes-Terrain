@@ -30,11 +30,11 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
             {
                 WorldPositionOffset = bounds.min.ToInt3(),
                 OutputVoxelData = voxelData,
-                heightmapData = heightmapWorldGenerator.HeightmapTerrainSettings.HeightmapData,
-                heightmapWidth = heightmapWorldGenerator.HeightmapTerrainSettings.Width,
-                heightmapHeight = heightmapWorldGenerator.HeightmapTerrainSettings.Height,
-                amplitude = heightmapWorldGenerator.HeightmapTerrainSettings.Amplitude,
-                heightOffset = heightmapWorldGenerator.HeightmapTerrainSettings.HeightOffset
+                HeightmapData = heightmapWorldGenerator.HeightmapTerrainSettings.HeightmapData,
+                HeightmapWidth = heightmapWorldGenerator.HeightmapTerrainSettings.Width,
+                HeightmapHeight = heightmapWorldGenerator.HeightmapTerrainSettings.Height,
+                Amplitude = heightmapWorldGenerator.HeightmapTerrainSettings.Amplitude,
+                HeightOffset = heightmapWorldGenerator.HeightmapTerrainSettings.HeightOffset
             };
 
             JobHandle jobHandle = job.Schedule(voxelData.Length, 256);

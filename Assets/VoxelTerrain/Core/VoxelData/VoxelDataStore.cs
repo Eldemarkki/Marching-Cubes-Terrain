@@ -50,10 +50,11 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         }
 
         /// <summary>
-        /// Gets a voxel data from a world position. If the position is not loaded, 0 will be returned (Note that 0 doesn't directly mean that the position is not loaded)
+        /// Tries to get the voxel data from <paramref name="worldPosition"/>. If the position is not loaded, false will be returned and <paramref name="voxelData"/> will be set to 0 (Note that 0 doesn't directly mean that the position is not loaded). If it is loaded, true will be returned and <paramref name="voxelData"/> will be set to the value.
         /// </summary>
         /// <param name="worldPosition">The world position to get the voxel data from</param>
-        /// <returns>The voxel data at the world position</returns>
+        /// <param name="voxelData">The voxel data value at the world position</param>
+        /// <returns>Does a voxel data point exist at that position</returns>
         public bool TryGetVoxelData(int3 worldPosition, out float voxelData)
         {
             int3 chunkCoordinate = VectorUtilities.WorldPositionToCoordinate(worldPosition, VoxelWorld.WorldSettings.ChunkSize);
@@ -71,10 +72,10 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         }
 
         /// <summary>
-        /// Gets the voxel data volume for one chunk with a persistent allocator
+        /// Tries to get the <see cref="VoxelDataVolume"/> for one chunk with a persistent allocator. If a chunk doesn't exist there, false will be returned and <paramref name="chunk"/> will be set to null. If a chunk exists there, true will be returned and <paramref name="chunk"/> will be set to the chunk.
         /// </summary>
         /// <param name="chunkCoordinate">The coordinate of the chunk whose voxel data should be gotten</param>
-        /// <returns>The voxel data for the chunk</returns>
+        /// <returns>Does a chunk exists at that coordinate</returns>
         public bool TryGetVoxelDataChunk(int3 chunkCoordinate, out VoxelDataVolume chunk)
         {
             ApplyChunkChanges(chunkCoordinate);

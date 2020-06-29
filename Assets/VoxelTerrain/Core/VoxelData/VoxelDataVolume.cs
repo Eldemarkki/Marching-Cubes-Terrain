@@ -36,7 +36,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         public int3 Size => new int3(Width, Height, Depth);
 
         /// <summary>
-        /// How many voxel data points  does this volume contain
+        /// How many voxel data points does this volume contain
         /// </summary>
         public int Length => Width * Height * Depth;
 
@@ -46,13 +46,21 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         public bool IsCreated => _voxelData.IsCreated;
 
         /// <summary>
-        /// Constructor to create a <see cref="VoxelDataVolume"/>
+        /// Creates a <see cref="VoxelDataVolume"/> with a persistent allocator
+        /// </summary>
+        /// <param name="width">The width of the volume</param>
+        /// <param name="height">The height of the volume</param>
+        /// <param name="depth">The depth of the volume</param>
+        public VoxelDataVolume(int width, int height, int depth) : this(width, height, depth, Allocator.Persistent) { }
+
+        /// <summary>
+        /// Creates a <see cref="VoxelDataVolume"/>
         /// </summary>
         /// <param name="width">The width of the volume</param>
         /// <param name="height">The height of the volume</param>
         /// <param name="depth">The depth of the volume</param>
         /// <param name="allocator">How the memory should be allocated</param>
-        public VoxelDataVolume(int width, int height, int depth, Allocator allocator = Allocator.Persistent)
+        public VoxelDataVolume(int width, int height, int depth, Allocator allocator)
         {
             _voxelData = new NativeArray<byte>(width * height * depth, allocator);
 
@@ -62,18 +70,30 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         }
 
         /// <summary>
-        /// Constructor to create a <see cref="VoxelDataVolume"/>
+        /// Creates a <see cref="VoxelDataVolume"/> with a persistent allocator
+        /// </summary>
+        /// <param name="size">Amount of items in 1 dimension of this volume</param>
+        public VoxelDataVolume(int size) : this(size, Allocator.Persistent) { }
+
+        /// <summary>
+        /// Creates a <see cref="VoxelDataVolume"/>
         /// </summary>
         /// <param name="size">Amount of items in 1 dimension of this volume</param>
         /// <param name="allocator">How the memory should be allocated</param>
-        public VoxelDataVolume(int size, Allocator allocator = Allocator.Persistent) : this(size, size, size, allocator) { }
+        public VoxelDataVolume(int size, Allocator allocator) : this(size, size, size, allocator) { }
 
         /// <summary>
-        /// Constructor to create a <see cref="VoxelDataVolume"/>
+        /// Creates a <see cref="VoxelDataVolume"/> with a persistent allocator
+        /// </summary>
+        /// <param name="size">The 3-dimensional size of this volume</param>
+        public VoxelDataVolume(int3 size) : this(size.x, size.y, size.z, Allocator.Persistent) { }
+
+        /// <summary>
+        /// Creates a <see cref="VoxelDataVolume"/>
         /// </summary>
         /// <param name="size">The 3-dimensional size of this volume</param>
         /// <param name="allocator">How the memory should be allocated</param>
-        public VoxelDataVolume(int3 size, Allocator allocator = Allocator.Persistent) : this(size.x, size.y, size.z, allocator) { }
+        public VoxelDataVolume(int3 size, Allocator allocator) : this(size.x, size.y, size.z, allocator) { }
 
         /// <summary>
         /// Disposes the native voxel data array
@@ -84,7 +104,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         }
 
         /// <summary>
-        /// Sets the voxel data in the specified location. Voxel data is clamped to go from 0 to 1
+        /// Stores the <paramref name="voxelData"/> at <paramref name="localPosition"/>. The <paramref name="voxelData"/> will be clamped to be in range [0, 1]
         /// </summary>
         /// <param name="voxelData">The new voxel data</param>
         /// <param name="localPosition">The location of that voxel data</param>
@@ -95,7 +115,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         }
 
         /// <summary>
-        /// Stores the voxel data in the specified location. Voxel data is clamped to go from 0 to 1
+        /// Stores the <paramref name="voxelData"/> at <paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/>. The <paramref name="voxelData"/> will be clamped to be in range [0, 1]
         /// </summary>
         /// <param name="voxelData">The new voxel data</param>
         /// <param name="x">The x value of the voxel data location</param>
@@ -108,7 +128,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         }
 
         /// <summary>
-        /// Stores the voxel data to the specified index. Voxel data is clamped to go from 0 to 1
+        /// Stores the <paramref name="voxelData"/> at <paramref name="index"/>. The <paramref name="voxelData"/> will be clamped to be in range [0, 1]
         /// </summary>
         /// <param name="voxelData">The new voxel data</param>
         /// <param name="index">The index in the native array</param>
@@ -118,22 +138,24 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         }
 
         /// <summary>
-        /// Gets the voxel data from the local position (x,y,z), voxel data is in range from 0 to 1
+        /// Tries to get the voxel data at <paramref name="localPosition"/>. If the data exists at <paramref name="localPosition"/>, true will be returned and <paramref name="voxelData"/> will be set to the value (range [0, 1]). If it doesn't exist, false will be returned and <paramref name="voxelData"/> will be set to 0.
         /// </summary>
         /// <param name="localPosition">The local position of the voxel data to get</param>
-        /// <returns>A voxel data in the range from 0 to 1 in the specified location</returns>
+        /// <param name="voxelData">A voxel data in the range [0, 1] at <paramref name="localPosition"/></param>
+        /// <returns>Does a voxel data point exist at <paramref name="localPosition"/></returns>
         public bool TryGetVoxelData(int3 localPosition, out float voxelData)
         {
             return TryGetVoxelData(localPosition.x, localPosition.y, localPosition.z, out voxelData);
         }
 
         /// <summary>
-        /// Gets the voxel data from the local position (x,y,z), voxel data is in range from 0 to 1
+        /// Tries to get the voxel data at <paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/>. If the data exists at <paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/>, true will be returned and <paramref name="voxelData"/> will be set to the value (range [0, 1]). If it doesn't exist, false will be returned and <paramref name="voxelData"/> will be set to 0.
         /// </summary>
         /// <param name="x">The x value of the voxel data location</param>
         /// <param name="y">The y value of the voxel data location</param>
         /// <param name="z">The z value of the voxel data location</param>
-        /// <returns>A voxel data in the range from 0 to 1 in the specified location</returns>
+        /// <param name="voxelData">A voxel data in the range [0, 1] at <paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/></param>
+        /// <returns>Does a voxel data point exist at <paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/></returns>
         public bool TryGetVoxelData(int x, int y, int z, out float voxelData)
         {
             int index = IndexUtilities.XyzToIndex(x, y, z, Width, Height);
@@ -141,10 +163,11 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         }
 
         /// <summary>
-        /// Gets the voxel data from an index in the native array, voxel data is in range from 0 to 1
+        /// Gets the voxel data at <paramref name="index"/>. If the data exists at <paramref name="index"/>, true will be returned and <paramref name="voxelData"/> will be set to the value (range [0, 1]). If it doesn't exist, false will be returned and <paramref name="voxelData"/> will be set to 0.
         /// </summary>
         /// <param name="index">The index in the native array</param>
-        /// <returns>A voxel data in the range from 0 to 1 at the specified index</returns>
+        /// <param name="voxelData">A voxel data in the range [0, 1] at <paramref name="index"/></param>
+        /// <returns>Does a voxel data point exist at <paramref name="index"/></returns>
         public bool TryGetVoxelData(int index, out float voxelData)
         {
             if (index >= 0 && index < _voxelData.Length)

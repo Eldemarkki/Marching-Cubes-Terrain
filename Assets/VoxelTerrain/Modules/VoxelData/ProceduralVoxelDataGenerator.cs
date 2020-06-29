@@ -29,7 +29,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
             {
                 WorldPositionOffset = bounds.min.ToInt3(),
                 OutputVoxelData = voxelData,
-                proceduralTerrainSettings = proceduralTerrainSettings
+                ProceduralTerrainSettings = proceduralTerrainSettings
             };
             
             JobHandle jobHandle = job.Schedule(voxelData.Length, 256);

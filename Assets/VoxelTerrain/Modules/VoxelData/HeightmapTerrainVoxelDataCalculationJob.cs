@@ -15,27 +15,27 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <summary>
         /// The height data from the heightmap
         /// </summary>
-        [ReadOnly] public NativeArray<float> heightmapData;
+        [ReadOnly] private NativeArray<float> _heightmapData;
 
         /// <summary>
         /// How wide the heightmap is (in pixels). 1 pixel = 1 Unity unit
         /// </summary>
-        [ReadOnly] public int heightmapWidth;
+        public int HeightmapWidth { get; set; }
 
         /// <summary>
         /// How high the heightmap is (in pixels). 1 pixel = 1 Unity unit
         /// </summary>
-        [ReadOnly] public int heightmapHeight;
+        public int HeightmapHeight { get; set; }
 
         /// <summary>
         /// The value to multiply the height with
         /// </summary>
-        [ReadOnly] public float amplitude;
+        public float Amplitude { get; set; }
 
         /// <summary>
         /// The offset to move the sampling point up and down
         /// </summary>
-        [ReadOnly] public float heightOffset;
+        public float HeightOffset { get; set; }
 
         /// <summary>
         /// The sampling point's world position offset
@@ -46,6 +46,11 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// The generated voxel data
         /// </summary>
         public VoxelDataVolume OutputVoxelData { get; set; }
+
+        /// <summary>
+        /// The height data from the heightmap
+        /// </summary>
+        public NativeArray<float> HeightmapData { get => _heightmapData; set => _heightmapData = value; }
 
         /// <summary>
         /// The execute method required for Unity's IJobParallelFor job type
@@ -59,7 +64,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
             int worldPositionZ = worldPosition.z;
 
             float voxelData = 1; // 1, because the default voxel data should be air
-            if (worldPositionX < heightmapWidth && worldPositionZ < heightmapHeight)
+            if (worldPositionX < HeightmapWidth && worldPositionZ < HeightmapHeight)
             {
                 voxelData = CalculateVoxelData(worldPositionX, worldPositionY, worldPositionZ);
             }
@@ -77,9 +82,9 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public float CalculateVoxelData(int worldPositionX, int worldPositionY, int worldPositionZ)
         {
-            float heightmapValue = heightmapData[worldPositionX + worldPositionZ * heightmapWidth];
-            float h = amplitude * heightmapValue;
-            return worldPositionY - h - heightOffset;
+            float heightmapValue = _heightmapData[worldPositionX + worldPositionZ * HeightmapWidth];
+            float h = Amplitude * heightmapValue;
+            return worldPositionY - h - HeightOffset;
         }
     }
 }

@@ -2,7 +2,6 @@
 using Eldemarkki.VoxelTerrain.Settings;
 using Eldemarkki.VoxelTerrain.Utilities;
 using Unity.Burst;
-using Unity.Collections;
 using Unity.Mathematics;
 
 namespace Eldemarkki.VoxelTerrain.VoxelData
@@ -16,7 +15,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <summary>
         /// The procedural terrain generation settings
         /// </summary>
-        [ReadOnly] public ProceduralTerrainSettings proceduralTerrainSettings;
+        public ProceduralTerrainSettings ProceduralTerrainSettings { get; set; }
 
         /// <summary>
         /// The sampling point's world position offset
@@ -54,8 +53,8 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         public float CalculateVoxelData(int worldPositionX, int worldPositionY, int worldPositionZ)
         {
             float voxelData = worldPositionY;
-            voxelData -= OctaveNoise(worldPositionX, worldPositionZ, proceduralTerrainSettings.NoiseFrequency * 0.001f, proceduralTerrainSettings.NoiseOctaveCount) * proceduralTerrainSettings.Amplitude;
-            voxelData -= proceduralTerrainSettings.HeightOffset;
+            voxelData -= OctaveNoise(worldPositionX, worldPositionZ, ProceduralTerrainSettings.NoiseFrequency * 0.001f, ProceduralTerrainSettings.NoiseOctaveCount) * ProceduralTerrainSettings.Amplitude;
+            voxelData -= ProceduralTerrainSettings.HeightOffset;
             voxelData *= 0.5f;
             return voxelData;
         }
