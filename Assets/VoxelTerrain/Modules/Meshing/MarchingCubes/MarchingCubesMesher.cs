@@ -33,7 +33,11 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         /// <returns>The job handle and the actual mesh generation job</returns>
         public override JobHandleWithData<IMesherJob> CreateMesh(VoxelDataStore voxelDataStore, int3 chunkCoordinate)
         {
-            VoxelDataVolume boundsVoxelData = voxelDataStore.GetVoxelDataChunk(chunkCoordinate);
+            if (!voxelDataStore.TryGetVoxelDataChunk(chunkCoordinate, out VoxelDataVolume boundsVoxelData))
+            {
+                return null;
+            }
+
             NativeCounter vertexCountCounter = new NativeCounter(Allocator.TempJob);
 
             int voxelCount = (boundsVoxelData.Width - 1) * (boundsVoxelData.Height - 1) * (boundsVoxelData.Depth - 1);

@@ -66,6 +66,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         public void GenerateMesh()
         {
             JobHandleWithData<IMesherJob> jobHandleWithData = _voxelWorld.VoxelMesher.CreateMesh(_voxelWorld.VoxelDataStore, ChunkCoordinate);
+            if(jobHandleWithData == null) { return; }
 
             IMesherJob job = jobHandleWithData.JobData;
 

@@ -38,6 +38,8 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
 
         private void OnApplicationQuit()
         {
+            if(_chunks == null) { return; }
+
             foreach (VoxelDataVolume chunk in _chunks.Values)
             {
                 if (chunk.IsCreated)
@@ -52,19 +54,20 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// </summary>
         /// <param name="worldPosition">The world position to get the voxel data from</param>
         /// <returns>The voxel data at the world position</returns>
-        public float GetVoxelData(int3 worldPosition)
+        public bool TryGetVoxelData(int3 worldPosition, out float voxelData)
         {
             int3 chunkCoordinate = VectorUtilities.WorldPositionToCoordinate(worldPosition, VoxelWorld.WorldSettings.ChunkSize);
             ApplyChunkChanges(chunkCoordinate);
             if (_chunks.TryGetValue(chunkCoordinate, out VoxelDataVolume chunk))
             {
                 int3 voxelDataLocalPosition = worldPosition.Mod(VoxelWorld.WorldSettings.ChunkSize);
-                float voxelData = chunk.GetVoxelData(voxelDataLocalPosition.x, voxelDataLocalPosition.y, voxelDataLocalPosition.z);
-                return voxelData;
+                return chunk.TryGetVoxelData(voxelDataLocalPosition.x, voxelDataLocalPosition.y, voxelDataLocalPosition.z, out voxelData);
             }
-
-            Debug.LogWarning($"The chunk which contains the world position {worldPosition.ToString()} is not loaded.");
-            return 0;
+            else
+            {
+                voxelData = 0;
+                return false;
+            }
         }
 
         /// <summary>
@@ -72,15 +75,10 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// </summary>
         /// <param name="chunkCoordinate">The coordinate of the chunk whose voxel data should be gotten</param>
         /// <returns>The voxel data for the chunk</returns>
-        public VoxelDataVolume GetVoxelDataChunk(int3 chunkCoordinate)
+        public bool TryGetVoxelDataChunk(int3 chunkCoordinate, out VoxelDataVolume chunk)
         {
             ApplyChunkChanges(chunkCoordinate);
-            if (_chunks.TryGetValue(chunkCoordinate, out VoxelDataVolume chunk))
-            {
-                return chunk;
-            }
-
-            throw new Exception($"The chunk at coordinate {chunkCoordinate.ToString()} is not loaded.");
+            return _chunks.TryGetValue(chunkCoordinate, out chunk);
         }
 
         /// <summary>
@@ -107,7 +105,11 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                     for (int chunkCoordinateZ = minChunkCoordinate.z; chunkCoordinateZ <= maxChunkCoordinate.z; chunkCoordinateZ++)
                     {
                         int3 chunkCoordinate = new int3(chunkCoordinateX, chunkCoordinateY, chunkCoordinateZ);
-                        VoxelDataVolume voxelDataChunk = GetVoxelDataChunk(chunkCoordinate);
+                        VoxelDataVolume voxelDataChunk;
+                        if (!TryGetVoxelDataChunk(chunkCoordinate, out voxelDataChunk))
+                        {
+                            continue;
+                        }
 
                         Vector3 chunkBoundsSize = new Vector3(voxelDataChunk.Width - 1, voxelDataChunk.Height - 1, voxelDataChunk.Depth - 1);
                         int3 chunkWorldSpaceOrigin = chunkCoordinate * chunkSize;
@@ -128,8 +130,10 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                                     int3 voxelDataWorldPosition = new int3(voxelDataWorldPositionX, voxelDataWorldPositionY, voxelDataWorldPositionZ);
                                     int3 voxelDataLocalPosition = voxelDataWorldPosition - chunkWorldSpaceOrigin;
 
-                                    float voxelData = voxelDataChunk.GetVoxelData(voxelDataLocalPosition);
-                                    voxelDataVolume.SetVoxelData(voxelData, voxelDataWorldPosition - bounds.min.ToInt3());
+                                    if (voxelDataChunk.TryGetVoxelData(voxelDataLocalPosition, out float voxelData))
+                                    {
+                                        voxelDataVolume.SetVoxelData(voxelData, voxelDataWorldPosition - bounds.min.ToInt3());
+                                    }
                                 }
                             }
                         }
@@ -155,13 +159,15 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
 
                 if (!_chunks.ContainsKey(chunkCoordinate)) { continue; }
 
-                VoxelDataVolume voxelDataVolume = GetVoxelDataChunk(chunkCoordinate);
-                int3 localPos = (worldPosition - chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize).Mod(VoxelWorld.WorldSettings.ChunkSize + 1);
-                voxelDataVolume.SetVoxelData(voxelData, localPos.x, localPos.y, localPos.z);
-
-                if (VoxelWorld.ChunkStore.TryGetChunkAtCoordinate(chunkCoordinate, out Chunk chunk))
+                if (TryGetVoxelDataChunk(chunkCoordinate, out VoxelDataVolume voxelDataVolume))
                 {
-                    chunk.HasChanges = true;
+                    int3 localPos = (worldPosition - chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize).Mod(VoxelWorld.WorldSettings.ChunkSize + 1);
+                    voxelDataVolume.SetVoxelData(voxelData, localPos.x, localPos.y, localPos.z);
+
+                    if (VoxelWorld.ChunkStore.TryGetChunkAtCoordinate(chunkCoordinate, out Chunk chunk))
+                    {
+                        chunk.HasChanges = true;
+                    }
                 }
             }
         }
@@ -211,7 +217,10 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                     for (int chunkCoordinateZ = minChunkCoordinate.z; chunkCoordinateZ <= maxChunkCoordinate.z; chunkCoordinateZ++)
                     {
                         int3 chunkCoordinate = new int3(chunkCoordinateX, chunkCoordinateY, chunkCoordinateZ);
-                        VoxelDataVolume voxelDataChunk = GetVoxelDataChunk(chunkCoordinate);
+                        if (!TryGetVoxelDataChunk(chunkCoordinate, out VoxelDataVolume voxelDataChunk))
+                        {
+                            continue;
+                        }
 
                         Vector3 chunkBoundsSize = new Vector3(voxelDataChunk.Width - 1, voxelDataChunk.Height - 1, voxelDataChunk.Depth - 1);
                         int3 chunkWorldSpaceOrigin = chunkCoordinate * chunkSize;
@@ -231,8 +240,10 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                                 {
                                     int3 voxelDataWorldPosition = new int3(voxelDataWorldPositionX, voxelDataWorldPositionY, voxelDataWorldPositionZ);
 
-                                    float voxelData = voxelDataChunk.GetVoxelData(voxelDataWorldPosition - worldSpaceQuery.min.ToInt3());
-                                    voxelDataChunk.SetVoxelData(voxelData, voxelDataWorldPosition - chunkWorldSpaceOrigin);
+                                    if (voxelDataChunk.TryGetVoxelData(voxelDataWorldPosition - worldSpaceQuery.min.ToInt3(), out float voxelData))
+                                    {
+                                        voxelDataChunk.SetVoxelData(voxelData, voxelDataWorldPosition - chunkWorldSpaceOrigin);
+                                    }
                                 }
                             }
                         }

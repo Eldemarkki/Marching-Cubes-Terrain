@@ -165,10 +165,11 @@ namespace Eldemarkki.VoxelTerrain.Player
 
                         float modificationAmount = deformSpeed / distance * buildModifier;
 
-                        float oldVoxelData = voxelDataStore.GetVoxelData(offsetPoint);
-                        float newVoxelData = oldVoxelData - modificationAmount;
-
-                        voxelDataStore.SetVoxelData(newVoxelData, offsetPoint);
+                        if (voxelDataStore.TryGetVoxelData(offsetPoint, out float oldVoxelData))
+                        {
+                            float newVoxelData = oldVoxelData - modificationAmount;
+                            voxelDataStore.SetVoxelData(newVoxelData, offsetPoint);
+                        }
                     }
                 }
             }
@@ -199,10 +200,11 @@ namespace Eldemarkki.VoxelTerrain.Player
                         }
 
                         int3 voxelDataWorldPosition = (int3)offsetPoint;
-                        float voxelDataChange = (math.dot(_flatteningNormal, voxelDataWorldPosition) - math.dot(_flatteningNormal, _flatteningOrigin)) / deformRange;
-                        float oldVoxelData = voxelDataStore.GetVoxelData(voxelDataWorldPosition);
-
-                        voxelDataStore.SetVoxelData((voxelDataChange * 0.5f + oldVoxelData) * 0.8f, voxelDataWorldPosition);
+                        if (voxelDataStore.TryGetVoxelData(voxelDataWorldPosition, out float oldVoxelData))
+                        {
+                            float voxelDataChange = (math.dot(_flatteningNormal, voxelDataWorldPosition) - math.dot(_flatteningNormal, _flatteningOrigin)) / deformRange;
+                            voxelDataStore.SetVoxelData((voxelDataChange * 0.5f + oldVoxelData) * 0.8f, voxelDataWorldPosition);
+                        }
                     }
                 }
             }

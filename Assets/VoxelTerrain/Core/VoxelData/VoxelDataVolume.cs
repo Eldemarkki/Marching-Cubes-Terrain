@@ -122,9 +122,9 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// </summary>
         /// <param name="localPosition">The local position of the voxel data to get</param>
         /// <returns>A voxel data in the range from 0 to 1 in the specified location</returns>
-        public float GetVoxelData(int3 localPosition)
+        public bool TryGetVoxelData(int3 localPosition, out float voxelData)
         {
-            return GetVoxelData(localPosition.x, localPosition.y, localPosition.z);
+            return TryGetVoxelData(localPosition.x, localPosition.y, localPosition.z, out voxelData);
         }
 
         /// <summary>
@@ -134,10 +134,10 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <param name="y">The y value of the voxel data location</param>
         /// <param name="z">The z value of the voxel data location</param>
         /// <returns>A voxel data in the range from 0 to 1 in the specified location</returns>
-        public float GetVoxelData(int x, int y, int z)
+        public bool TryGetVoxelData(int x, int y, int z, out float voxelData)
         {
             int index = IndexUtilities.XyzToIndex(x, y, z, Width, Height);
-            return GetVoxelData(index);
+            return TryGetVoxelData(index, out voxelData);
         }
 
         /// <summary>
@@ -145,9 +145,16 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// </summary>
         /// <param name="index">The index in the native array</param>
         /// <returns>A voxel data in the range from 0 to 1 at the specified index</returns>
-        public float GetVoxelData(int index)
+        public bool TryGetVoxelData(int index, out float voxelData)
         {
-            return _voxelData[index] / 255f;
+            if (index >= 0 && index < _voxelData.Length)
+            {
+                voxelData = _voxelData[index] / 255f;
+                return true;
+            }
+            
+            voxelData = 0;
+            return false;
         }
 
         /// <summary>
