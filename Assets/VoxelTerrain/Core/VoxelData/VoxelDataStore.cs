@@ -75,6 +75,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// Tries to get the <see cref="VoxelDataVolume"/> for one chunk with a persistent allocator. If a chunk doesn't exist there, false will be returned and <paramref name="chunk"/> will be set to null. If a chunk exists there, true will be returned and <paramref name="chunk"/> will be set to the chunk.
         /// </summary>
         /// <param name="chunkCoordinate">The coordinate of the chunk whose voxel data should be gotten</param>
+        /// <param name="chunk">The voxel data of a chunk at the coordinate</param>
         /// <returns>Does a chunk exists at that coordinate</returns>
         public bool TryGetVoxelDataChunk(int3 chunkCoordinate, out VoxelDataVolume chunk)
         {
@@ -83,12 +84,22 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         }
 
         /// <summary>
+        /// Gets the voxel data of a custom volume in the world with a persistent allocator
+        /// </summary>
+        /// <param name="bounds">The world-space volume to get the voxel data for</param>
+        /// <returns>The voxel data volume inside the bounds</returns>
+        public VoxelDataVolume GetVoxelDataCustom(Bounds bounds)
+        {
+            return GetVoxelDataCustom(bounds, Allocator.Persistent);
+        }
+
+        /// <summary>
         /// Gets the voxel data of a custom volume in the world
         /// </summary>
         /// <param name="bounds">The world-space volume to get the voxel data for</param>
         /// <param name="allocator">How the new voxel data volume should be allocated</param>
         /// <returns>The voxel data volume inside the bounds</returns>
-        public VoxelDataVolume GetVoxelDataCustom(Bounds bounds, Allocator allocator = Allocator.Persistent)
+        public VoxelDataVolume GetVoxelDataCustom(Bounds bounds, Allocator allocator)
         {
             VoxelDataVolume voxelDataVolume = new VoxelDataVolume(bounds.size.ToInt3(), allocator);
 

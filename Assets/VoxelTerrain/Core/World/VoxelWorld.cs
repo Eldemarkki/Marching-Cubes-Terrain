@@ -11,25 +11,25 @@ namespace Eldemarkki.VoxelTerrain.World
     /// </summary>
     public class VoxelWorld : MonoBehaviour
     {
-        [SerializeField] private WorldSettings worldSettings = null;
+        [SerializeField] private WorldSettings worldSettings;
         public WorldSettings WorldSettings => worldSettings;
 
-        [SerializeField] private VoxelMesher voxelMesher = null;
+        [SerializeField] private VoxelMesher voxelMesher;
         public VoxelMesher VoxelMesher => voxelMesher;
 
-        [SerializeField] private VoxelDataStore voxelDataStore = null;
+        [SerializeField] private VoxelDataStore voxelDataStore;
         public VoxelDataStore VoxelDataStore => voxelDataStore;
 
-        [SerializeField] private VoxelDataGenerator voxelDataGenerator = null;
+        [SerializeField] private VoxelDataGenerator voxelDataGenerator;
         public VoxelDataGenerator VoxelDataGenerator => voxelDataGenerator;
 
-        [SerializeField] private ChunkProvider chunkProvider = null;
+        [SerializeField] private ChunkProvider chunkProvider;
         public ChunkProvider ChunkProvider => chunkProvider;
 
-        [SerializeField] private ChunkStore chunkStore = null;
+        [SerializeField] private ChunkStore chunkStore;
         public ChunkStore ChunkStore => chunkStore;
 
-        [SerializeField] private ChunkLoader chunkLoader = null;
+        [SerializeField] private ChunkLoader chunkLoader;
         public ChunkLoader ChunkLoader => chunkLoader;
 
         private void Awake()

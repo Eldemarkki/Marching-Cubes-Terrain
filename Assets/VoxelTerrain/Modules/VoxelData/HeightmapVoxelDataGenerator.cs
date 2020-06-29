@@ -14,7 +14,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <summary>
         /// The heightmap world generator which gives this class the HeightmapTerrainSettings
         /// </summary>
-        [SerializeField] private HeightmapWorldGenerator heightmapWorldGenerator = null;
+        [SerializeField] private HeightmapWorldGenerator heightmapWorldGenerator;
 
         /// <summary>
         /// Starts generating the voxel data for a specified volume
@@ -22,7 +22,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <param name="bounds">The volume to generate the voxel data for</param>
         /// <param name="allocator">The allocator for the new <see cref="VoxelDataVolume"/></param>
         /// <returns>The job handle and the voxel data generation job</returns>
-        public override JobHandleWithData<IVoxelDataGenerationJob> GenerateVoxelData(Bounds bounds, Allocator allocator = Allocator.Persistent)
+        public override JobHandleWithData<IVoxelDataGenerationJob> GenerateVoxelData(Bounds bounds, Allocator allocator)
         {
             VoxelDataVolume voxelData = new VoxelDataVolume(bounds.size.ToInt3(), allocator);
 

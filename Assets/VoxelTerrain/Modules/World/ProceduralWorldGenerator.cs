@@ -14,12 +14,12 @@ namespace Eldemarkki.VoxelTerrain.World
         /// <summary>
         /// The voxel world that "owns" this world generator
         /// </summary>
-        [SerializeField] private VoxelWorld voxelWorld = null;
+        [SerializeField] private VoxelWorld voxelWorld;
 
         /// <summary>
         /// A chunk provider which provides chunks with procedurally generated data
         /// </summary>
-        [SerializeField] private ProceduralChunkProvider chunkProvider = null;
+        [SerializeField] private ProceduralChunkProvider chunkProvider;
 
         /// <summary>
         /// The radius of the chunks the player sees
@@ -29,7 +29,7 @@ namespace Eldemarkki.VoxelTerrain.World
         /// <summary>
         /// The viewer which the terrain is generated around
         /// </summary>
-        [SerializeField] private Transform player = null;
+        [SerializeField] private Transform player;
 
         /// <summary>
         /// The coordinate of the chunk where terrain was last generated around

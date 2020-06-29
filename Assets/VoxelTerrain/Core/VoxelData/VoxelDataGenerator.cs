@@ -17,7 +17,6 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <returns>The job handle and the voxel data generation job</returns>
         public abstract JobHandleWithData<IVoxelDataGenerationJob> GenerateVoxelData(Bounds bounds, Allocator allocator);
 
-
         /// <summary>
         /// Starts generating the voxel data for a specified volume with a persistent allocator
         /// </summary>

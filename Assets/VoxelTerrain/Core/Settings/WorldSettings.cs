@@ -17,7 +17,7 @@ namespace Eldemarkki.VoxelTerrain.Settings
         /// <summary>
         /// The chunk's prefab that will be instantiated
         /// </summary>
-        [SerializeField] private Chunk chunkPrefab = null;
+        [SerializeField] private Chunk chunkPrefab;
 
         /// <summary>
         /// The chunk's size. This represents the width, height and depth in Unity units.

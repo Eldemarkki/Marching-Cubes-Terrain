@@ -15,7 +15,7 @@ namespace Eldemarkki.VoxelTerrain.Player
         /// The voxel data store that will be deformed
         /// </summary>
         [Header("Terrain Deforming Settings")]
-        [SerializeField] private VoxelDataStore voxelDataStore = null;
+        [SerializeField] private VoxelDataStore voxelDataStore;
 
         /// <summary>
         /// Does the left mouse button add or remove terrain
@@ -47,7 +47,7 @@ namespace Eldemarkki.VoxelTerrain.Player
         /// The game object that the deformation raycast will be cast from
         /// </summary>
         [Header("Player Settings")]
-        [SerializeField] private Transform playerCamera = null;
+        [SerializeField] private Transform playerCamera;
 
         /// <summary>
         /// Is the terrain currently being flattened
