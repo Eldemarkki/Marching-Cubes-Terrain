@@ -16,7 +16,7 @@ namespace Eldemarkki.VoxelTerrain.Player
         /// </summary>
         [Header("Terrain Deforming Settings")]
         [SerializeField] private VoxelDataStore voxelDataStore = null;
-        
+
         /// <summary>
         /// Does the left mouse button add or remove terrain
         /// </summary>
@@ -202,7 +202,7 @@ namespace Eldemarkki.VoxelTerrain.Player
                         float voxelDataChange = (math.dot(_flatteningNormal, voxelDataWorldPosition) - math.dot(_flatteningNormal, _flatteningOrigin)) / deformRange;
                         float oldVoxelData = voxelDataStore.GetVoxelData(voxelDataWorldPosition);
 
-                        voxelDataStore.SetVoxelData((voxelDataChange + oldVoxelData) * 0.8f, voxelDataWorldPosition);
+                        voxelDataStore.SetVoxelData((voxelDataChange * 0.5f + oldVoxelData) * 0.8f, voxelDataWorldPosition);
                     }
                 }
             }
