@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Runtime.CompilerServices;
 using Eldemarkki.VoxelTerrain.Utilities;
 using Unity.Burst;
 using Unity.Collections;
@@ -10,7 +11,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
     /// A heightmap terrain voxel data calculation job
     /// </summary>
     [BurstCompile]
-    public struct HeightmapTerrainVoxelDataCalculationJob : IVoxelDataGenerationJob
+    public struct HeightmapTerrainVoxelDataCalculationJob : IVoxelDataGenerationJob, IEquatable<HeightmapTerrainVoxelDataCalculationJob>
     {
         /// <summary>
         /// The height data from the heightmap
@@ -85,6 +86,59 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
             float heightmapValue = _heightmapData[worldPositionX + worldPositionZ * HeightmapWidth];
             float h = Amplitude * heightmapValue;
             return worldPositionY - h - HeightOffset;
+        }
+
+        public bool Equals(HeightmapTerrainVoxelDataCalculationJob other)
+        {
+            if(other == null) { return false; }
+
+            return _heightmapData.Equals(other._heightmapData) &&
+                   HeightmapWidth == other.HeightmapWidth &&
+                   HeightmapHeight == other.HeightmapHeight &&
+                   Amplitude == other.Amplitude &&
+                   HeightOffset == other.HeightOffset &&
+                   WorldPositionOffset.Equals(other.WorldPositionOffset) &&
+                   OutputVoxelData.Equals(other.OutputVoxelData);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if(obj == null) { return false; }
+
+            if(obj is HeightmapTerrainVoxelDataCalculationJob other)
+            {
+                return Equals(other);
+            }
+
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+
+                hash = hash * 23 + _heightmapData.GetHashCode();
+                hash = hash * 23 + HeightmapWidth.GetHashCode();
+                hash = hash * 23 + HeightmapHeight.GetHashCode();
+                hash = hash * 23 + Amplitude.GetHashCode();
+                hash = hash * 23 + HeightOffset.GetHashCode();
+                hash = hash * 23 + WorldPositionOffset.GetHashCode();
+                hash = hash * 23 + OutputVoxelData.GetHashCode();
+
+                return hash;
+            }
+        }
+
+        public static bool operator ==(HeightmapTerrainVoxelDataCalculationJob left, HeightmapTerrainVoxelDataCalculationJob right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(HeightmapTerrainVoxelDataCalculationJob left, HeightmapTerrainVoxelDataCalculationJob right)
+        {
+            return !(left == right);
         }
     }
 }

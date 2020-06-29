@@ -7,7 +7,7 @@ namespace Eldemarkki.VoxelTerrain.Settings
     /// The procedural terrain generation settings
     /// </summary>
     [Serializable]
-    public struct ProceduralTerrainSettings
+    public struct ProceduralTerrainSettings : IEquatable<ProceduralTerrainSettings>
     {
         /// <summary>
         /// The frequency of the noise
@@ -62,6 +62,53 @@ namespace Eldemarkki.VoxelTerrain.Settings
             this.noiseOctaveCount = noiseOctaveCount;
             this.amplitude = amplitude;
             this.heightOffset = heightOffset;
+        }
+
+        public bool Equals(ProceduralTerrainSettings other)
+        {
+            if(other == null) { return false; }
+
+            return NoiseFrequency == other.NoiseFrequency &&
+                NoiseOctaveCount == other.NoiseOctaveCount &&
+                Amplitude == other.Amplitude &&
+                HeightOffset == other.HeightOffset;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if(obj == null) { return false; }
+
+            if(obj is ProceduralTerrainSettings other)
+            {
+                return Equals(other);
+            }
+
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+
+                hash = hash * 23 + noiseFrequency.GetHashCode();
+                hash = hash * 23 + noiseOctaveCount.GetHashCode();
+                hash = hash * 23 + amplitude.GetHashCode();
+                hash = hash * 23 + heightOffset.GetHashCode();
+
+                return hash;
+            }
+        }
+
+        public static bool operator ==(ProceduralTerrainSettings left, ProceduralTerrainSettings right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(ProceduralTerrainSettings left, ProceduralTerrainSettings right)
+        {
+            return !(left == right);
         }
     }
 }

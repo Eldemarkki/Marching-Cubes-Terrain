@@ -1,5 +1,4 @@
 ﻿using Eldemarkki.VoxelTerrain.Utilities.Intersection;
-using System.Linq;
 using Eldemarkki.VoxelTerrain.VoxelData;
 using Unity.Mathematics;
 using UnityEngine;

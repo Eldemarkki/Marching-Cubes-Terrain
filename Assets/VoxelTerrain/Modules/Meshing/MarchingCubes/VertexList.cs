@@ -1,3 +1,4 @@
+using System;
 using Unity.Mathematics;
 
 namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
@@ -5,7 +6,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
     /// <summary>
     /// A container for a vertex list with 12 vertices
     /// </summary>
-    public struct VertexList
+    public struct VertexList : IEquatable<VertexList>
     {
         /// <summary>
         /// The first vertex
@@ -71,7 +72,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         /// The indexer for the vertex list
         /// </summary>
         /// <param name="index">The vertex's index</param>
-        /// <exception cref="System.IndexOutOfRangeException">Thrown when the index is more than 11.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when the index is more than 11.</exception>
         public float3 this[int index]
         {
             get
@@ -90,7 +91,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
                     case 9: return _c10;
                     case 10: return _c11;
                     case 11: return _c12;
-                    default: throw new System.IndexOutOfRangeException();
+                    default: throw new ArgumentOutOfRangeException($"There are only 8 corners! You tried to access the corner at index {index.ToString()}");
                 }
             }
             set
@@ -134,9 +135,72 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
                         _c12 = value;
                         break;
                     default:
-                        throw new System.IndexOutOfRangeException();
+                        throw new ArgumentOutOfRangeException($"There are only 8 corners! You tried to access the corner at index {index.ToString()}");
                 }
             }
+        }
+
+        public bool Equals(VertexList other)
+        {
+            if (other == null) { return false; }
+
+            return _c1.Equals(other._c1) &&
+                   _c2.Equals(other._c2) &&
+                   _c3.Equals(other._c3) &&
+                   _c4.Equals(other._c4) &&
+                   _c5.Equals(other._c5) &&
+                   _c6.Equals(other._c6) &&
+                   _c7.Equals(other._c7) &&
+                   _c8.Equals(other._c8) &&
+                   _c9.Equals(other._c9) &&
+                   _c10.Equals(other._c10) &&
+                   _c11.Equals(other._c11) &&
+                   _c12.Equals(other._c12);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null) { return false; }
+
+            if(obj is VertexList other)
+            {
+                return Equals(other);
+            }
+
+            return false;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+
+                hash = hash * 23 + _c1.GetHashCode();
+                hash = hash * 23 + _c2.GetHashCode();
+                hash = hash * 23 + _c3.GetHashCode();
+                hash = hash * 23 + _c4.GetHashCode();
+                hash = hash * 23 + _c5.GetHashCode();
+                hash = hash * 23 + _c6.GetHashCode();
+                hash = hash * 23 + _c7.GetHashCode();
+                hash = hash * 23 + _c8.GetHashCode();
+                hash = hash * 23 + _c9.GetHashCode();
+                hash = hash * 23 + _c10.GetHashCode();
+                hash = hash * 23 + _c11.GetHashCode();
+                hash = hash * 23 + _c12.GetHashCode();
+
+                return hash;
+            }
+        }
+
+        public static bool operator ==(VertexList left, VertexList right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(VertexList left, VertexList right)
+        {
+            return !(left == right);
         }
     }
 }
