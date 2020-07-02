@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using Eldemarkki.VoxelTerrain.Settings;
 using Eldemarkki.VoxelTerrain.Utilities;
 using Unity.Burst;
@@ -11,7 +10,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
     /// A procedural terrain voxel data calculation job
     /// </summary>
     [BurstCompile]
-    public struct ProceduralTerrainVoxelDataCalculationJob : IVoxelDataGenerationJob, IEquatable<ProceduralTerrainVoxelDataCalculationJob>
+    public struct ProceduralTerrainVoxelDataCalculationJob : IVoxelDataGenerationJob
     {
         /// <summary>
         /// The procedural terrain generation settings
@@ -69,7 +68,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <param name="octaveCount">How many layers of noise to combine</param>
         /// <returns>The sampled noise value</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static float OctaveNoise(float x, float y, float frequency, int octaveCount)
+        private float OctaveNoise(float x, float y, float frequency, int octaveCount)
         {
             float value = 0;
 
@@ -83,51 +82,6 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
             }
 
             return value;
-        }
-
-        public bool Equals(ProceduralTerrainVoxelDataCalculationJob other)
-        {
-            if(other == null) { return false; }
-
-            return ProceduralTerrainSettings.Equals(other.ProceduralTerrainSettings) &&
-                   WorldPositionOffset.Equals(other.WorldPositionOffset) &&
-                   OutputVoxelData.Equals(other.OutputVoxelData);
-        }
-
-        public override bool Equals(object obj)
-        {
-            if(obj == null) { return false; }
-
-            if(obj is ProceduralTerrainVoxelDataCalculationJob other)
-            {
-                return Equals(other);
-            }
-
-            return false;
-        }
-
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int hash = 17;
-
-                hash = hash * 23 + ProceduralTerrainSettings.GetHashCode();
-                hash = hash * 23 + WorldPositionOffset.GetHashCode();
-                hash = hash * 23 + OutputVoxelData.GetHashCode();
-
-                return hash;
-            }
-        }
-
-        public static bool operator ==(ProceduralTerrainVoxelDataCalculationJob left, ProceduralTerrainVoxelDataCalculationJob right)
-        {
-            return left.Equals(right);
-        }
-
-        public static bool operator !=(ProceduralTerrainVoxelDataCalculationJob left, ProceduralTerrainVoxelDataCalculationJob right)
-        {
-            return !(left == right);
         }
     }
 }

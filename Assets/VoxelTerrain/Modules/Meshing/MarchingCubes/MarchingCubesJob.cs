@@ -4,7 +4,6 @@ using Eldemarkki.VoxelTerrain.Utilities;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
-using System;
 
 namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
 {
@@ -12,7 +11,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
     /// A marching cubes mesh generation job
     /// </summary>
     [BurstCompile]
-    public struct MarchingCubesJob : IMesherJob, IEquatable<MarchingCubesJob>
+    public struct MarchingCubesJob : IMesherJob
     {
         /// <summary>
         /// The densities to generate the mesh off of
@@ -103,55 +102,6 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
                     _triangles[triangleIndex + 2] = (ushort)(triangleIndex + 2);
                 }
             }
-        }
-
-        public bool Equals(MarchingCubesJob other)
-        {
-            if(other == null) { return false; }
-
-            return _voxelData.Equals(other._voxelData) &&
-                   Isolevel == other.Isolevel &&
-                   VertexCountCounter.Equals(other.VertexCountCounter) &&
-                   _vertices.Equals(other._vertices) &&
-                   _triangles.Equals(other._triangles);
-        }
-
-        public override bool Equals(object obj)
-        {
-            if(obj == null) { return false; }
-
-            if(obj is MarchingCubesJob other)
-            {
-                return Equals(other);
-            }
-
-            return false;
-        }
-
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int hash = 17;
-
-                hash = hash * 23 + _voxelData.GetHashCode();
-                hash = hash * 23 + Isolevel.GetHashCode();
-                hash = hash * 23 + VertexCountCounter.GetHashCode();
-                hash = hash * 23 + _vertices.GetHashCode();
-                hash = hash * 23 + _triangles.GetHashCode();
-
-                return hash;
-            }
-        }
-
-        public static bool operator ==(MarchingCubesJob left, MarchingCubesJob right)
-        {
-            return left.Equals(right);
-        }
-
-        public static bool operator !=(MarchingCubesJob left, MarchingCubesJob right)
-        {
-            return !(left == right);
         }
     }
 }

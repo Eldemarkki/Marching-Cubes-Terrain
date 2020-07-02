@@ -8,7 +8,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
     /// <summary>
     /// A 3-dimensional volume of voxel data
     /// </summary>
-    public struct VoxelDataVolume : IDisposable, IEquatable<VoxelDataVolume>
+    public struct VoxelDataVolume : IDisposable
     {
         /// <summary>
         /// The native array which contains the voxel data. Voxel data is stored as bytes (0 to 255), and later mapped to go from 0 to 1
@@ -192,57 +192,8 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
             }
             else
             {
-                throw new ArgumentException($"The chunks are not the same size! Width: {Width.ToString()}/{sourceVolume.Width.ToString()}, Height: {Height.ToString()}/{sourceVolume.Height.ToString()}, Depth: {Depth.ToString()}/{sourceVolume.Depth.ToString()}");
+                throw new ArgumentException($"The chunks are not the same size! Width: {Width}/{sourceVolume.Width}, Height: {Height}/{sourceVolume.Height}, Depth: {Depth}/{sourceVolume.Depth}");
             }
-        }
-
-        public bool Equals(VoxelDataVolume other)
-        {
-            if (other == null) { return false; }
-
-            return Width == other.Width &&
-                   Height == other.Height &&
-                   Depth == other.Depth &&
-                   IsCreated == other.IsCreated &&
-                   _voxelData.Equals(other._voxelData);
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (obj == null) { return false; }
-
-            if (obj is VoxelDataVolume other)
-            {
-                return Equals(other);
-            }
-
-            return false;
-        }
-
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int hash = 17;
-
-                hash = hash * 23 + Width.GetHashCode();
-                hash = hash * 23 + Height.GetHashCode();
-                hash = hash * 23 + Depth.GetHashCode();
-                hash = hash * 23 + IsCreated.GetHashCode();
-                hash = hash * 23 + _voxelData.GetHashCode();
-
-                return hash;
-            }
-        }
-
-        public static bool operator ==(VoxelDataVolume left, VoxelDataVolume right)
-        {
-            return left.Equals(right);
-        }
-
-        public static bool operator !=(VoxelDataVolume left, VoxelDataVolume right)
-        {
-            return !(left == right);
         }
     }
 }

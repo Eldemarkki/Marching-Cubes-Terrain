@@ -8,17 +8,17 @@ namespace Eldemarkki.VoxelTerrain.Meshing
     /// <summary>
     /// An incremental counter made for the Unity Job System
     /// </summary>
-    public unsafe struct NativeCounter : IDisposable, IEquatable<NativeCounter>
+    public unsafe struct NativeCounter : IDisposable
     {
         /// <summary>
         /// The allocator for the counter
         /// </summary>
-        private readonly Allocator _allocator;
+        private Allocator _allocator;
         
         /// <summary>
         /// The pointer to the value
         /// </summary>
-        [NativeDisableUnsafePtrRestriction] private readonly int* _counter;
+        [NativeDisableUnsafePtrRestriction] private int* _counter;
 
         /// <summary>
         /// The counter's value
@@ -55,51 +55,6 @@ namespace Eldemarkki.VoxelTerrain.Meshing
         public void Dispose()
         {
             UnsafeUtility.Free(_counter, _allocator);
-        }
-
-        public bool Equals(NativeCounter other)
-        {
-            if (other == null) { return false; }
-
-            return _allocator == other._allocator &&
-                   _counter == other._counter &&
-                   Count == other.Count;
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (obj == null) { return false; }
-
-            if(obj is NativeCounter other)
-            {
-                return Equals(other);
-            }
-
-            return false;
-        }
-
-        public override int GetHashCode()
-        {
-
-            unchecked
-            {
-                int hash = 17;
-
-                hash = hash * 23 + ((int)_allocator).GetHashCode();
-                hash = hash * 23 + Count.GetHashCode();
-
-                return hash;
-            }
-        }
-
-        public static bool operator ==(NativeCounter left, NativeCounter right)
-        {
-            return left.Equals(right);
-        }
-
-        public static bool operator !=(NativeCounter left, NativeCounter right)
-        {
-            return !(left == right);
         }
     }
 }

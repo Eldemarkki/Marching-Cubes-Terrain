@@ -117,7 +117,8 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                     for (int chunkCoordinateZ = minChunkCoordinate.z; chunkCoordinateZ <= maxChunkCoordinate.z; chunkCoordinateZ++)
                     {
                         int3 chunkCoordinate = new int3(chunkCoordinateX, chunkCoordinateY, chunkCoordinateZ);
-                        if (!TryGetVoxelDataChunk(chunkCoordinate, out VoxelDataVolume voxelDataChunk))
+                        VoxelDataVolume voxelDataChunk;
+                        if (!TryGetVoxelDataChunk(chunkCoordinate, out voxelDataChunk))
                         {
                             continue;
                         }

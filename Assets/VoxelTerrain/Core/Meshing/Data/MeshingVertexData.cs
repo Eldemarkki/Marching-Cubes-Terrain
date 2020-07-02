@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using Unity.Mathematics;
 using UnityEngine.Rendering;
 
@@ -9,7 +8,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.Data
     /// A struct to hold the data every vertex should have
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
-    public struct MeshingVertexData : IEquatable<MeshingVertexData>
+    public struct MeshingVertexData
     {
         /// <summary>
         /// The vertex's local position
@@ -40,48 +39,5 @@ namespace Eldemarkki.VoxelTerrain.Meshing.Data
             new VertexAttributeDescriptor(VertexAttribute.Position),
             new VertexAttributeDescriptor(VertexAttribute.Normal)
         };
-
-        public bool Equals(MeshingVertexData other)
-        {
-            if(other == null) { return false; }
-
-            return position.Equals(other.position) &&
-                   normal.Equals(other.position);
-        }
-
-        public override bool Equals(object obj)
-        {
-            if(obj == null) { return false; }
-
-            if(obj is MeshingVertexData other)
-            {
-                return Equals(other);
-            }
-
-            return false;
-        }
-
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int hash = 17;
-
-                hash = hash * 23 + position.GetHashCode();
-                hash = hash * 23 + normal.GetHashCode();
-
-                return hash;
-            }
-        }
-
-        public static bool operator ==(MeshingVertexData left, MeshingVertexData right)
-        {
-            return left.Equals(right);
-        }
-
-        public static bool operator !=(MeshingVertexData left, MeshingVertexData right)
-        {
-            return !(left == right);
-        }
     }
 }

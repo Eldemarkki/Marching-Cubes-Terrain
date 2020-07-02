@@ -1,12 +1,10 @@
-﻿using System;
-
-namespace Eldemarkki.VoxelTerrain.Meshing.Data
+﻿namespace Eldemarkki.VoxelTerrain.Meshing.Data
 {
     /// <summary>
     /// A container for the corners of a voxel
     /// </summary>
     /// <typeparam name="T">The element's type to hold in the corners</typeparam>
-    public struct VoxelCorners<T> : IEquatable<VoxelCorners<T>>
+    public struct VoxelCorners<T>
     {
         /// <summary>
         /// The first corner
@@ -52,7 +50,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.Data
         /// The indexer for the voxel corners
         /// </summary>
         /// <param name="index">The corner's index</param>
-        /// <exception cref="ArgumentOutOfRangeException">Thrown when index is larger than 7.</exception>
+        /// <exception cref="System.IndexOutOfRangeException">Thrown when index is more than 7.</exception>
         public T this[int index]
         {
             get
@@ -67,7 +65,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.Data
                     case 5: return Corner6;
                     case 6: return Corner7;
                     case 7: return Corner8;
-                    default: throw new ArgumentOutOfRangeException($"There are only 8 corners! You tried to access the corner at index {index.ToString()}");
+                    default: throw new System.IndexOutOfRangeException();
                 }
             }
             set
@@ -98,64 +96,9 @@ namespace Eldemarkki.VoxelTerrain.Meshing.Data
                     case 7:
                         Corner8 = value;
                         break;
-                    default: throw new ArgumentOutOfRangeException($"There are only 8 corners! You tried to access the corner at index {index.ToString()}");
+                    default: throw new System.IndexOutOfRangeException();
                 }
             }
-        }
-
-        public bool Equals(VoxelCorners<T> other)
-        {
-            if (other == null) { return false; }
-
-            return Corner1.Equals(other.Corner1) &&
-                   Corner2.Equals(other.Corner2) &&
-                   Corner3.Equals(other.Corner3) &&
-                   Corner4.Equals(other.Corner4) &&
-                   Corner5.Equals(other.Corner5) &&
-                   Corner6.Equals(other.Corner6) &&
-                   Corner7.Equals(other.Corner7) &&
-                   Corner8.Equals(other.Corner8);
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (obj == null) { return false; }
-
-            if (obj is VoxelCorners<T> other)
-            {
-                return Equals(other);
-            }
-
-            return false;
-        }
-
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                int hash = 17;
-
-                hash = hash * 23 + Corner1.GetHashCode();
-                hash = hash * 23 + Corner2.GetHashCode();
-                hash = hash * 23 + Corner3.GetHashCode();
-                hash = hash * 23 + Corner4.GetHashCode();
-                hash = hash * 23 + Corner5.GetHashCode();
-                hash = hash * 23 + Corner6.GetHashCode();
-                hash = hash * 23 + Corner7.GetHashCode();
-                hash = hash * 23 + Corner8.GetHashCode();
-
-                return hash;
-            }
-        }
-
-        public static bool operator ==(VoxelCorners<T> left, VoxelCorners<T> right)
-        {
-            return left.Equals(right);
-        }
-
-        public static bool operator !=(VoxelCorners<T> left, VoxelCorners<T> right)
-        {
-            return !(left == right);
         }
     }
 }
