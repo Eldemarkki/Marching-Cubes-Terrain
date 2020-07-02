@@ -27,6 +27,10 @@ namespace Eldemarkki.VoxelTerrain.World
         private void Awake()
         {
             heightmapTerrainSettings.Initialize(heightmapTerrainSettings.Heightmap, heightmapTerrainSettings.Amplitude, heightmapTerrainSettings.HeightOffset);
+        }
+
+        private void Start()
+        {
             CreateHeightmapTerrain();
         }
 
