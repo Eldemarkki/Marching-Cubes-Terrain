@@ -68,7 +68,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <param name="octaveCount">How many layers of noise to combine</param>
         /// <returns>The sampled noise value</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private float OctaveNoise(float x, float y, float frequency, int octaveCount)
+        private static float OctaveNoise(float x, float y, float frequency, int octaveCount)
         {
             float value = 0;
 

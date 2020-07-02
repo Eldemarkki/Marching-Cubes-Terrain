@@ -1,4 +1,6 @@
-﻿namespace Eldemarkki.VoxelTerrain.Meshing.Data
+﻿using System;
+
+namespace Eldemarkki.VoxelTerrain.Meshing.Data
 {
     /// <summary>
     /// A container for the corners of a voxel
@@ -50,7 +52,7 @@
         /// The indexer for the voxel corners
         /// </summary>
         /// <param name="index">The corner's index</param>
-        /// <exception cref="System.IndexOutOfRangeException">Thrown when index is more than 7.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when index is larger than 7.</exception>
         public T this[int index]
         {
             get
@@ -65,7 +67,7 @@
                     case 5: return Corner6;
                     case 6: return Corner7;
                     case 7: return Corner8;
-                    default: throw new System.IndexOutOfRangeException();
+                    default: throw new ArgumentOutOfRangeException($"There are only 8 corners! You tried to access the corner at index {index.ToString()}");
                 }
             }
             set
@@ -96,7 +98,7 @@
                     case 7:
                         Corner8 = value;
                         break;
-                    default: throw new System.IndexOutOfRangeException();
+                    default: throw new ArgumentOutOfRangeException($"There are only 8 corners! You tried to access the corner at index {index.ToString()}");
                 }
             }
         }

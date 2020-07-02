@@ -1,3 +1,4 @@
+using System;
 using Unity.Mathematics;
 
 namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
@@ -71,7 +72,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         /// The indexer for the vertex list
         /// </summary>
         /// <param name="index">The vertex's index</param>
-        /// <exception cref="System.IndexOutOfRangeException">Thrown when the index is more than 11.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when the index is more than 11.</exception>
         public float3 this[int index]
         {
             get
@@ -90,7 +91,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
                     case 9: return _c10;
                     case 10: return _c11;
                     case 11: return _c12;
-                    default: throw new System.IndexOutOfRangeException();
+                    default: throw new ArgumentOutOfRangeException($"There are only 12 vertices! You tried to access the vertex at index {index.ToString()}");
                 }
             }
             set
@@ -133,8 +134,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
                     case 11:
                         _c12 = value;
                         break;
-                    default:
-                        throw new System.IndexOutOfRangeException();
+                    default: throw new ArgumentOutOfRangeException($"There are only 12 vertices! You tried to access the vertex at index {index.ToString()}");
                 }
             }
         }

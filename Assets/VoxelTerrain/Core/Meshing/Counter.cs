@@ -13,12 +13,12 @@ namespace Eldemarkki.VoxelTerrain.Meshing
         /// <summary>
         /// The allocator for the counter
         /// </summary>
-        private Allocator _allocator;
+        private readonly Allocator _allocator;
         
         /// <summary>
         /// The pointer to the value
         /// </summary>
-        [NativeDisableUnsafePtrRestriction] private int* _counter;
+        [NativeDisableUnsafePtrRestriction] private readonly int* _counter;
 
         /// <summary>
         /// The counter's value

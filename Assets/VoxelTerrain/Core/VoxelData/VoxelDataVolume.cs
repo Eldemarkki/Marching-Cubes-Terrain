@@ -192,7 +192,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
             }
             else
             {
-                throw new ArgumentException($"The chunks are not the same size! Width: {Width}/{sourceVolume.Width}, Height: {Height}/{sourceVolume.Height}, Depth: {Depth}/{sourceVolume.Depth}");
+                throw new ArgumentException($"The chunks are not the same size! Width: {Width.ToString()}/{sourceVolume.Width.ToString()}, Height: {Height.ToString()}/{sourceVolume.Height.ToString()}, Depth: {Depth.ToString()}/{sourceVolume.Depth.ToString()}");
             }
         }
     }
