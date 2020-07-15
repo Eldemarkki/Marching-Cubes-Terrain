@@ -1,6 +1,4 @@
-﻿using Eldemarkki.VoxelTerrain.VoxelData;
-using Eldemarkki.VoxelTerrain.Utilities;
-using Eldemarkki.VoxelTerrain.World.Chunks;
+﻿using Eldemarkki.VoxelTerrain.World.Chunks;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
@@ -18,18 +16,12 @@ namespace Eldemarkki.VoxelTerrain.Chunks
         [SerializeField] private int chunkGenerationRate = 10;
 
         /// <summary>
-        /// A queue that contains the chunks' coordinates that are out of view and thus ready to be moved elsewhere
-        /// </summary>
-        private Queue<int3> _availableChunkCoordinates;
-
-        /// <summary>
         /// A list that contains all the coordinates where a chunk will eventually have to be generated
         /// </summary>
         private List<int3> _generationQueue;
 
         private void Awake()
         {
-            _availableChunkCoordinates = new Queue<int3>();
             _generationQueue = new List<int3>();
         }
 
@@ -41,15 +33,7 @@ namespace Eldemarkki.VoxelTerrain.Chunks
                 int3 chunkCoordinate = _generationQueue[0];
                 _generationQueue.RemoveAt(0);
 
-                if (_availableChunkCoordinates.Count == 0)
-                {
-                    VoxelWorld.ChunkLoader.LoadChunkToCoordinate(chunkCoordinate);
-                }
-                else
-                {
-                    int3 availableChunkCoordinate = _availableChunkCoordinates.Dequeue();
-                    MoveChunk(availableChunkCoordinate, chunkCoordinate);
-                }
+                VoxelWorld.ChunkLoader.LoadChunkToCoordinate(chunkCoordinate);
 
                 chunksGenerated++;
             }
@@ -73,14 +57,10 @@ namespace Eldemarkki.VoxelTerrain.Chunks
         /// <param name="coordinatesToUnload">A list of the coordinates to unload</param>
         public void UnloadCoordinates(List<int3> coordinatesToUnload)
         {
-            // Mark coordinates as available
+            // Remove the coordinates from the generation queue
             for (int i = 0; i < coordinatesToUnload.Count; i++)
             {
                 int3 coordinateToUnload = coordinatesToUnload[i];
-                if (!_availableChunkCoordinates.Contains(coordinateToUnload))
-                {
-                    _availableChunkCoordinates.Enqueue(coordinateToUnload);
-                }
 
                 if (_generationQueue.Contains(coordinateToUnload))
                 {
@@ -89,36 +69,11 @@ namespace Eldemarkki.VoxelTerrain.Chunks
             }
 
             VoxelWorld.VoxelDataStore.UnloadCoordinates(coordinatesToUnload);
-        }
 
-        /// <summary>
-        /// Moves a chunk to a different coordinate if a chunk doesn't already exist there
-        /// </summary>
-        /// <param name="fromCoordinate">The coordinate of the chunk to move</param>
-        /// <param name="toCoordinate">The coordinate where the chunk should be moved</param>
-        private void MoveChunk(int3 fromCoordinate, int3 toCoordinate)
-        {
-            if (!VoxelWorld.ChunkStore.TryGetChunkAtCoordinate(fromCoordinate, out Chunk chunk))
+            foreach(int3 chunkCoordinate in coordinatesToUnload)
             {
-                Debug.LogWarning($"No chunk at {fromCoordinate.ToString()}, exiting the function");
-                return;
+                VoxelWorld.ChunkStore.DestroyChunk(chunkCoordinate);
             }
-
-            if (VoxelWorld.ChunkStore.DoesChunkExistAtCoordinate(toCoordinate))
-            {
-                Debug.LogWarning($"A chunk already exists at {toCoordinate.ToString()}, exiting the function");
-                return;
-            }
-
-            Bounds generationBounds = BoundsUtilities.GetChunkBounds(toCoordinate, VoxelWorld.WorldSettings.ChunkSize);
-            JobHandleWithData<IVoxelDataGenerationJob> jobHandleWithData = VoxelWorld.VoxelDataGenerator.GenerateVoxelData(generationBounds);
-            jobHandleWithData.JobHandle.Complete();
-            VoxelWorld.VoxelDataStore.SetVoxelDataChunk(jobHandleWithData.JobData.OutputVoxelData, toCoordinate);
-
-            VoxelWorld.ChunkStore.RemoveChunk(fromCoordinate);
-
-            chunk.Initialize(toCoordinate, VoxelWorld);
-            VoxelWorld.ChunkStore.AddChunk(chunk);
         }
     }
 }

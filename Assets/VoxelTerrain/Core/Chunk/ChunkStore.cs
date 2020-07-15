@@ -1,5 +1,4 @@
-﻿using Eldemarkki.VoxelTerrain.World.Chunks;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -82,6 +81,19 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         public void RemoveChunk(int3 chunkCoordinate)
         {
             _chunks.Remove(chunkCoordinate);
+        }
+
+        /// <summary>
+        /// Removes a chunk from a coordinate and destroys its GameObject
+        /// </summary>
+        /// <param name="chunkCoordinate">The coordinate of the chunk to remove and destroy</param>
+        public void DestroyChunk(int3 chunkCoordinate)
+        {
+            if (TryGetChunkAtCoordinate(chunkCoordinate, out Chunk chunk))
+            {
+                Destroy(chunk.gameObject);
+                RemoveChunk(chunkCoordinate);
+            }
         }
     }
 }
