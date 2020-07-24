@@ -1,6 +1,5 @@
 ﻿using Eldemarkki.VoxelTerrain.VoxelData;
 using Eldemarkki.VoxelTerrain.Meshing.Data;
-using Eldemarkki.VoxelTerrain.Utilities;
 using Unity.Collections;
 using Unity.Jobs;
 

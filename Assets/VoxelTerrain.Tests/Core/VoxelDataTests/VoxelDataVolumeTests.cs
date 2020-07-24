@@ -134,7 +134,9 @@ namespace Eldemarkki.VoxelTerrain.VoxelData.Tests
         public void Teardown()
         {
             if (voxelDataVolume.IsCreated)
+            {
                 voxelDataVolume.Dispose();
+            }
         }
     }
 }

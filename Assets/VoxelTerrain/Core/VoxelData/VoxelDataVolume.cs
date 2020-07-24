@@ -64,8 +64,11 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <exception cref="ArgumentException">Thrown when any of the dimensions is negative</exception>
         public VoxelDataVolume(int width, int height, int depth, Allocator allocator)
         {
-            if (width < 0 || height < 0 || depth < 0) throw new ArgumentException("The dimensions of this volume must all be positive!");
-            
+            if (width < 0 || height < 0 || depth < 0)
+            {
+                throw new ArgumentException("The dimensions of this volume must all be positive!");
+            }
+
             _voxelData = new NativeArray<byte>(width * height * depth, allocator);
 
             Width = width;
