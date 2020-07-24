@@ -1,7 +1,7 @@
 ﻿using NUnit.Framework;
 using Unity.Mathematics;
 
-namespace Eldemarkki.VoxelTerrain.Utilities
+namespace Eldemarkki.VoxelTerrain.Utilities.Tests
 {
     public class ToVectorIntTests
     {

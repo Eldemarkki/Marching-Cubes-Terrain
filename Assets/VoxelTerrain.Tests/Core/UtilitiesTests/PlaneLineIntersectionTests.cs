@@ -1,7 +1,7 @@
 ﻿using NUnit.Framework;
 using Unity.Mathematics;
 
-namespace Eldemarkki.VoxelTerrain.Utilities.Intersection
+namespace Eldemarkki.VoxelTerrain.Utilities.Intersection.Tests
 {
     public class PlaneLineIntersectionTests
     {

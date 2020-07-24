@@ -2,7 +2,7 @@
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace Eldemarkki.VoxelTerrain.Utilities
+namespace Eldemarkki.VoxelTerrain.Utilities.Tests
 {
     public class ToInt3Tests
     {
