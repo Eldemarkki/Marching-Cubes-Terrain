@@ -48,7 +48,7 @@ namespace Eldemarkki.VoxelTerrain.World
             int3 playerCoordinate = GetPlayerCoordinate();
             if (!playerCoordinate.Equals(_lastGenerationCoordinate))
             {
-                List<int3> coordinatesToUnload = voxelWorld.ChunkStore.GetChunkCoordinatesOutsideOfRenderDistance(playerCoordinate, renderDistance);
+                IEnumerable<int3> coordinatesToUnload = voxelWorld.ChunkStore.GetChunkCoordinatesOutsideOfRenderDistance(playerCoordinate, renderDistance);
                 chunkProvider.UnloadCoordinates(coordinatesToUnload);
 
                 GenerateTerrainAroundCoordinate(playerCoordinate);

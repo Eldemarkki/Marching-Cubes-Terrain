@@ -28,27 +28,33 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         }
 
         /// <summary>
-        /// Gets a list of chunks that contain a world position. For a chunk to contain a position, the position has to be inside of the chunk or on the chunk's edge
+        /// Gets a collection of chunks that contain a world position. For a chunk to contain a position, the position has to be inside of the chunk or on the chunk's edge
         /// </summary>
-        /// <param name="worldPosition">The world position to check for</param>
+        /// <param name="worldPosition">The world position to check</param>
         /// <param name="chunkSize">The size of the chunks</param>
-        /// <returns>A list of chunks that contain the world position</returns>
-        public static List<int3> GetChunkCoordinatesContainingPoint(int3 worldPosition, int chunkSize)
+        /// <returns>A collection of chunk coordinates that contain the world position</returns>
+        public static IEnumerable<int3> GetChunkCoordinatesContainingPoint(int3 worldPosition, int chunkSize)
         {
-            List<int3> chunkCoordinates = new List<int3>();
+            int3 localPosition = VectorUtilities.Mod(worldPosition, chunkSize);
+          
+            int chunkCheckCountX = localPosition.x == 0 ? 1 : 0;
+            int chunkCheckCountY = localPosition.y == 0 ? 1 : 0;
+            int chunkCheckCountZ = localPosition.z == 0 ? 1 : 0;
 
-            for (int i = 0; i < 8; i++)
+            int3 origin = VectorUtilities.WorldPositionToCoordinate(worldPosition, chunkSize);
+
+            // The origin (worldPosition as a chunk coordinate) is always included
+            yield return origin;
+
+            // The first corner can be skipped, since it's (0, 0, 0) and would just return origin
+            for (int i = 1; i < 8; i++)
             {
-                int3 chunkCoordinate = VectorUtilities.WorldPositionToCoordinate(worldPosition - LookupTables.CubeCorners[i], chunkSize);
-                if (chunkCoordinates.Contains(chunkCoordinate))
+                var cornerOffset = LookupTables.CubeCorners[i];
+                if(cornerOffset.x <= chunkCheckCountX && cornerOffset.y <= chunkCheckCountY && cornerOffset.z <= chunkCheckCountZ)
                 {
-                    continue;
+                    yield return origin - cornerOffset;
                 }
-
-                chunkCoordinates.Add(chunkCoordinate);
             }
-
-            return chunkCoordinates;
         }
     }
 }

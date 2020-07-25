@@ -68,23 +68,22 @@ namespace Eldemarkki.VoxelTerrain.Chunks
         }
 
         /// <summary>
-        /// Unloads every coordinate in the list
+        /// Unloads every coordinate in <paramref name="coordinatesToUnload"/>
         /// </summary>
-        /// <param name="coordinatesToUnload">A list of the coordinates to unload</param>
-        public void UnloadCoordinates(List<int3> coordinatesToUnload)
+        /// <param name="coordinatesToUnload">A collection of the chunk coordinates to unload</param>
+        public void UnloadCoordinates(IEnumerable<int3> coordinatesToUnload)
         {
             // Mark coordinates as available
-            for (int i = 0; i < coordinatesToUnload.Count; i++)
+            foreach(int3 chunkCoordinate in coordinatesToUnload)
             {
-                int3 coordinateToUnload = coordinatesToUnload[i];
-                if (!_availableChunkCoordinates.Contains(coordinateToUnload))
+                if (!_availableChunkCoordinates.Contains(chunkCoordinate))
                 {
-                    _availableChunkCoordinates.Enqueue(coordinateToUnload);
+                    _availableChunkCoordinates.Enqueue(chunkCoordinate);
                 }
 
-                if (_generationQueue.Contains(coordinateToUnload))
+                if (_generationQueue.Contains(chunkCoordinate))
                 {
-                    _generationQueue.Remove(coordinateToUnload);
+                    _generationQueue.Remove(chunkCoordinate);
                 }
             }
 

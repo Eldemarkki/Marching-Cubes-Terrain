@@ -39,14 +39,13 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         }
 
         /// <summary>
-        /// Gets a list of chunk coordinates whose Manhattan Distance to the coordinate parameter is more than <see cref="renderDistance"/>
+        /// Gets a collection of chunk coordinates whose Manhattan Distance to the coordinate parameter is more than <see cref="renderDistance"/>
         /// </summary>
         /// <param name="coordinate">Central coordinate</param>
         /// <param name="renderDistance">The radius of the chunks the player can see</param>
-        /// <returns>A list of chunk coordinates outside of the viewing range from the coordinate parameter</returns>
-        public List<int3> GetChunkCoordinatesOutsideOfRenderDistance(int3 coordinate, int renderDistance)
+        /// <returns>A collection of chunk coordinates outside of the viewing range from the coordinate parameter</returns>
+        public IEnumerable<int3> GetChunkCoordinatesOutsideOfRenderDistance(int3 coordinate, int renderDistance)
         {
-            List<int3> chunkCoordinates = new List<int3>();
             foreach (int3 chunkCoordinate in _chunks.Keys)
             {
                 int dX = math.abs(coordinate.x - chunkCoordinate.x);
@@ -55,11 +54,9 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
 
                 if (dX > renderDistance || dY > renderDistance || dZ > renderDistance)
                 {
-                    chunkCoordinates.Add(chunkCoordinate);
+                    yield return chunkCoordinate;
                 }
             }
-
-            return chunkCoordinates;
         }
 
         /// <summary>

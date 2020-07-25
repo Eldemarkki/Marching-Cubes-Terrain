@@ -160,12 +160,10 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <param name="worldPosition">The world position of the voxel data that should be increased</param>
         public void IncreaseVoxelData(int3 worldPosition, float increaseAmount)
         {
-            List<int3> affectedChunkCoordinates = ChunkProvider.GetChunkCoordinatesContainingPoint(worldPosition, VoxelWorld.WorldSettings.ChunkSize);
+            IEnumerable<int3> affectedChunkCoordinates = ChunkProvider.GetChunkCoordinatesContainingPoint(worldPosition, VoxelWorld.WorldSettings.ChunkSize);
 
-            for (int i = 0; i < affectedChunkCoordinates.Count; i++)
+            foreach(int3 chunkCoordinate in affectedChunkCoordinates)
             {
-                int3 chunkCoordinate = affectedChunkCoordinates[i];
-
                 if (!_chunks.ContainsKey(chunkCoordinate)) { continue; }
 
                 if (TryGetVoxelDataChunk(chunkCoordinate, out VoxelDataVolume voxelDataVolume))
@@ -188,12 +186,10 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <param name="worldPosition">The world position of the voxel data</param>
         public void SetVoxelData(float voxelData, int3 worldPosition)
         {
-            List<int3> affectedChunkCoordinates = ChunkProvider.GetChunkCoordinatesContainingPoint(worldPosition, VoxelWorld.WorldSettings.ChunkSize);
+            IEnumerable<int3> affectedChunkCoordinates = ChunkProvider.GetChunkCoordinatesContainingPoint(worldPosition, VoxelWorld.WorldSettings.ChunkSize);
 
-            for (int i = 0; i < affectedChunkCoordinates.Count; i++)
+            foreach (int3 chunkCoordinate in affectedChunkCoordinates)
             {
-                int3 chunkCoordinate = affectedChunkCoordinates[i];
-
                 if (!_chunks.ContainsKey(chunkCoordinate)) { continue; }
 
                 if (TryGetVoxelDataChunk(chunkCoordinate, out VoxelDataVolume voxelDataVolume))
@@ -325,7 +321,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// Unloads the voxel data of chunks from the coordinates
         /// </summary>
         /// <param name="coordinatesToUnload">The list of chunk coordinates to unload</param>
-        public void UnloadCoordinates(List<int3> coordinatesToUnload)
+        public void UnloadCoordinates(IEnumerable<int3> coordinatesToUnload)
         {
             foreach (int3 coordinate in coordinatesToUnload)
             {
