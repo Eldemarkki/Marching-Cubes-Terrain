@@ -145,7 +145,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <param name="index">The index in the native array</param>
         public void SetVoxelData(float voxelData, int index)
         {
-            _voxelData[index] = (byte)(255f * math.saturate(voxelData));
+            _voxelData[index] = (byte)math.round(255f * math.saturate(voxelData));
         }
 
         /// <summary>
@@ -222,6 +222,42 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         public float GetVoxelData(int index)
         {
             return _voxelData[index] / 255f;
+        }
+
+        /// <summary>
+        /// Increases the voxel data at <paramref name="localPosition"/> by <paramref name="increaseAmount"/>. If <paramref name="localPosition"/> is out of <see cref="Size"/>, an <see cref="IndexOutOfRangeException"/> will be thrown.
+        /// </summary>
+        /// <param name="increaseAmount">How much the voxel data at <paramref name="localPosition"/> should be increased by</param>
+        /// <param name="localPosition">The local position of the voxel data to increase</param>
+        public void IncreaseVoxelData(float increaseAmount, int3 localPosition)
+        {
+            int index = IndexUtilities.XyzToIndex(localPosition, Width, Height);
+            IncreaseVoxelData(increaseAmount, index);
+        }
+
+        /// <summary>
+        /// Increases the voxel data at <paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/> by <paramref name="increaseAmount"/>. If <paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/> is out of <see cref="Size"/>, an <see cref="IndexOutOfRangeException"/> will be thrown.
+        /// </summary>
+        /// <param name="increaseAmount">How much the voxel data at <paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/> should be increased by</param>
+        /// <param name="x">The x value of the voxel data location</param>
+        /// <param name="y">The y value of the voxel data location</param>
+        /// <param name="z">The z value of the voxel data location</param>
+        public void IncreaseVoxelData(float increaseAmount, int x, int y, int z)
+        {
+            int index = IndexUtilities.XyzToIndex(x, y, z, Width, Height);
+            IncreaseVoxelData(increaseAmount, index);
+        }
+
+        /// <summary>
+        /// Increases the voxel data at <paramref name="index"/> by <paramref name="increaseAmount"/>. If <paramref name="index"/> is outside of <see cref="Length"/>, an <see cref="IndexOutOfRangeException"/> will be thrown.
+        /// </summary>
+        /// <param name="increaseAmount"></param>
+        /// <param name="index"></param>
+        public void IncreaseVoxelData(float increaseAmount, int index)
+        {
+            float voxelData = GetVoxelData(index);
+            byte newVoxelData = (byte)math.round(math.clamp((voxelData + increaseAmount) * 255, 0, 255));
+            _voxelData[index] = newVoxelData;
         }
 
         /// <summary>

@@ -163,12 +163,7 @@ namespace Eldemarkki.VoxelTerrain.Player
                         }
 
                         float modificationAmount = deformSpeed / distance * buildModifier;
-
-                        if (voxelDataStore.TryGetVoxelData(offsetPoint, out float oldVoxelData))
-                        {
-                            float newVoxelData = oldVoxelData - modificationAmount;
-                            voxelDataStore.SetVoxelData(newVoxelData, offsetPoint);
-                        }
+                        voxelDataStore.IncreaseVoxelData(offsetPoint, -modificationAmount);
                     }
                 }
             }

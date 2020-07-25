@@ -155,6 +155,33 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         }
 
         /// <summary>
+        /// Increases the voxel data at <paramref name="worldPosition"/> by <paramref name="increaseAmount"/>.
+        /// </summary>
+        /// <param name="worldPosition">The world position of the voxel data that should be increased</param>
+        public void IncreaseVoxelData(int3 worldPosition, float increaseAmount)
+        {
+            List<int3> affectedChunkCoordinates = ChunkProvider.GetChunkCoordinatesContainingPoint(worldPosition, VoxelWorld.WorldSettings.ChunkSize);
+
+            for (int i = 0; i < affectedChunkCoordinates.Count; i++)
+            {
+                int3 chunkCoordinate = affectedChunkCoordinates[i];
+
+                if (!_chunks.ContainsKey(chunkCoordinate)) { continue; }
+
+                if (TryGetVoxelDataChunk(chunkCoordinate, out VoxelDataVolume voxelDataVolume))
+                {
+                    int3 localPos = (worldPosition - chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize).Mod(VoxelWorld.WorldSettings.ChunkSize + 1);
+                    voxelDataVolume.IncreaseVoxelData(increaseAmount, localPos);
+
+                    if (VoxelWorld.ChunkStore.TryGetChunkAtCoordinate(chunkCoordinate, out Chunk chunk))
+                    {
+                        chunk.HasChanges = true;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Sets the voxel data for a world position
         /// </summary>
         /// <param name="voxelData">The new voxel data</param>
