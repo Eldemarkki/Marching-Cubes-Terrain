@@ -145,7 +145,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <param name="index">The index in the native array</param>
         public void SetVoxelData(float voxelData, int index)
         {
-            _voxelData[index] = (byte)(255f * math.saturate(voxelData));
+            _voxelData[index] = (byte)math.round(255f * math.saturate(voxelData));
         }
 
         /// <summary>
@@ -256,8 +256,8 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         public void IncreaseVoxelData(float increaseAmount, int index)
         {
             float voxelData = GetVoxelData(index);
-            float newVoxelData = voxelData + increaseAmount;
-            SetVoxelData(newVoxelData, index);
+            byte newVoxelData = (byte)math.round(math.clamp((voxelData + increaseAmount) * 255, 0, 255));
+            _voxelData[index] = newVoxelData;
         }
 
         /// <summary>
