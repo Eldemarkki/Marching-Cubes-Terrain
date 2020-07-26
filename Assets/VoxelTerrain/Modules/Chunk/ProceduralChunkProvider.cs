@@ -55,13 +55,11 @@ namespace Eldemarkki.VoxelTerrain.Chunks
         /// Unloads every coordinate in the list
         /// </summary>
         /// <param name="coordinatesToUnload">A list of the coordinates to unload</param>
-        public void UnloadCoordinates(List<int3> coordinatesToUnload)
+        public void UnloadCoordinates(IEnumerable<int3> coordinatesToUnload)
         {
             // Remove the coordinates from the generation queue
-            for (int i = 0; i < coordinatesToUnload.Count; i++)
+            foreach(int3 coordinateToUnload in coordinatesToUnload)
             {
-                int3 coordinateToUnload = coordinatesToUnload[i];
-
                 if (_generationQueue.Contains(coordinateToUnload))
                 {
                     _generationQueue.Remove(coordinateToUnload);

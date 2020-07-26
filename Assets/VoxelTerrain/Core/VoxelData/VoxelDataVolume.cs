@@ -24,7 +24,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// The height of the volume
         /// </summary>
         public int Height { get; }
-        
+
         /// <summary>
         /// The depth of the volume
         /// </summary>
@@ -51,6 +51,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <param name="width">The width of the volume</param>
         /// <param name="height">The height of the volume</param>
         /// <param name="depth">The depth of the volume</param>
+        /// <exception cref="ArgumentException">Thrown when any of the dimensions is negative</exception>
         public VoxelDataVolume(int width, int height, int depth) : this(width, height, depth, Allocator.Persistent) { }
 
         /// <summary>
@@ -60,8 +61,14 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <param name="height">The height of the volume</param>
         /// <param name="depth">The depth of the volume</param>
         /// <param name="allocator">How the memory should be allocated</param>
+        /// <exception cref="ArgumentException">Thrown when any of the dimensions is negative</exception>
         public VoxelDataVolume(int width, int height, int depth, Allocator allocator)
         {
+            if (width < 0 || height < 0 || depth < 0)
+            {
+                throw new ArgumentException("The dimensions of this volume must all be positive!");
+            }
+
             _voxelData = new NativeArray<byte>(width * height * depth, allocator);
 
             Width = width;
@@ -73,6 +80,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// Creates a <see cref="VoxelDataVolume"/> with a persistent allocator
         /// </summary>
         /// <param name="size">Amount of items in 1 dimension of this volume</param>
+        /// <exception cref="ArgumentException">Thrown when <paramref name="size"/> is negative</exception>
         public VoxelDataVolume(int size) : this(size, Allocator.Persistent) { }
 
         /// <summary>
@@ -80,12 +88,14 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// </summary>
         /// <param name="size">Amount of items in 1 dimension of this volume</param>
         /// <param name="allocator">How the memory should be allocated</param>
+        /// <exception cref="ArgumentException">Thrown when <paramref name="size"/> is negative</exception>
         public VoxelDataVolume(int size, Allocator allocator) : this(size, size, size, allocator) { }
 
         /// <summary>
         /// Creates a <see cref="VoxelDataVolume"/> with a persistent allocator
         /// </summary>
         /// <param name="size">The 3-dimensional size of this volume</param>
+        /// <exception cref="ArgumentException">Thrown when any of the dimensions is negative</exception>
         public VoxelDataVolume(int3 size) : this(size.x, size.y, size.z, Allocator.Persistent) { }
 
         /// <summary>
@@ -93,6 +103,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// </summary>
         /// <param name="size">The 3-dimensional size of this volume</param>
         /// <param name="allocator">How the memory should be allocated</param>
+        /// <exception cref="ArgumentException">Thrown when any of the dimensions is negative</exception>
         public VoxelDataVolume(int3 size, Allocator allocator) : this(size.x, size.y, size.z, allocator) { }
 
         /// <summary>
@@ -134,7 +145,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <param name="index">The index in the native array</param>
         public void SetVoxelData(float voxelData, int index)
         {
-            _voxelData[index] = (byte) (255f * math.saturate(voxelData));
+            _voxelData[index] = (byte)math.round(255f * math.saturate(voxelData));
         }
 
         /// <summary>
@@ -175,9 +186,78 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                 voxelData = _voxelData[index] / 255f;
                 return true;
             }
-            
+
             voxelData = 0;
             return false;
+        }
+
+        /// <summary>
+        /// Gets the voxel data at <paramref name="localPosition"/>. If the data doesn't exist at <paramref name="localPosition"/>, an <see cref="IndexOutOfRangeException"/> will be thrown
+        /// </summary>
+        /// <param name="localPosition">The local position of the voxel data to get</param>
+        /// <returns>The voxel data at <paramref name="localPosition"/></returns>
+        public float GetVoxelData(int3 localPosition)
+        {
+            return GetVoxelData(localPosition.x, localPosition.y, localPosition.z);
+        }
+
+        /// <summary>
+        /// Gets the voxel data at <paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/>. If the data doesn't exist at <paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/>, an <see cref="IndexOutOfRangeException"/> will be thrown
+        /// </summary>
+        /// <param name="x">The x value of the voxel data location</param>
+        /// <param name="y">The y value of the voxel data location</param>
+        /// <param name="z">The z value of the voxel data location</param>
+        /// <returns>The voxel data at <paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/></returns>
+        public float GetVoxelData(int x, int y, int z)
+        {
+            int index = IndexUtilities.XyzToIndex(x, y, z, Width, Height);
+            return GetVoxelData(index);
+        }
+
+        /// <summary>
+        /// Gets the voxel data at <paramref name="index"/>. If the data doesn't exist at <paramref name="index"/>, an <see cref="IndexOutOfRangeException"/> will be thrown
+        /// </summary>
+        /// <param name="index">The index in the native array</param>
+        /// <returns>The voxel data at <paramref name="index"/></returns>
+        public float GetVoxelData(int index)
+        {
+            return _voxelData[index] / 255f;
+        }
+
+        /// <summary>
+        /// Increases the voxel data at <paramref name="localPosition"/> by <paramref name="increaseAmount"/>. If <paramref name="localPosition"/> is out of <see cref="Size"/>, an <see cref="IndexOutOfRangeException"/> will be thrown.
+        /// </summary>
+        /// <param name="increaseAmount">How much the voxel data at <paramref name="localPosition"/> should be increased by</param>
+        /// <param name="localPosition">The local position of the voxel data to increase</param>
+        public void IncreaseVoxelData(float increaseAmount, int3 localPosition)
+        {
+            int index = IndexUtilities.XyzToIndex(localPosition, Width, Height);
+            IncreaseVoxelData(increaseAmount, index);
+        }
+
+        /// <summary>
+        /// Increases the voxel data at <paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/> by <paramref name="increaseAmount"/>. If <paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/> is out of <see cref="Size"/>, an <see cref="IndexOutOfRangeException"/> will be thrown.
+        /// </summary>
+        /// <param name="increaseAmount">How much the voxel data at <paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/> should be increased by</param>
+        /// <param name="x">The x value of the voxel data location</param>
+        /// <param name="y">The y value of the voxel data location</param>
+        /// <param name="z">The z value of the voxel data location</param>
+        public void IncreaseVoxelData(float increaseAmount, int x, int y, int z)
+        {
+            int index = IndexUtilities.XyzToIndex(x, y, z, Width, Height);
+            IncreaseVoxelData(increaseAmount, index);
+        }
+
+        /// <summary>
+        /// Increases the voxel data at <paramref name="index"/> by <paramref name="increaseAmount"/>. If <paramref name="index"/> is outside of <see cref="Length"/>, an <see cref="IndexOutOfRangeException"/> will be thrown.
+        /// </summary>
+        /// <param name="increaseAmount"></param>
+        /// <param name="index"></param>
+        public void IncreaseVoxelData(float increaseAmount, int index)
+        {
+            float voxelData = GetVoxelData(index);
+            byte newVoxelData = (byte)math.round(math.clamp((voxelData + increaseAmount) * 255, 0, 255));
+            _voxelData[index] = newVoxelData;
         }
 
         /// <summary>
