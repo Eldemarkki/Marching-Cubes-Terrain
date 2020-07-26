@@ -29,14 +29,10 @@ namespace Eldemarkki.VoxelTerrain.World
         [SerializeField] private ChunkStore chunkStore;
         public ChunkStore ChunkStore => chunkStore;
 
-        [SerializeField] private ChunkLoader chunkLoader;
-        public ChunkLoader ChunkLoader => chunkLoader;
-
         private void Awake()
         {
             voxelDataStore.VoxelWorld = this;
             chunkProvider.VoxelWorld = this;
-            chunkLoader.VoxelWorld = this;
         }
     }
 }

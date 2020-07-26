@@ -33,7 +33,7 @@ namespace Eldemarkki.VoxelTerrain.Chunks
                 int3 chunkCoordinate = _generationQueue[0];
                 _generationQueue.RemoveAt(0);
 
-                VoxelWorld.ChunkLoader.LoadChunkToCoordinate(chunkCoordinate);
+                LoadChunkToCoordinate(chunkCoordinate);
 
                 chunksGenerated++;
             }

@@ -576,7 +576,6 @@ GameObject:
   - component: {fileID: 1406068214}
   - component: {fileID: 1406068213}
   - component: {fileID: 1406068209}
-  - component: {fileID: 1406068208}
   - component: {fileID: 1406068212}
   - component: {fileID: 1406068211}
   - component: {fileID: 1406068210}
@@ -587,18 +586,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1406068208
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1406068207}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6cefe5c1b781dc44d866d80d9cde65cf, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1406068209
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -697,7 +684,6 @@ MonoBehaviour:
   voxelDataGenerator: {fileID: 1406068212}
   chunkProvider: {fileID: 1406068210}
   chunkStore: {fileID: 1406068209}
-  chunkLoader: {fileID: 1406068208}
 --- !u!4 &1406068216
 Transform:
   m_ObjectHideFlags: 0
