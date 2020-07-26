@@ -65,10 +65,26 @@ namespace Eldemarkki.VoxelTerrain.World
         }
 
         /// <summary>
-        /// Generates terrain around <paramref name="coordinate"/> with a radius of <paramref name="coordinate"/>
+        /// Generates terrain around <paramref name="coordinate"/> with a radius of <see cref="renderDistance"/>
         /// </summary>
         /// <param name="coordinate">The coordinate to generate the terrain around</param>
         private void GenerateTerrainAroundCoordinate(int3 coordinate)
+        {
+            foreach (int3 chunkCoordinate in GetChunkGenerationCoordinates(coordinate, renderDistance))
+            {
+                chunkProvider.EnsureChunkExistsAtCoordinate(chunkCoordinate);
+            }
+
+            _lastGenerationCoordinate = coordinate;
+        }
+
+        /// <summary>
+        /// Calculates the chunk coordinates that should be present when the viewer is in <paramref name="centerChunkCoordinate"/>.
+        /// </summary>
+        /// <param name="centerChunkCoordinate">The chunk coordinate to generate the coordinates around</param>
+        /// <param name="renderDistance"><inheritdoc cref="renderDistance"/></param>
+        /// <returns>A collection of coordinates that should be generated</returns>
+        private static IEnumerable<int3> GetChunkGenerationCoordinates(int3 centerChunkCoordinate, int renderDistance)
         {
             for (int x = -renderDistance; x <= renderDistance; x++)
             {
@@ -76,13 +92,11 @@ namespace Eldemarkki.VoxelTerrain.World
                 {
                     for (int z = -renderDistance; z <= renderDistance; z++)
                     {
-                        int3 chunkCoordinate = coordinate + new int3(x, y, z);
-                        chunkProvider.EnsureChunkExistsAtCoordinate(chunkCoordinate);
+                        int3 chunkCoordinate = centerChunkCoordinate + new int3(x, y, z);
+                        yield return chunkCoordinate;
                     }
                 }
             }
-
-            _lastGenerationCoordinate = coordinate;
         }
     }
 }
