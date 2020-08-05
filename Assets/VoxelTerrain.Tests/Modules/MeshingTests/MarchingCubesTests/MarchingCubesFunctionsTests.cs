@@ -1,6 +1,7 @@
 ﻿using Eldemarkki.VoxelTerrain.Meshing.Data;
 using NUnit.Framework;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Mathematics;
 
 namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes.Tests
@@ -74,7 +75,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes.Tests
             expected[11] = new float3(0f, 0.5f, 1f);
 
             // Act
-            VertexList actual = MarchingCubesFunctions.GenerateVertexList(densities, new int3(0, 0, 0), edgeIndex, isolevel);
+            IEnumerable<float3> actual = MarchingCubesFunctions.GenerateVertexList(densities, new int3(0, 0, 0), edgeIndex, isolevel);
 
             // Assert
             Assert.AreEqual(expected, actual);
@@ -109,10 +110,10 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes.Tests
             expected[11] = new float3(6f, -12.75f, 101f);
 
             // Act
-            VertexList actual = MarchingCubesFunctions.GenerateVertexList(densities, new int3(6, -13, 100), edgeIndex, isolevel);
+            IEnumerable<float3> actual = MarchingCubesFunctions.GenerateVertexList(densities, new int3(6, -13, 100), edgeIndex, isolevel);
 
             // Assert
-            Assert.AreEqual(expected, actual);
+            Assert.That(actual, Is.EquivalentTo(expected));
         }
 
         [Test]
@@ -141,12 +142,13 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes.Tests
             expected[11] = new float3(-56f, -0.272727272727f, 10f);
 
             // Act
-            VertexList actual = MarchingCubesFunctions.GenerateVertexList(densities, new int3(-56, -1, 9), edgeIndex, isolevel);
+            IEnumerable<float3> actual = MarchingCubesFunctions.GenerateVertexList(densities, new int3(-56, -1, 9), edgeIndex, isolevel);
 
             // Assert
             for (int i = 0; i < 12; i++)
             {
-                Assert.AreEqual(0, math.distance(expected[i], actual[i]), 0.0001f, $"Expected: {expected[i]}, Actual: {actual[i]}");
+                var actualPosition = actual.ElementAt(i);
+                Assert.AreEqual(0, math.distance(expected[i], actualPosition), 0.0001f, $"Expected: {expected[i]}, Actual: {actualPosition}");
             }
         }
 

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Eldemarkki.VoxelTerrain.Meshing.Data
 {
@@ -6,7 +8,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.Data
     /// A container for the corners of a voxel
     /// </summary>
     /// <typeparam name="T">The element's type to hold in the corners</typeparam>
-    public struct VoxelCorners<T>
+    public struct VoxelCorners<T> : IEnumerable<T>
     {
         /// <summary>
         /// The first corner
@@ -101,6 +103,19 @@ namespace Eldemarkki.VoxelTerrain.Meshing.Data
                     default: throw new ArgumentOutOfRangeException($"There are only 8 corners! You tried to access the corner at index {index.ToString()}");
                 }
             }
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            for (int i = 0; i < 8; i++)
+            {
+                yield return this[i];
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

@@ -1,4 +1,6 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using Unity.Mathematics;
 
 namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
@@ -6,7 +8,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
     /// <summary>
     /// A container for a vertex list with 12 vertices
     /// </summary>
-    public struct VertexList
+    public struct VertexList : IEnumerable<float3>
     {
         /// <summary>
         /// The first vertex
@@ -137,6 +139,19 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
                     default: throw new ArgumentOutOfRangeException($"There are only 12 vertices! You tried to access the vertex at index {index.ToString()}");
                 }
             }
+        }
+
+        public IEnumerator<float3> GetEnumerator()
+        {
+            for (int i = 0; i < 12; i++)
+            {
+                yield return this[i];
+            }
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }
