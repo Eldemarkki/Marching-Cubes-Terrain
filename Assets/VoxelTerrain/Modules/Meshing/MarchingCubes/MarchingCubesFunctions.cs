@@ -11,23 +11,6 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
     public static class MarchingCubesFunctions
     {
         /// <summary>
-        /// Gets the corners for the voxel at a position
-        /// </summary>
-        /// <param name="position">The position of the voxel</param>
-        /// <returns>The corners of the voxel</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static VoxelCorners<int3> GetCorners(int3 position)
-        {
-            VoxelCorners<int3> corners = new VoxelCorners<int3>();
-            for (int i = 0; i < 8; i++)
-            {
-                corners[i] = position + LookupTables.CubeCorners[i];
-            }
-
-            return corners;
-        }
-
-        /// <summary>
         /// Interpolates the vertex's position 
         /// </summary>
         /// <param name="p1">The first corner's position</param>
@@ -71,13 +54,13 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         /// Generates the vertex list for a single voxel
         /// </summary>
         /// <param name="voxelDensities">The densities of the voxel</param>
-        /// <param name="voxelCorners">The corners of the voxel</param>
+        /// <param name="voxelLocalPosition">The local voxel position of the voxel whose vertex list should be generated</param>
         /// <param name="edgeIndex">The edge index</param>
         /// <param name="isolevel">The density level where a surface will be created. Densities below this will be inside the surface (solid),
         /// and densities above this will be outside the surface (air)</param>
         /// <returns>The generated vertex list for the voxel</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static VertexList GenerateVertexList(VoxelCorners<float> voxelDensities, VoxelCorners<int3> voxelCorners,
+        public static VertexList GenerateVertexList(VoxelCorners<float> voxelDensities, int3 voxelLocalPosition,
             int edgeIndex, float isolevel)
         {
             VertexList vertexList = new VertexList();
@@ -89,8 +72,8 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
                 int edgeStartIndex = MarchingCubesLookupTables.EdgeIndexTable[2 * i + 0];
                 int edgeEndIndex = MarchingCubesLookupTables.EdgeIndexTable[2 * i + 1];
 
-                int3 corner1 = voxelCorners[edgeStartIndex];
-                int3 corner2 = voxelCorners[edgeEndIndex];
+                int3 corner1 = voxelLocalPosition + LookupTables.CubeCorners[edgeStartIndex];
+                int3 corner2 = voxelLocalPosition + LookupTables.CubeCorners[edgeEndIndex];
 
                 float density1 = voxelDensities[edgeStartIndex];
                 float density2 = voxelDensities[edgeEndIndex];

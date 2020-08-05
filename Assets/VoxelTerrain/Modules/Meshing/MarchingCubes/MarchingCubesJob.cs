@@ -71,11 +71,9 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
                 return;
             }
 
-            VoxelCorners<int3> corners = MarchingCubesFunctions.GetCorners(voxelLocalPosition);
-
             int edgeIndex = MarchingCubesLookupTables.EdgeTable[cubeIndex];
 
-            VertexList vertexList = MarchingCubesFunctions.GenerateVertexList(densities, corners, edgeIndex, Isolevel);
+            VertexList vertexList = MarchingCubesFunctions.GenerateVertexList(densities, voxelLocalPosition, edgeIndex, Isolevel);
 
             // Index at the beginning of the row
             int rowIndex = 15 * cubeIndex;

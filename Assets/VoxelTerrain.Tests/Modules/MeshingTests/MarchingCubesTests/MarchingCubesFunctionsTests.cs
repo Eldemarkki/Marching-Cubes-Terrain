@@ -41,31 +41,6 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes.Tests
             Assert.AreEqual(expectedCubeIndex, cubeIndex);
         }
 
-        [TestCase(0, 0, 0)]
-        [TestCase(1, 5, 10)]
-        [TestCase(-7, -13, -81)]
-        [TestCase(90, -3135, 5582)]
-        public void GetCorners_Test(int x, int y, int z)
-        {
-            int3 pos = new int3(x, y, z);
-
-            VoxelCorners<int3> corners = MarchingCubesFunctions.GetCorners(pos);
-
-            VoxelCorners<int3> expected = new VoxelCorners<int3>()
-            {
-                Corner1 = new int3(x, y, z),
-                Corner2 = new int3(x + 1, y, z),
-                Corner3 = new int3(x + 1, y, z + 1),
-                Corner4 = new int3(x, y, z + 1),
-
-                Corner5 = new int3(x, y + 1, z),
-                Corner6 = new int3(x + 1, y + 1, z),
-                Corner7 = new int3(x + 1, y + 1, z + 1),
-                Corner8 = new int3(x, y + 1, z + 1)
-            };
-            Assert.AreEqual(expected, corners);
-        }
-
         [TestCaseSource(nameof(VertexInterpolateTestCases))]
         public void VertexInterpolate_Test(float3 a, float3 b, float densityA, float densityB, float isolevel, float3 expectedPoint)
         {
@@ -108,12 +83,12 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes.Tests
             expected[11] = new float3(0f, 0.5f, 1f);
 
             // Act
-            VertexList actual = MarchingCubesFunctions.GenerateVertexList(densities, corners, edgeIndex, isolevel);
-            
+            VertexList actual = MarchingCubesFunctions.GenerateVertexList(densities, corners[0], edgeIndex, isolevel);
+
             // Assert
             Assert.AreEqual(expected, actual);
         }
-        
+
         [Test]
         public void GenerateVertexList_Test2()
         {
@@ -154,7 +129,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes.Tests
             expected[11] = new float3(6f, -12.75f, 101f);
 
             // Act
-            VertexList actual = MarchingCubesFunctions.GenerateVertexList(densities, corners, edgeIndex, isolevel);
+            VertexList actual = MarchingCubesFunctions.GenerateVertexList(densities, corners[0], edgeIndex, isolevel);
 
             // Assert
             Assert.AreEqual(expected, actual);
@@ -197,8 +172,8 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes.Tests
             expected[11] = new float3(-56f, -0.272727272727f, 10f);
 
             // Act
-            VertexList actual = MarchingCubesFunctions.GenerateVertexList(densities, corners, edgeIndex, isolevel);
-            
+            VertexList actual = MarchingCubesFunctions.GenerateVertexList(densities, corners[0], edgeIndex, isolevel);
+
             // Assert
             for (int i = 0; i < 12; i++)
             {
