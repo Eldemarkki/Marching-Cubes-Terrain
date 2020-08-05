@@ -413,7 +413,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b25c4f659e9d0f84d9897b9f38efef04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  voxelDataStore: {fileID: 1406068213}
+  voxelWorld: {fileID: 1406068215}
   leftClickAddsTerrain: 1
   deformSpeed: 0.1
   deformRange: 3

@@ -1,5 +1,6 @@
-﻿using Eldemarkki.VoxelTerrain.Utilities.Intersection;
-using Eldemarkki.VoxelTerrain.VoxelData;
+﻿using Eldemarkki.VoxelTerrain.Meshing.MarchingCubes;
+using Eldemarkki.VoxelTerrain.Utilities.Intersection;
+using Eldemarkki.VoxelTerrain.World;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -14,7 +15,7 @@ namespace Eldemarkki.VoxelTerrain.Player
         /// The voxel data store that will be deformed
         /// </summary>
         [Header("Terrain Deforming Settings")]
-        [SerializeField] private VoxelDataStore voxelDataStore;
+        [SerializeField] private VoxelWorld voxelWorld;
 
         /// <summary>
         /// Does the left mouse button add or remove terrain
@@ -163,7 +164,7 @@ namespace Eldemarkki.VoxelTerrain.Player
                         }
 
                         float modificationAmount = deformSpeed / distance * buildModifier;
-                        voxelDataStore.IncreaseVoxelData(offsetPoint, -modificationAmount);
+                        voxelWorld.VoxelDataStore.IncreaseVoxelData(offsetPoint, -modificationAmount);
                     }
                 }
             }
@@ -176,6 +177,14 @@ namespace Eldemarkki.VoxelTerrain.Player
         {
             PlaneLineIntersectionResult result = IntersectionUtilities.PlaneLineIntersection(_flatteningOrigin, _flatteningNormal, playerCamera.position, playerCamera.forward, out float3 intersectionPoint);
             if (result != PlaneLineIntersectionResult.OneHit) { return; }
+
+            float flattenOffset = 0;
+
+            // This is a bit hacky. One fix could be that the VoxelMesher class has a flattenOffset property, but I'm not sure if that's a good idea either.
+            if(voxelWorld.VoxelMesher is MarchingCubesMesher marchingCubesMesher)
+            {
+                flattenOffset = marchingCubesMesher.Isolevel;
+            }
 
             int intRange = (int)math.ceil(deformRange);
             for (int x = -intRange; x <= intRange; x++)
@@ -194,10 +203,10 @@ namespace Eldemarkki.VoxelTerrain.Player
                         }
 
                         int3 voxelDataWorldPosition = (int3)offsetPoint;
-                        if (voxelDataStore.TryGetVoxelData(voxelDataWorldPosition, out float oldVoxelData))
+                        if (voxelWorld.VoxelDataStore.TryGetVoxelData(voxelDataWorldPosition, out float oldVoxelData))
                         {
                             float voxelDataChange = (math.dot(_flatteningNormal, voxelDataWorldPosition) - math.dot(_flatteningNormal, _flatteningOrigin)) / deformRange;
-                            voxelDataStore.SetVoxelData((voxelDataChange * 0.5f + oldVoxelData) * 0.8f, voxelDataWorldPosition);
+                            voxelWorld.VoxelDataStore.SetVoxelData((voxelDataChange * 0.5f + oldVoxelData - flattenOffset) * 0.8f + flattenOffset, voxelDataWorldPosition);
                         }
                     }
                 }
