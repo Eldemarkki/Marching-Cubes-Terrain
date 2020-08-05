@@ -1,6 +1,7 @@
 ﻿using Eldemarkki.VoxelTerrain.Meshing;
 using Eldemarkki.VoxelTerrain.Meshing.Data;
 using Eldemarkki.VoxelTerrain.Utilities;
+using Eldemarkki.VoxelTerrain.VoxelData;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -29,6 +30,8 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         /// </summary>
         public bool HasChanges { get; set; }
 
+        public bool IsMeshGenerated { get; set; }
+
         private void Awake()
         {
             _meshFilter = GetComponent<MeshFilter>();
@@ -44,7 +47,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         }
 
         /// <summary>
-        /// Initializes the chunk and generates the mesh.
+        /// Initializes the chunk's properties.
         /// </summary>
         /// <param name="coordinate">The coordinate of this chunk</param>
         /// <param name="voxelWorld">The world that "owns" this chunk</param>
@@ -56,8 +59,6 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
             name = GetName(coordinate);
 
             ChunkCoordinate = coordinate;
-
-            GenerateMesh();
         }
 
         /// <summary>
@@ -97,6 +98,20 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
             _meshCollider.sharedMesh = mesh;
 
             HasChanges = false;
+
+            IsMeshGenerated = true;
+        }
+
+        /// <summary>
+        /// Generates the voxel data for this chunk and generates the mesh
+        /// </summary>
+        public void GenerateVoxelDataAndMesh()
+        {
+            Bounds chunkBounds = BoundsUtilities.GetChunkBounds(ChunkCoordinate, _voxelWorld.WorldSettings.ChunkSize);
+            JobHandleWithData<IVoxelDataGenerationJob> jobHandleWithData = _voxelWorld.VoxelDataGenerator.GenerateVoxelData(chunkBounds);
+            _voxelWorld.VoxelDataStore.SetVoxelDataJobHandle(jobHandleWithData, ChunkCoordinate);
+
+            GenerateMesh();
         }
 
         /// <summary>

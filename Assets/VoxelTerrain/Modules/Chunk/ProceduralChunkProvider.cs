@@ -33,22 +33,28 @@ namespace Eldemarkki.VoxelTerrain.Chunks
                 int3 chunkCoordinate = _generationQueue[0];
                 _generationQueue.RemoveAt(0);
 
-                LoadChunkToCoordinate(chunkCoordinate);
-
-                chunksGenerated++;
+                if (VoxelWorld.ChunkStore.TryGetChunkAtCoordinate(chunkCoordinate, out Chunk chunk))
+                {
+                    if (!chunk.IsMeshGenerated)
+                    {
+                        chunk.GenerateVoxelDataAndMesh();
+                        chunksGenerated++;
+                    }
+                }
             }
         }
 
         /// <summary>
-        /// Ensures that a chunk exists at a coordinate, if there is not, a new chunk is created later
+        /// Ensures that a chunk exists at a coordinate, if there is not, a new chunk is instantiated there, and its will eventually be generated
         /// </summary>
         /// <param name="chunkCoordinate">The chunk's coordinate</param>
-        public override void EnsureChunkExistsAtCoordinate(int3 chunkCoordinate)
+        public void EnsureChunkExistsAtCoordinate(int3 chunkCoordinate)
         {
-            if (VoxelWorld.ChunkStore.DoesChunkExistAtCoordinate(chunkCoordinate)) { return; }
-            if (_generationQueue.Contains(chunkCoordinate)) { return; }
-
-            _generationQueue.Add(chunkCoordinate);
+            if (!VoxelWorld.ChunkStore.DoesChunkExistAtCoordinate(chunkCoordinate))
+            {
+                CreateUnloadedChunkToCoordinate(chunkCoordinate);
+                _generationQueue.Add(chunkCoordinate);
+            }
         }
 
         /// <summary>

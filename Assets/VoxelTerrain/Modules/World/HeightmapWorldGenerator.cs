@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Eldemarkki.VoxelTerrain.World
 {
     /// <summary>
-    /// A procedurally generated world
+    /// A world generated from a heightmap
     /// </summary>
     public class HeightmapWorldGenerator : MonoBehaviour
     {
@@ -40,7 +40,7 @@ namespace Eldemarkki.VoxelTerrain.World
         }
 
         /// <summary>
-        /// Creates the heightmap terrain and instantiates the chunks.
+        /// Creates the heightmap terrain and loads the chunks.
         /// </summary>
         private void CreateHeightmapTerrain()
         {
@@ -54,7 +54,7 @@ namespace Eldemarkki.VoxelTerrain.World
                 {
                     for (int z = 0; z < chunkCountZ; z++)
                     {
-                        voxelWorld.ChunkProvider.EnsureChunkExistsAtCoordinate(new int3(x, y, z));
+                        voxelWorld.ChunkProvider.CreateLoadedChunkToCoordinate(new int3(x, y, z));
                     }
                 }
             }
