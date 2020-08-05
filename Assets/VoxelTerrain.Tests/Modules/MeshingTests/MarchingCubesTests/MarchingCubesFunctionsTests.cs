@@ -64,26 +64,17 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes.Tests
                 Corner7 = 1f,
                 Corner8 = 1f
             };
-            VoxelCorners<int3> corners = new VoxelCorners<int3>()
-            {
-                Corner1 = new int3(0, 0, 0),
-                Corner2 = new int3(1, 0, 0),
-                Corner3 = new int3(1, 0, 1),
-                Corner4 = new int3(0, 0, 1),
-                Corner5 = new int3(0, 1, 0),
-                Corner6 = new int3(1, 1, 0),
-                Corner7 = new int3(1, 1, 1),
-                Corner8 = new int3(0, 1, 1)
-            };
+
             int edgeIndex = 0b1000_0000_1100;
             float isolevel = 0.5f;
+
             VertexList expected = new VertexList();
             expected[2] = new float3(0.5f, 0f, 1f);
             expected[3] = new float3(0f, 0f, 0.5f);
             expected[11] = new float3(0f, 0.5f, 1f);
 
             // Act
-            VertexList actual = MarchingCubesFunctions.GenerateVertexList(densities, corners[0], edgeIndex, isolevel);
+            VertexList actual = MarchingCubesFunctions.GenerateVertexList(densities, new int3(0, 0, 0), edgeIndex, isolevel);
 
             // Assert
             Assert.AreEqual(expected, actual);
@@ -104,17 +95,6 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes.Tests
                 Corner7 = 0f,
                 Corner8 = 0f
             };
-            VoxelCorners<int3> corners = new VoxelCorners<int3>()
-            {
-                Corner1 = new int3(6, -13, 100),
-                Corner2 = new int3(7, -13, 100),
-                Corner3 = new int3(7, -13, 101),
-                Corner4 = new int3(6, -13, 101),
-                Corner5 = new int3(6, -12, 100),
-                Corner6 = new int3(7, -12, 100),
-                Corner7 = new int3(7, -12, 101),
-                Corner8 = new int3(6, -12, 101)
-            };
 
             float isolevel = 0.75f;
             int edgeIndex = 0b1110_1010_0011;
@@ -129,7 +109,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes.Tests
             expected[11] = new float3(6f, -12.75f, 101f);
 
             // Act
-            VertexList actual = MarchingCubesFunctions.GenerateVertexList(densities, corners[0], edgeIndex, isolevel);
+            VertexList actual = MarchingCubesFunctions.GenerateVertexList(densities, new int3(6, -13, 100), edgeIndex, isolevel);
 
             // Assert
             Assert.AreEqual(expected, actual);
@@ -150,34 +130,23 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes.Tests
                 Corner7 = 1f,
                 Corner8 = 0.9f
             };
-            VoxelCorners<int3> corners = new VoxelCorners<int3>()
-            {
-                Corner1 = new int3(-56, -1, 9),
-                Corner2 = new int3(-57, -1, 9),
-                Corner3 = new int3(-57, -1, 10),
-                Corner4 = new int3(-56, -1, 10),
-                Corner5 = new int3(-56, 0, 9),
-                Corner6 = new int3(-57, 0, 9),
-                Corner7 = new int3(-57, 0, 10),
-                Corner8 = new int3(-56, 0, 10)
-            };
 
             float isolevel = 0.75f;
             int edgeIndex = 0b1111_0000_0000;
 
             VertexList expected = new VertexList();
             expected[8] = new float3(-56f, -0.02439022f, 9f);
-            expected[9] = new float3(-57f, -0.07142866f, 9f);
-            expected[10] = new float3(-57f, -0.9803922f, 10f);
+            expected[9] = new float3(-55f, -0.07142866f, 9f);
+            expected[10] = new float3(-55f, -0.9803922f, 10f);
             expected[11] = new float3(-56f, -0.272727272727f, 10f);
 
             // Act
-            VertexList actual = MarchingCubesFunctions.GenerateVertexList(densities, corners[0], edgeIndex, isolevel);
+            VertexList actual = MarchingCubesFunctions.GenerateVertexList(densities, new int3(-56, -1, 9), edgeIndex, isolevel);
 
             // Assert
             for (int i = 0; i < 12; i++)
             {
-                Assert.AreEqual(0, math.distance(expected[i], actual[i]), 0.0001f);
+                Assert.AreEqual(0, math.distance(expected[i], actual[i]), 0.0001f, $"Expected: {expected[i]}, Actual: {actual[i]}");
             }
         }
 
