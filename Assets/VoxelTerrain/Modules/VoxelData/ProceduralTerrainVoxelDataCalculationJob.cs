@@ -1,6 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
 using Eldemarkki.VoxelTerrain.Settings;
-using Eldemarkki.VoxelTerrain.Utilities;
 using Unity.Burst;
 using Unity.Mathematics;
 
@@ -31,15 +30,23 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// The execute method required for Unity's IJobParallelFor job type
         /// </summary>
         /// <param name="index">The iteration index provided by Unity's Job System</param>
-        public void Execute(int index)
+        public void Execute()
         {
-            int3 worldPosition = IndexUtilities.IndexToXyz(index, OutputVoxelData.Width, OutputVoxelData.Height) + WorldPositionOffset;
-            int worldPositionX = worldPosition.x;
-            int worldPositionY = worldPosition.y;
-            int worldPositionZ = worldPosition.z;
+            int index = 0;
+            for (int z = 0; z < OutputVoxelData.Depth; z++)
+            {
+                for (int y = 0; y < OutputVoxelData.Height; y++)
+                {
+                    for (int x = 0; x < OutputVoxelData.Width; x++)
+                    {
+                        int3 worldPosition = new int3(x, y, z) + WorldPositionOffset;
 
-            float voxelData = CalculateVoxelData(worldPositionX, worldPositionY, worldPositionZ);
-            OutputVoxelData.SetVoxelData(voxelData, index);
+                        float voxelData = CalculateVoxelData(worldPosition.x, worldPosition.y, worldPosition.z);
+                        OutputVoxelData.SetVoxelData(voxelData, index);
+                        index++;
+                    }
+                }
+            }
         }
 
         /// <summary>

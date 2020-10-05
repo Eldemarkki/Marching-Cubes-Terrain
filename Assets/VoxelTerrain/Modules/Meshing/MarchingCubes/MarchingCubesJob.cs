@@ -55,49 +55,56 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         public NativeArray<ushort> OutputTriangles { get => _triangles; set => _triangles = value; }
 
         /// <summary>
-        /// The execute method required by the Unity Job System's IJobParallelFor
+        /// The execute method required by the Unity Job System's IJob
         /// </summary>
-        /// <param name="index">The iteration index</param>
-        public void Execute(int index)
+        public void Execute()
         {
-            // The position of the voxel Voxel inside the chunk. Goes from (0, 0, 0) to (densityVolume.Width-1, densityVolume.Height-1, densityVolume.Depth-1). Both are inclusive.
-            int3 voxelLocalPosition = IndexUtilities.IndexToXyz(index, _voxelData.Width - 1, _voxelData.Height - 1);
-
-            VoxelCorners<float> densities = _voxelData.GetVoxelDataUnitCube(voxelLocalPosition);
-
-            byte cubeIndex = MarchingCubesFunctions.CalculateCubeIndex(densities, Isolevel);
-            if (cubeIndex == 0 || cubeIndex == 255)
+            for (int x = 0; x < VoxelData.Width - 1; x++)
             {
-                return;
-            }
-
-            int edgeIndex = MarchingCubesLookupTables.EdgeTable[cubeIndex];
-
-            VertexList vertexList = MarchingCubesFunctions.GenerateVertexList(densities, voxelLocalPosition, edgeIndex, Isolevel);
-
-            // Index at the beginning of the row
-            int rowIndex = 15 * cubeIndex;
-
-            for (int i = 0; MarchingCubesLookupTables.TriangleTable[rowIndex+i] != -1 && i < 15; i += 3)
-            {
-                float3 vertex1 = vertexList[MarchingCubesLookupTables.TriangleTable[rowIndex + i + 0]];
-                float3 vertex2 = vertexList[MarchingCubesLookupTables.TriangleTable[rowIndex + i + 1]];
-                float3 vertex3 = vertexList[MarchingCubesLookupTables.TriangleTable[rowIndex + i + 2]];
-
-                if (!vertex1.Equals(vertex2) && !vertex1.Equals(vertex3) && !vertex2.Equals(vertex3))
+                for (int y = 0; y < VoxelData.Height - 1; y++)
                 {
-                    float3 normal = math.normalize(math.cross(vertex2 - vertex1, vertex3 - vertex1));
+                    for (int z = 0; z < VoxelData.Depth - 1; z++)
+                    {
+                        int3 voxelLocalPosition = new int3(x, y, z);
 
-                    int triangleIndex = VertexCountCounter.Increment() * 3;
-                    
-                    _vertices[triangleIndex + 0] = new MeshingVertexData(vertex1, normal);
-                    _triangles[triangleIndex + 0] = (ushort)(triangleIndex + 0);
+                        VoxelCorners<float> densities = _voxelData.GetVoxelDataUnitCube(voxelLocalPosition);
 
-                    _vertices[triangleIndex + 1] = new MeshingVertexData(vertex2, normal);
-                    _triangles[triangleIndex + 1] = (ushort)(triangleIndex + 1);
+                        byte cubeIndex = MarchingCubesFunctions.CalculateCubeIndex(densities, Isolevel);
+                        if (cubeIndex == 0 || cubeIndex == 255)
+                        {
+                            continue;
+                        }
 
-                    _vertices[triangleIndex + 2] = new MeshingVertexData(vertex3, normal);
-                    _triangles[triangleIndex + 2] = (ushort)(triangleIndex + 2);
+                        int edgeIndex = MarchingCubesLookupTables.EdgeTable[cubeIndex];
+
+                        VertexList vertexList = MarchingCubesFunctions.GenerateVertexList(densities, voxelLocalPosition, edgeIndex, Isolevel);
+
+                        // Index at the beginning of the row
+                        int rowIndex = 15 * cubeIndex;
+
+                        for (int i = 0; MarchingCubesLookupTables.TriangleTable[rowIndex+i] != -1 && i < 15; i += 3)
+                        {
+                            float3 vertex1 = vertexList[MarchingCubesLookupTables.TriangleTable[rowIndex + i + 0]];
+                            float3 vertex2 = vertexList[MarchingCubesLookupTables.TriangleTable[rowIndex + i + 1]];
+                            float3 vertex3 = vertexList[MarchingCubesLookupTables.TriangleTable[rowIndex + i + 2]];
+
+                            if (!vertex1.Equals(vertex2) && !vertex1.Equals(vertex3) && !vertex2.Equals(vertex3))
+                            {
+                                float3 normal = math.normalize(math.cross(vertex2 - vertex1, vertex3 - vertex1));
+
+                                int triangleIndex = VertexCountCounter.Increment() * 3;
+
+                                _vertices[triangleIndex + 0] = new MeshingVertexData(vertex1, normal);
+                                _triangles[triangleIndex + 0] = (ushort)(triangleIndex + 0);
+
+                                _vertices[triangleIndex + 1] = new MeshingVertexData(vertex2, normal);
+                                _triangles[triangleIndex + 1] = (ushort)(triangleIndex + 1);
+
+                                _vertices[triangleIndex + 2] = new MeshingVertexData(vertex3, normal);
+                                _triangles[triangleIndex + 2] = (ushort)(triangleIndex + 2);
+                            }
+                        }
+                    }
                 }
             }
         }

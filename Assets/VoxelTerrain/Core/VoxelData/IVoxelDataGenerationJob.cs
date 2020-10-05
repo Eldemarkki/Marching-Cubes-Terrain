@@ -6,7 +6,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
     /// <summary>
     /// An interface for voxel data generation jobs
     /// </summary>
-    public interface IVoxelDataGenerationJob : IJobParallelFor
+    public interface IVoxelDataGenerationJob : IJob
     {
         /// <summary>
         /// The sampling point's world position offset

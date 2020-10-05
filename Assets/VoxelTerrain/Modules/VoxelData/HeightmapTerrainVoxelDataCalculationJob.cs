@@ -1,5 +1,4 @@
 ﻿using System.Runtime.CompilerServices;
-using Eldemarkki.VoxelTerrain.Utilities;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -56,20 +55,31 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// The execute method required for Unity's IJobParallelFor job type
         /// </summary>
         /// <param name="index">The iteration index provided by Unity's Job System</param>
-        public void Execute(int index)
+        public void Execute()
         {
-            int3 worldPosition = IndexUtilities.IndexToXyz(index, OutputVoxelData.Width, OutputVoxelData.Height) + WorldPositionOffset;
-            int worldPositionX = worldPosition.x;
-            int worldPositionY = worldPosition.y;
-            int worldPositionZ = worldPosition.z;
-
-            float voxelData = 1; // 1, because the default voxel data should be air
-            if (worldPositionX < HeightmapWidth && worldPositionZ < HeightmapHeight)
+            int index = 0;
+            for (int z = 0; z < OutputVoxelData.Depth; z++)
             {
-                voxelData = CalculateVoxelData(worldPositionX, worldPositionY, worldPositionZ);
-            }
+                for (int y = 0; y < OutputVoxelData.Height; y++)
+                {
+                    for (int x = 0; x < OutputVoxelData.Width; x++)
+                    {
+                        int3 worldPosition = new int3(x, y, z) + WorldPositionOffset;
+                        int worldPositionX = worldPosition.x;
+                        int worldPositionY = worldPosition.y;
+                        int worldPositionZ = worldPosition.z;
 
-            OutputVoxelData.SetVoxelData(voxelData, index);
+                        float voxelData = 1; // 1, because the default voxel data should be air
+                        if (worldPositionX < HeightmapWidth && worldPositionZ < HeightmapHeight)
+                        {
+                            voxelData = CalculateVoxelData(worldPositionX, worldPositionY, worldPositionZ);
+                        }
+
+                        OutputVoxelData.SetVoxelData(voxelData, index);
+                        index++;
+                    }
+                }
+            }
         }
 
         /// <summary>

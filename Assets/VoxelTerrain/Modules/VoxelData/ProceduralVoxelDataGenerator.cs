@@ -32,7 +32,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                 ProceduralTerrainSettings = proceduralTerrainSettings
             };
             
-            JobHandle jobHandle = job.Schedule(voxelData.Length, 256);
+            JobHandle jobHandle = job.Schedule();
 
             JobHandleWithData<IVoxelDataGenerationJob> jobHandleWithData = new JobHandleWithData<IVoxelDataGenerationJob>();
             jobHandleWithData.JobHandle = jobHandle;

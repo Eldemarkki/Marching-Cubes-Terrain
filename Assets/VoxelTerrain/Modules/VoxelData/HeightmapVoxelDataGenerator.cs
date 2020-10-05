@@ -37,7 +37,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                 HeightOffset = heightmapWorldGenerator.HeightmapTerrainSettings.HeightOffset
             };
 
-            JobHandle jobHandle = job.Schedule(voxelData.Length, 256);
+            JobHandle jobHandle = job.Schedule();
 
             JobHandleWithData<IVoxelDataGenerationJob> jobHandleWithData = new JobHandleWithData<IVoxelDataGenerationJob>();
             jobHandleWithData.JobHandle = jobHandle;
