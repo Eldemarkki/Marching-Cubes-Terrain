@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028334, g: 0.22571328, b: 0.3069217, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -239,6 +239,7 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -579,6 +580,7 @@ GameObject:
   - component: {fileID: 1406068212}
   - component: {fileID: 1406068211}
   - component: {fileID: 1406068210}
+  - component: {fileID: 1406068208}
   m_Layer: 0
   m_Name: VoxelWorld
   m_TagString: Untagged
@@ -586,6 +588,18 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &1406068208
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1406068207}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f754d5f5e2253a409594cb8cd7a4278, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &1406068209
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -677,13 +691,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   worldSettings:
     chunkSize: 16
-    chunkPrefab: {fileID: 1405804976320875969, guid: d3008c1365ac1cb49b849d43fffdc19e,
+    chunkPrefab: {fileID: 1042568357287805991, guid: d3008c1365ac1cb49b849d43fffdc19e,
       type: 3}
   voxelMesher: {fileID: 1406068214}
   voxelDataStore: {fileID: 1406068213}
   voxelDataGenerator: {fileID: 1406068212}
   chunkProvider: {fileID: 1406068210}
   chunkStore: {fileID: 1406068209}
+  chunkUpdater: {fileID: 1406068208}
 --- !u!4 &1406068216
 Transform:
   m_ObjectHideFlags: 0

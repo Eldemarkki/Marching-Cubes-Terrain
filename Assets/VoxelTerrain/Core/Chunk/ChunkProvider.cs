@@ -19,14 +19,23 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         /// </summary>
         /// <param name="chunkCoordinate">The chunk's coordinate</param>
         /// <returns>The new chunk</returns>
-        protected Chunk CreateUnloadedChunkToCoordinate(int3 chunkCoordinate)
+        protected ChunkProperties CreateUnloadedChunkToCoordinate(int3 chunkCoordinate)
         {
             int3 worldPosition = chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize;
-            Chunk chunk = Instantiate(VoxelWorld.WorldSettings.ChunkPrefab, worldPosition.ToVectorInt(), Quaternion.identity);
-            chunk.Initialize(chunkCoordinate, VoxelWorld);
-            VoxelWorld.ChunkStore.AddChunk(chunk);
+            GameObject chunkGameObject = Instantiate(VoxelWorld.WorldSettings.ChunkPrefab, worldPosition.ToVectorInt(), Quaternion.identity);
 
-            return chunk;
+            ChunkProperties chunkProperties = new ChunkProperties()
+            {
+                ChunkGameObject = chunkGameObject,
+                MeshCollider = chunkGameObject.GetComponent<MeshCollider>(),
+                MeshFilter = chunkGameObject.GetComponent<MeshFilter>(),
+            };
+
+            VoxelWorld.ChunkUpdater.Initialize(chunkProperties, chunkCoordinate);
+
+            VoxelWorld.ChunkStore.AddChunk(chunkProperties);
+
+            return chunkProperties;
         }
 
         /// <summary>
@@ -34,11 +43,11 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         /// </summary>
         /// <param name="chunkCoordinate">The coordinate of the chunk to create</param>
         /// <returns>The new chunk</returns>
-        public Chunk CreateLoadedChunkToCoordinate(int3 chunkCoordinate)
+        public ChunkProperties CreateLoadedChunkToCoordinate(int3 chunkCoordinate)
         {
-            Chunk chunk = CreateUnloadedChunkToCoordinate(chunkCoordinate);
-            chunk.GenerateVoxelDataAndMesh();
-            return chunk;
+            ChunkProperties chunkProperties = CreateUnloadedChunkToCoordinate(chunkCoordinate);
+            VoxelWorld.ChunkUpdater.GenerateVoxelDataAndMesh(chunkProperties);
+            return chunkProperties;
         }
     }
 }

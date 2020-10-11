@@ -171,9 +171,9 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                     int3 localPos = (worldPosition - chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize).Mod(VoxelWorld.WorldSettings.ChunkSize + 1);
                     voxelDataVolume.IncreaseVoxelData(increaseAmount, localPos);
 
-                    if (VoxelWorld.ChunkStore.TryGetChunkAtCoordinate(chunkCoordinate, out Chunk chunk))
+                    if (VoxelWorld.ChunkStore.TryGetChunkAtCoordinate(chunkCoordinate, out ChunkProperties chunkProperties))
                     {
-                        chunk.HasChanges = true;
+                        chunkProperties.HasChanges = true;
                     }
                 }
             }
@@ -197,9 +197,9 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                     int3 localPos = (worldPosition - chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize).Mod(VoxelWorld.WorldSettings.ChunkSize + 1);
                     voxelDataVolume.SetVoxelData(voxelData, localPos.x, localPos.y, localPos.z);
 
-                    if (VoxelWorld.ChunkStore.TryGetChunkAtCoordinate(chunkCoordinate, out Chunk chunk))
+                    if (VoxelWorld.ChunkStore.TryGetChunkAtCoordinate(chunkCoordinate, out ChunkProperties chunkProperties))
                     {
-                        chunk.HasChanges = true;
+                        chunkProperties.HasChanges = true;
                     }
                 }
             }
@@ -221,9 +221,9 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                 _chunks.Add(chunkCoordinate, chunkVoxelData);
             }
 
-            if (VoxelWorld.ChunkStore.TryGetChunkAtCoordinate(chunkCoordinate, out Chunk chunk))
+            if (VoxelWorld.ChunkStore.TryGetChunkAtCoordinate(chunkCoordinate, out ChunkProperties chunkProperties))
             {
-                chunk.HasChanges = true;
+                chunkProperties.HasChanges = true;
             }
         }
 
@@ -281,9 +281,9 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                             }
                         }
 
-                        if (VoxelWorld.ChunkStore.TryGetChunkAtCoordinate(chunkCoordinate, out Chunk chunk))
+                        if (VoxelWorld.ChunkStore.TryGetChunkAtCoordinate(chunkCoordinate, out ChunkProperties chunkProperties))
                         {
-                            chunk.HasChanges = true;
+                            chunkProperties.HasChanges = true;
                         }
                     }
                 }

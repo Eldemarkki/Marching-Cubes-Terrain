@@ -33,11 +33,11 @@ namespace Eldemarkki.VoxelTerrain.Chunks
                 int3 chunkCoordinate = _generationQueue[0];
                 _generationQueue.RemoveAt(0);
 
-                if (VoxelWorld.ChunkStore.TryGetChunkAtCoordinate(chunkCoordinate, out Chunk chunk))
+                if (VoxelWorld.ChunkStore.TryGetChunkAtCoordinate(chunkCoordinate, out ChunkProperties chunkProperties))
                 {
-                    if (!chunk.IsMeshGenerated)
+                    if (!chunkProperties.IsMeshGenerated)
                     {
-                        chunk.GenerateVoxelDataAndMesh();
+                        VoxelWorld.ChunkUpdater.GenerateVoxelDataAndMesh(chunkProperties);
                         chunksGenerated++;
                     }
                 }
