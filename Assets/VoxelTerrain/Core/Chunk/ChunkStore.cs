@@ -54,7 +54,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         /// <returns>A collection of chunk coordinates outside of the viewing range from the coordinate parameter</returns>
         public IEnumerable<int3> GetChunkCoordinatesOutsideOfRenderDistance(int3 coordinate, int renderDistance)
         {
-            foreach (int3 chunkCoordinate in _chunks.Keys)
+            foreach (int3 chunkCoordinate in _chunks.Keys.ToList())
             {
                 int dX = math.abs(coordinate.x - chunkCoordinate.x);
                 int dY = math.abs(coordinate.y - chunkCoordinate.y);

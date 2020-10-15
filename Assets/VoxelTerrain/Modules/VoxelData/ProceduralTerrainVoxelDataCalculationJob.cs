@@ -32,18 +32,20 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <param name="index">The iteration index provided by Unity's Job System</param>
         public void Execute()
         {
-            int index = 0;
-            for (int z = 0; z < OutputVoxelData.Depth; z++)
+            for (int x = 0; x < OutputVoxelData.Width; x++)
             {
-                for (int y = 0; y < OutputVoxelData.Height; y++)
+                for (int z = 0; z < OutputVoxelData.Depth; z++)
                 {
-                    for (int x = 0; x < OutputVoxelData.Width; x++)
-                    {
-                        int3 worldPosition = new int3(x, y, z) + WorldPositionOffset;
+                    int2 terrainPosition = new int2(x + WorldPositionOffset.x, z + WorldPositionOffset.z);
+                    float terrainNoise = OctaveNoise(terrainPosition.x, terrainPosition.y, ProceduralTerrainSettings.NoiseFrequency * 0.001f, ProceduralTerrainSettings.NoiseOctaveCount) * ProceduralTerrainSettings.Amplitude;
 
-                        float voxelData = CalculateVoxelData(worldPosition.x, worldPosition.y, worldPosition.z);
-                        OutputVoxelData.SetVoxelData(voxelData, index);
-                        index++;
+                    for (int y = 0; y < OutputVoxelData.Height; y++)
+                    {
+                        int3 worldPosition = new int3(terrainPosition.x, y + WorldPositionOffset.y, terrainPosition.y);
+
+                        float voxelData = (worldPosition.y - ProceduralTerrainSettings.HeightOffset - terrainNoise) * 0.5f;
+                        OutputVoxelData.SetVoxelData(voxelData, x, y, z);
+
                     }
                 }
             }
