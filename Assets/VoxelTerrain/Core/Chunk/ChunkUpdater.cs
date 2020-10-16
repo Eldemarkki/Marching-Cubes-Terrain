@@ -3,6 +3,7 @@ using Eldemarkki.VoxelTerrain.Meshing.Data;
 using Eldemarkki.VoxelTerrain.Utilities;
 using Eldemarkki.VoxelTerrain.VoxelData;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -49,10 +50,13 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
             VoxelWorld.VoxelDataStore.SetVoxelDataJobHandle(jobHandleWithData, chunkProperties.ChunkCoordinate);
 
             NativeArray<Color32> colors = new NativeArray<Color32>((VoxelWorld.WorldSettings.ChunkSize + 1) * (VoxelWorld.WorldSettings.ChunkSize + 1) * (VoxelWorld.WorldSettings.ChunkSize + 1), Allocator.Persistent);
-            for (int i = 0; i < colors.Length; i++)
+
+            Color32 defaultColor = new Color32(11, 91, 33, 255);
+            NativeArray<Color32> defaultColorArray = new NativeArray<Color32>(new Color32[] { defaultColor }, Allocator.Temp);
+
+            unsafe
             {
-                // This is the default color of the terrain
-                colors[i] = new Color32(11, 91, 33, 255);
+                UnsafeUtility.MemCpyReplicate(colors.GetUnsafePtr(), defaultColorArray.GetUnsafeReadOnlyPtr(), sizeof(Color32), colors.Length);
             }
 
             VoxelWorld.VoxelColorStore.SetVoxelColorsChunk(chunkProperties.ChunkCoordinate, colors);
