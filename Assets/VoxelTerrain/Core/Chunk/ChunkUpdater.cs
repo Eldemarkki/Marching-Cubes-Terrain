@@ -2,6 +2,7 @@
 using Eldemarkki.VoxelTerrain.Meshing.Data;
 using Eldemarkki.VoxelTerrain.Utilities;
 using Eldemarkki.VoxelTerrain.VoxelData;
+using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -39,13 +40,22 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         }
 
         /// <summary>
-        /// Generates the voxel data for this chunk and generates the mesh
+        /// Generates the voxel data and colors for this chunk and generates the mesh
         /// </summary>
         public void GenerateVoxelDataAndMesh(ChunkProperties chunkProperties)
         {
             Bounds chunkBounds = BoundsUtilities.GetChunkBounds(chunkProperties.ChunkCoordinate, VoxelWorld.WorldSettings.ChunkSize);
             JobHandleWithData<IVoxelDataGenerationJob> jobHandleWithData = VoxelWorld.VoxelDataGenerator.GenerateVoxelData(chunkBounds);
             VoxelWorld.VoxelDataStore.SetVoxelDataJobHandle(jobHandleWithData, chunkProperties.ChunkCoordinate);
+
+            NativeArray<Color32> colors = new NativeArray<Color32>((VoxelWorld.WorldSettings.ChunkSize + 1) * (VoxelWorld.WorldSettings.ChunkSize + 1) * (VoxelWorld.WorldSettings.ChunkSize + 1), Allocator.Persistent);
+            for (int i = 0; i < colors.Length; i++)
+            {
+                // This is the default color of the terrain
+                colors[i] = new Color32(11, 91, 33, 255);
+            }
+
+            VoxelWorld.VoxelColorStore.SetVoxelColorsChunk(chunkProperties.ChunkCoordinate, colors);
 
             GenerateMesh(chunkProperties);
         }
@@ -55,7 +65,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         /// </summary>
         public void GenerateMesh(ChunkProperties chunkProperties)
         {
-            JobHandleWithData<IMesherJob> jobHandleWithData = VoxelWorld.VoxelMesher.CreateMesh(VoxelWorld.VoxelDataStore, chunkProperties.ChunkCoordinate);
+            JobHandleWithData<IMesherJob> jobHandleWithData = VoxelWorld.VoxelMesher.CreateMesh(VoxelWorld.VoxelDataStore, VoxelWorld.VoxelColorStore, chunkProperties.ChunkCoordinate);
             if (jobHandleWithData == null) { return; }
 
             IMesherJob job = jobHandleWithData.JobData;

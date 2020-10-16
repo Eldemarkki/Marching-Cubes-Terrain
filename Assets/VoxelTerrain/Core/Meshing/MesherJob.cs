@@ -2,6 +2,7 @@
 using Eldemarkki.VoxelTerrain.Meshing.Data;
 using Unity.Collections;
 using Unity.Jobs;
+using UnityEngine;
 
 namespace Eldemarkki.VoxelTerrain.Meshing
 {
@@ -19,6 +20,11 @@ namespace Eldemarkki.VoxelTerrain.Meshing
         /// The voxel data to generate the mesh from
         /// </summary>
         VoxelDataVolume VoxelData { get; set; }
+
+        /// <summary>
+        /// The voxel colors used to color the triangles
+        /// </summary>
+        NativeArray<Color32> VoxelColors { get; set; }
 
         /// <summary>
         /// The generated vertices

@@ -25,15 +25,15 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         /// </summary>
         public float Isolevel => isolevel;
 
-        /// <summary>
-        /// Starts a mesh generation job
-        /// </summary>
-        /// <param name="voxelDataStore">The store where to retrieve the voxel data from</param>
-        /// <param name="chunkCoordinate">The coordinate of the chunk that will be generated</param>
-        /// <returns>The job handle and the actual mesh generation job</returns>
-        public override JobHandleWithData<IMesherJob> CreateMesh(VoxelDataStore voxelDataStore, int3 chunkCoordinate)
+        /// <inheritdoc/>
+        public override JobHandleWithData<IMesherJob> CreateMesh(VoxelDataStore voxelDataStore, VoxelColorStore voxelColorStore, int3 chunkCoordinate)
         {
             if (!voxelDataStore.TryGetVoxelDataChunk(chunkCoordinate, out VoxelDataVolume boundsVoxelData))
+            {
+                return null;
+            }
+
+            if (!voxelColorStore.TryGetVoxelColorsChunk(chunkCoordinate, out NativeArray<Color32> boundsVoxelColors))
             {
                 return null;
             }
@@ -49,6 +49,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
             MarchingCubesJob marchingCubesJob = new MarchingCubesJob
             {
                 VoxelData = boundsVoxelData,
+                VoxelColors = boundsVoxelColors,
                 Isolevel = Isolevel,
                 VertexCountCounter = vertexCountCounter,
 

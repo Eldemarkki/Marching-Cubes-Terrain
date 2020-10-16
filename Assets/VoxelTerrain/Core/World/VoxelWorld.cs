@@ -20,6 +20,9 @@ namespace Eldemarkki.VoxelTerrain.World
         [SerializeField] private VoxelDataStore voxelDataStore;
         public VoxelDataStore VoxelDataStore => voxelDataStore;
 
+        [SerializeField] private VoxelColorStore voxelColorStore;
+        public VoxelColorStore VoxelColorStore => voxelColorStore;
+
         [SerializeField] private VoxelDataGenerator voxelDataGenerator;
         public VoxelDataGenerator VoxelDataGenerator => voxelDataGenerator;
 
@@ -35,6 +38,7 @@ namespace Eldemarkki.VoxelTerrain.World
         private void Awake()
         {
             voxelDataStore.VoxelWorld = this;
+            voxelColorStore.VoxelWorld = this;
             chunkProvider.VoxelWorld = this;
             chunkUpdater.VoxelWorld = this;
         }

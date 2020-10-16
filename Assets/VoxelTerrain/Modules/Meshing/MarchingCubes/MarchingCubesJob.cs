@@ -4,6 +4,7 @@ using Eldemarkki.VoxelTerrain.Utilities;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
+using UnityEngine;
 
 namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
 {
@@ -17,6 +18,9 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         /// The densities to generate the mesh off of
         /// </summary>
         [ReadOnly] private VoxelDataVolume _voxelData;
+
+        /// <inheritdoc cref="VoxelColors"/>
+        [ReadOnly] private NativeArray<Color32> _voxelColors;
 
         /// <summary>
         /// The density level where a surface will be created. Densities below this will be inside the surface (solid),
@@ -44,6 +48,9 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         /// </summary>
         public VoxelDataVolume VoxelData { get => _voxelData; set => _voxelData = value; }
 
+        /// <inheritdoc/>
+        public NativeArray<Color32> VoxelColors { get => _voxelColors; set => _voxelColors = value; }
+       
         /// <summary>
         /// The generated vertices
         /// </summary>
@@ -91,16 +98,23 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
                             if (!vertex1.Equals(vertex2) && !vertex1.Equals(vertex3) && !vertex2.Equals(vertex3))
                             {
                                 float3 normal = math.normalize(math.cross(vertex2 - vertex1, vertex3 - vertex1));
-
+     
                                 int triangleIndex = VertexCountCounter.Increment() * 3;
 
-                                _vertices[triangleIndex + 0] = new MeshingVertexData(vertex1, normal);
+                                float3 triangleMiddlePoint = (vertex1 + vertex2 + vertex3) / 3f;
+
+                                // Take the position of the closest corner of the current voxel
+                                int3 colorSamplePoint = (int3)math.round(triangleMiddlePoint);
+                                int colorSamplePointIndex = IndexUtilities.XyzToIndex(colorSamplePoint, VoxelData.Width, VoxelData.Height);
+                                Color32 color = _voxelColors[colorSamplePointIndex];
+
+                                _vertices[triangleIndex + 0] = new MeshingVertexData(vertex1, normal, color);
                                 _triangles[triangleIndex + 0] = (ushort)(triangleIndex + 0);
 
-                                _vertices[triangleIndex + 1] = new MeshingVertexData(vertex2, normal);
-                                _triangles[triangleIndex + 1] = (ushort)(triangleIndex + 1);
-
-                                _vertices[triangleIndex + 2] = new MeshingVertexData(vertex3, normal);
+                                _vertices[triangleIndex + 1] = new MeshingVertexData(vertex2, normal, color);
+                                _triangles[triangleIndex + 1] = (ushort)(triangleIndex + 1);          
+                                                                                                      
+                                _vertices[triangleIndex + 2] = new MeshingVertexData(vertex3, normal, color);
                                 _triangles[triangleIndex + 2] = (ushort)(triangleIndex + 2);
                             }
                         }

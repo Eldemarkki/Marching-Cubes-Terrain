@@ -44,6 +44,12 @@ namespace Eldemarkki.VoxelTerrain.Player
         [SerializeField] private KeyCode flatteningKey = KeyCode.LeftControl;
 
         /// <summary>
+        /// The color that the terrain will be painted with
+        /// </summary>
+        [Header("Material Painting")]
+        [SerializeField] private Color32 paintColor;
+
+        /// <summary>
         /// The game object that the deformation raycast will be cast from
         /// </summary>
         [Header("Player Settings")]
@@ -113,10 +119,14 @@ namespace Eldemarkki.VoxelTerrain.Player
             {
                 RaycastToTerrain(!leftClickAddsTerrain);
             }
+            else if (Input.GetMouseButton(2))
+            {
+                PaintColor();
+            }
         }
 
         /// <summary>
-        /// Tests if the player is in the way of deforming and edits the terrain if the player is not.
+        /// Shoots a raycast to the terrain and deforms the terrain around the hit point
         /// </summary>
         /// <param name="addTerrain">Should terrain be added or removed</param>
         private void RaycastToTerrain(bool addTerrain)
@@ -208,6 +218,45 @@ namespace Eldemarkki.VoxelTerrain.Player
                             float voxelDataChange = (math.dot(_flatteningNormal, voxelDataWorldPosition) - math.dot(_flatteningNormal, _flatteningOrigin)) / deformRange;
                             voxelWorld.VoxelDataStore.SetVoxelData((voxelDataChange * 0.5f + oldVoxelData - flattenOffset) * 0.8f + flattenOffset, voxelDataWorldPosition);
                         }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Shoots a ray towards the terrain and changes the material around the hitpoint to <see cref="paintColor"/>
+        /// </summary>
+        private void PaintColor()
+        {
+            Ray ray = new Ray(playerCamera.position, playerCamera.forward);
+
+            if (!Physics.Raycast(ray, out RaycastHit hit, maxReachDistance)) { return; }
+            Vector3 point = hit.point;
+
+            int hitX = Mathf.RoundToInt(point.x);
+            int hitY = Mathf.RoundToInt(point.y);
+            int hitZ = Mathf.RoundToInt(point.z);
+
+            int intRange = Mathf.CeilToInt(deformRange);
+
+            for (int x = -intRange; x <= intRange; x++)
+            {
+                for (int y = -intRange; y <= intRange; y++)
+                {
+                    for (int z = -intRange; z <= intRange; z++)
+                    {
+                        int offsetX = hitX - x;
+                        int offsetY = hitY - y;
+                        int offsetZ = hitZ - z;
+
+                        int3 offsetPoint = new int3(offsetX, offsetY, offsetZ);
+                        float distance = math.distance(offsetPoint, point);
+                        if (distance > deformRange)
+                        {
+                            continue;
+                        }
+
+                        voxelWorld.VoxelColorStore.SetColor(offsetPoint, paintColor);
                     }
                 }
             }
