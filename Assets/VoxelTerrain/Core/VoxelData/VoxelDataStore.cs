@@ -273,7 +273,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                                 {
                                     int3 voxelDataWorldPosition = new int3(voxelDataWorldPositionX, voxelDataWorldPositionY, voxelDataWorldPositionZ);
 
-                                    if (voxelDataChunk.TryGetVoxelData(voxelDataWorldPosition - worldSpaceQuery.min.ToInt3(), out float voxelData))
+                                    if (voxelDataVolume.TryGetVoxelData(voxelDataWorldPosition - worldSpaceQuery.min.ToInt3(), out float voxelData))
                                     {
                                         voxelDataChunk.SetVoxelData(voxelData, voxelDataWorldPosition - chunkWorldSpaceOrigin);
                                     }
