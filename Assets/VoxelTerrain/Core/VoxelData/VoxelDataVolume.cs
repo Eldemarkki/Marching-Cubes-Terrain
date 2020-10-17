@@ -275,5 +275,23 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                 throw new ArgumentException($"The chunks are not the same size! Width: {Width.ToString()}/{sourceVolume.Width.ToString()}, Height: {Height.ToString()}/{sourceVolume.Height.ToString()}, Depth: {Depth.ToString()}/{sourceVolume.Depth.ToString()}");
             }
         }
+
+        /// <summary>
+        /// Loops through each point in this volume, and calls <paramref name="function"/> on each of them
+        /// </summary>
+        /// <param name="function">The function that should be called on each of the points</param>
+        public void ForEach(Action<int3> function)
+        {
+            for (int x = 0; x < Width; x++)
+            {
+                for (int y = 0; y < Height; y++)
+                {
+                    for (int z = 0; z < Depth; z++)
+                    {
+                        function(new int3(x, y, z));
+                    }
+                }
+            }
+        }
     }
 }

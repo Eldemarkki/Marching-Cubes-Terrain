@@ -1,5 +1,7 @@
 ﻿using Eldemarkki.VoxelTerrain.Meshing.MarchingCubes;
+using Eldemarkki.VoxelTerrain.Utilities;
 using Eldemarkki.VoxelTerrain.Utilities.Intersection;
+using Eldemarkki.VoxelTerrain.VoxelData;
 using Eldemarkki.VoxelTerrain.World;
 using Unity.Mathematics;
 using UnityEngine;
@@ -153,31 +155,30 @@ namespace Eldemarkki.VoxelTerrain.Player
             int hitX = Mathf.RoundToInt(point.x);
             int hitY = Mathf.RoundToInt(point.y);
             int hitZ = Mathf.RoundToInt(point.z);
+            int3 hitPoint = new int3(hitX, hitY, hitZ);
 
             int intRange = Mathf.CeilToInt(range);
+            int3 rangeInt3 = new int3(intRange, intRange, intRange);
 
-            for (int x = -intRange; x <= intRange; x++)
+            Bounds queryBounds = new Bounds();
+
+            int3 min = hitPoint - rangeInt3;
+            int3 max = hitPoint + rangeInt3;
+            queryBounds.SetMinMax(min.ToVectorInt(), max.ToVectorInt());
+
+            VoxelDataVolume volume = voxelWorld.VoxelDataStore.GetVoxelDataCustom(queryBounds);
+            volume.ForEach((voxelDataPoint) =>
             {
-                for (int y = -intRange; y <= intRange; y++)
+                int3 offsetPoint = min + voxelDataPoint;
+                float distance = math.distance(offsetPoint, point);
+                if (distance <= range)
                 {
-                    for (int z = -intRange; z <= intRange; z++)
-                    {
-                        int offsetX = hitX - x;
-                        int offsetY = hitY - y;
-                        int offsetZ = hitZ - z;
-
-                        int3 offsetPoint = new int3(offsetX, offsetY, offsetZ);
-                        float distance = math.distance(offsetPoint, point);
-                        if (distance > range)
-                        {
-                            continue;
-                        }
-
-                        float modificationAmount = deformSpeed / distance * buildModifier;
-                        voxelWorld.VoxelDataStore.IncreaseVoxelData(offsetPoint, -modificationAmount);
-                    }
+                    float modificationAmount = deformSpeed / distance * buildModifier;
+                    volume.IncreaseVoxelData(-modificationAmount, voxelDataPoint);
                 }
-            }
+            });
+
+            voxelWorld.VoxelDataStore.SetVoxelDataCustom(volume, min);
         }
 
         /// <summary>
