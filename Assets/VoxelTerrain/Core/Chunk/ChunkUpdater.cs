@@ -35,7 +35,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         /// <param name="chunkCoordinate">The new coordinate of the chunk</param>
         public void Initialize(ChunkProperties chunkProperties, int3 chunkCoordinate)
         {
-            chunkProperties.ChunkGameObject.transform.position = chunkCoordinate.ToVectorInt() * VoxelWorld.WorldSettings.ChunkSize;
+            chunkProperties.ChunkGameObject.transform.position = (chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize).ToVectorInt();
             chunkProperties.ChunkGameObject.name = ChunkProperties.GetName(chunkCoordinate);
             chunkProperties.ChunkCoordinate = chunkCoordinate;
         }
@@ -49,7 +49,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
             JobHandleWithData<IVoxelDataGenerationJob> jobHandleWithData = VoxelWorld.VoxelDataGenerator.GenerateVoxelData(chunkBounds);
             VoxelWorld.VoxelDataStore.SetVoxelDataJobHandle(jobHandleWithData, chunkProperties.ChunkCoordinate);
 
-            NativeArray<Color32> colors = new NativeArray<Color32>((VoxelWorld.WorldSettings.ChunkSize + 1) * (VoxelWorld.WorldSettings.ChunkSize + 1) * (VoxelWorld.WorldSettings.ChunkSize + 1), Allocator.Persistent);
+            NativeArray<Color32> colors = new NativeArray<Color32>((VoxelWorld.WorldSettings.ChunkSize.x + 1) * (VoxelWorld.WorldSettings.ChunkSize.y + 1) * (VoxelWorld.WorldSettings.ChunkSize.z + 1), Allocator.Persistent);
 
             Color32 defaultColor = new Color32(11, 91, 33, 255);
             NativeArray<Color32> defaultColorArray = new NativeArray<Color32>(new Color32[] { defaultColor }, Allocator.Temp);

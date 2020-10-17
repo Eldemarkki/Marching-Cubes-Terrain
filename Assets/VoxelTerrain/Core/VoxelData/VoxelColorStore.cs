@@ -54,7 +54,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                 {
                     int3 localPos = (colorWorldPosition - chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize).Mod(VoxelWorld.WorldSettings.ChunkSize + 1);
 
-                    int index = IndexUtilities.XyzToIndex(localPos, VoxelWorld.WorldSettings.ChunkSize + 1, VoxelWorld.WorldSettings.ChunkSize + 1);
+                    int index = IndexUtilities.XyzToIndex(localPos, VoxelWorld.WorldSettings.ChunkSize.x + 1, VoxelWorld.WorldSettings.ChunkSize.y + 1);
 
                     colors[index] = color;
 

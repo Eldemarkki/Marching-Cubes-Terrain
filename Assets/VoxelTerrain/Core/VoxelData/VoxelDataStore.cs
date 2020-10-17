@@ -104,7 +104,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
 
             Bounds worldSpaceQuery = bounds;
 
-            int chunkSize = VoxelWorld.WorldSettings.ChunkSize;
+            int3 chunkSize = VoxelWorld.WorldSettings.ChunkSize;
 
             int3 minChunkCoordinate = VectorUtilities.WorldPositionToCoordinate(worldSpaceQuery.min - Vector3Int.one, chunkSize);
             int3 maxChunkCoordinate = VectorUtilities.WorldPositionToCoordinate(worldSpaceQuery.max + Vector3Int.one, chunkSize);
@@ -238,7 +238,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
 
             worldSpaceQuery.SetMinMax(originPosition.ToVectorInt(), (originPosition + voxelDataVolume.Size - new int3(1, 1, 1)).ToVectorInt());
 
-            int chunkSize = VoxelWorld.WorldSettings.ChunkSize;
+            int3 chunkSize = VoxelWorld.WorldSettings.ChunkSize;
 
             int3 minChunkCoordinate = VectorUtilities.WorldPositionToCoordinate(worldSpaceQuery.min - Vector3Int.one, chunkSize);
             int3 maxChunkCoordinate = VectorUtilities.WorldPositionToCoordinate(worldSpaceQuery.max + Vector3Int.one, chunkSize);
@@ -339,7 +339,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <param name="worldPosition">The world position to check</param>
         /// <param name="chunkSize">The size of the chunks</param>
         /// <returns>A collection of chunk coordinates that contain the world position</returns>
-        public static IEnumerable<int3> GetChunkCoordinatesContainingPoint(int3 worldPosition, int chunkSize)
+        public static IEnumerable<int3> GetChunkCoordinatesContainingPoint(int3 worldPosition, int3 chunkSize)
         {
             int3 localPosition = VectorUtilities.Mod(worldPosition, chunkSize);
 

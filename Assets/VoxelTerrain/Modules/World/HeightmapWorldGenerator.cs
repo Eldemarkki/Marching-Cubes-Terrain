@@ -44,9 +44,9 @@ namespace Eldemarkki.VoxelTerrain.World
         /// </summary>
         private void CreateHeightmapTerrain()
         {
-            int chunkCountX = Mathf.CeilToInt((float)(heightmapTerrainSettings.Width - 1) / voxelWorld.WorldSettings.ChunkSize);
-            int chunkCountZ = Mathf.CeilToInt((float)(heightmapTerrainSettings.Height - 1) / voxelWorld.WorldSettings.ChunkSize);
-            int chunkCountY = Mathf.CeilToInt(heightmapTerrainSettings.Amplitude / voxelWorld.WorldSettings.ChunkSize);
+            int chunkCountX = Mathf.CeilToInt((float)(heightmapTerrainSettings.Width - 1) / voxelWorld.WorldSettings.ChunkSize.x);
+            int chunkCountZ = Mathf.CeilToInt((float)(heightmapTerrainSettings.Height - 1) / voxelWorld.WorldSettings.ChunkSize.z);
+            int chunkCountY = Mathf.CeilToInt(heightmapTerrainSettings.Amplitude / voxelWorld.WorldSettings.ChunkSize.y);
 
             for (int x = 0; x < chunkCountX; x++)
             {

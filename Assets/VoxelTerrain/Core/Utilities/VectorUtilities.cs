@@ -16,7 +16,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities
         /// <param name="x">The multiple to floor to</param>
         /// <returns>The floored value</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int3 FloorToMultipleOfX(this float3 n, int x)
+        public static int3 FloorToMultipleOfX(this float3 n, int3 x)
         {
             return (int3)(math.floor(n / x) * x);
         }
@@ -50,7 +50,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities
         /// <param name="x">The divisor</param>
         /// <returns>The remainder of n/x</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int3 Mod(this int3 n, int x)
+        public static int3 Mod(this int3 n, int3 x)
         {
             return (n % x + x) % x;
         }
@@ -62,7 +62,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities
         /// <param name="chunkSize">The size of a chunk in the world</param>
         /// <returns>The chunk coordinate</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int3 WorldPositionToCoordinate(float3 worldPosition, int chunkSize)
+        public static int3 WorldPositionToCoordinate(float3 worldPosition, int3 chunkSize)
         {
             return worldPosition.FloorToMultipleOfX(chunkSize) / chunkSize;
         }

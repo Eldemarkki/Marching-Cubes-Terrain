@@ -1,4 +1,4 @@
-﻿using Eldemarkki.VoxelTerrain.World.Chunks;
+﻿using Unity.Mathematics;
 using UnityEngine;
 
 namespace Eldemarkki.VoxelTerrain.Settings
@@ -12,7 +12,7 @@ namespace Eldemarkki.VoxelTerrain.Settings
         /// <summary>
         /// The chunk's size. This represents the width, height and depth in Unity units.
         /// </summary>
-        [SerializeField] private int chunkSize = 16;
+        [SerializeField] private int3 chunkSize = new int3(16, 16, 16);
 
         /// <summary>
         /// The chunk's prefab that will be instantiated
@@ -22,7 +22,7 @@ namespace Eldemarkki.VoxelTerrain.Settings
         /// <summary>
         /// The chunk's size. This represents the width, height and depth in Unity units.
         /// </summary>
-        public int ChunkSize => chunkSize;
+        public int3 ChunkSize => chunkSize;
 
         /// <summary>
         /// The chunk's prefab that will be instantiated
