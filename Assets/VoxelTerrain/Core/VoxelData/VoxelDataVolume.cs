@@ -267,8 +267,8 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <summary>
         /// Increases the voxel data at <paramref name="index"/> by <paramref name="increaseAmount"/>. If <paramref name="index"/> is outside of <see cref="Length"/>, an <see cref="IndexOutOfRangeException"/> will be thrown.
         /// </summary>
-        /// <param name="increaseAmount"></param>
-        /// <param name="index"></param>
+        /// <param name="increaseAmount">How much the voxel data should be increased by</param>
+        /// <param name="index">The index of the voxel data that should be increased</param>
         public void IncreaseVoxelData(float increaseAmount, int index)
         {
             float voxelData = GetVoxelData(index);
