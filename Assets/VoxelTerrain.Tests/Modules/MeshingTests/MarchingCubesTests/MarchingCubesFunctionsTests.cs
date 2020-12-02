@@ -25,7 +25,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes.Tests
         [TestCase(0.3f, 0.45f, 0.9f, 0.4f, 0.5f, 0.55f, 0.75f, 0.625f, 0.55f, 27)]
         public void CalculateCubeIndex_Test(float c1, float c2, float c3, float c4, float c5, float c6, float c7, float c8, float isolevel, int expectedCubeIndex)
         {
-            VoxelCorners<float> densities = new VoxelCorners<float>()
+            VoxelCorners<float> densities = new VoxelCorners<float>
             {
                 Corner1 = c1,
                 Corner2 = c2,
@@ -54,7 +54,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes.Tests
         public void GenerateVertexList_Test1()
         {
             // Arrange
-            VoxelCorners<float> densities = new VoxelCorners<float>()
+            VoxelCorners<float> densities = new VoxelCorners<float>
             {
                 Corner1 = 1f,
                 Corner2 = 1f,
@@ -85,7 +85,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes.Tests
         public void GenerateVertexList_Test2()
         {
             // Arrange
-            VoxelCorners<float> densities = new VoxelCorners<float>()
+            VoxelCorners<float> densities = new VoxelCorners<float>
             {
                 Corner1 = 1f,
                 Corner2 = 0f,
@@ -120,7 +120,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes.Tests
         public void GenerateVertexList_Test3()
         {
             // Arrange
-            VoxelCorners<float> densities = new VoxelCorners<float>()
+            VoxelCorners<float> densities = new VoxelCorners<float>
             {
                 Corner1 = 0.55f,
                 Corner2 = 0.1f,
