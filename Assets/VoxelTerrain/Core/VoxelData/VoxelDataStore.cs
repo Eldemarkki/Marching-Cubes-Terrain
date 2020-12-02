@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Eldemarkki.VoxelTerrain.Utilities;
 using Eldemarkki.VoxelTerrain.Utilities.Intersection;
 using Eldemarkki.VoxelTerrain.World;
@@ -276,6 +277,68 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                                     if (voxelDataVolume.TryGetVoxelData(voxelDataWorldPosition - worldSpaceQuery.min.ToInt3(), out float voxelData))
                                     {
                                         voxelDataChunk.SetVoxelData(voxelData, voxelDataWorldPosition - chunkWorldSpaceOrigin);
+                                    }
+                                }
+                            }
+                        }
+
+                        if (VoxelWorld.ChunkStore.TryGetChunkAtCoordinate(chunkCoordinate, out ChunkProperties chunkProperties))
+                        {
+                            chunkProperties.HasChanges = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Increases the voxel data for a volume in the world
+        /// </summary>
+        /// <param name="worldSpaceQuery">The volume where the voxel datas should be increased</param>
+        /// <param name="increaseFunction">The function that calculates how much a voxel data should be increased by. The first argument is the world space position of the voxel data, and the second argument is the current voxel data. The return value is how much the voxel data should be increased by.</param>
+        public void IncreaseVoxelDataCustom(Bounds worldSpaceQuery, Func<int3, float, float> increaseFunction)
+        {            
+            int3 chunkSize = VoxelWorld.WorldSettings.ChunkSize;
+
+            int3 minChunkCoordinate = VectorUtilities.WorldPositionToCoordinate(worldSpaceQuery.min - Vector3Int.one, chunkSize);
+            int3 maxChunkCoordinate = VectorUtilities.WorldPositionToCoordinate(worldSpaceQuery.max + Vector3Int.one, chunkSize);
+
+            for (int chunkCoordinateX = minChunkCoordinate.x; chunkCoordinateX <= maxChunkCoordinate.x; chunkCoordinateX++)
+            {
+                for (int chunkCoordinateY = minChunkCoordinate.y; chunkCoordinateY <= maxChunkCoordinate.y; chunkCoordinateY++)
+                {
+                    for (int chunkCoordinateZ = minChunkCoordinate.z; chunkCoordinateZ <= maxChunkCoordinate.z; chunkCoordinateZ++)
+                    {
+                        int3 chunkCoordinate = new int3(chunkCoordinateX, chunkCoordinateY, chunkCoordinateZ);
+                        if (!TryGetVoxelDataChunk(chunkCoordinate, out VoxelDataVolume voxelDataChunk))
+                        {
+                            continue;
+                        }
+
+                        Vector3 chunkBoundsSize = new Vector3(voxelDataChunk.Width - 1, voxelDataChunk.Height - 1, voxelDataChunk.Depth - 1);
+                        int3 chunkWorldSpaceOrigin = chunkCoordinate * chunkSize;
+
+                        Bounds chunkWorldSpaceBounds = new Bounds();
+                        chunkWorldSpaceBounds.SetMinMax(chunkWorldSpaceOrigin.ToVectorInt(), chunkWorldSpaceOrigin.ToVectorInt() + chunkBoundsSize);
+
+                        Bounds intersectionVolume = IntersectionUtilities.GetIntersectionVolume(worldSpaceQuery, chunkWorldSpaceBounds);
+                        int3 intersectionVolumeMin = intersectionVolume.min.ToInt3();
+                        int3 intersectionVolumeMax = intersectionVolume.max.ToInt3();
+
+                        for (int voxelDataWorldPositionX = intersectionVolumeMin.x; voxelDataWorldPositionX <= intersectionVolumeMax.x; voxelDataWorldPositionX++)
+                        {
+                            for (int voxelDataWorldPositionY = intersectionVolumeMin.y; voxelDataWorldPositionY <= intersectionVolumeMax.y; voxelDataWorldPositionY++)
+                            {
+                                for (int voxelDataWorldPositionZ = intersectionVolumeMin.z; voxelDataWorldPositionZ <= intersectionVolumeMax.z; voxelDataWorldPositionZ++)
+                                {
+                                    int3 voxelDataWorldPosition = new int3(voxelDataWorldPositionX, voxelDataWorldPositionY, voxelDataWorldPositionZ);
+
+                                    int3 voxelDataLocalPosition = voxelDataWorldPosition - chunkWorldSpaceOrigin;
+                                    int voxelDataIndex = voxelDataChunk.GetIndex(voxelDataLocalPosition);
+                                    if (voxelDataChunk.TryGetVoxelData(voxelDataIndex, out float voxelData))
+                                    {
+                                        float increaseAmount = increaseFunction(voxelDataWorldPosition, voxelData);
+                                        voxelDataChunk.IncreaseVoxelData(increaseAmount, voxelDataIndex);
                                     }
                                 }
                             }

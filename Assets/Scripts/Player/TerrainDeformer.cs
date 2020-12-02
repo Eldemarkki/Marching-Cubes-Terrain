@@ -166,19 +166,17 @@ namespace Eldemarkki.VoxelTerrain.Player
             int3 max = hitPoint + rangeInt3;
             queryBounds.SetMinMax(min.ToVectorInt(), max.ToVectorInt());
 
-            VoxelDataVolume volume = voxelWorld.VoxelDataStore.GetVoxelDataCustom(queryBounds);
-            volume.ForEach((voxelDataPoint) =>
+            voxelWorld.VoxelDataStore.IncreaseVoxelDataCustom(queryBounds, (voxelDataWorldPosition, voxelData) =>
             {
-                int3 offsetPoint = min + voxelDataPoint;
-                float distance = math.distance(offsetPoint, point);
+                float distance = math.distance(voxelDataWorldPosition, point);
                 if (distance <= range)
                 {
                     float modificationAmount = deformSpeed / distance * buildModifier;
-                    volume.IncreaseVoxelData(-modificationAmount, voxelDataPoint);
+                    return -modificationAmount;
                 }
-            });
 
-            voxelWorld.VoxelDataStore.SetVoxelDataCustom(volume, min);
+                return 0;
+            });
         }
 
         /// <summary>

@@ -293,5 +293,10 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                 }
             }
         }
+
+        public int GetIndex(int3 voxelDataLocalPosition)
+        {
+            return IndexUtilities.XyzToIndex(voxelDataLocalPosition.x, voxelDataLocalPosition.y, voxelDataLocalPosition.z, Width, Height);
+        }
     }
 }
