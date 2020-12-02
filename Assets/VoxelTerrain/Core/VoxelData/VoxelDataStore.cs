@@ -105,31 +105,6 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         }
 
         /// <summary>
-        /// Increases the voxel data at <paramref name="worldPosition"/> by <paramref name="increaseAmount"/>.
-        /// </summary>
-        /// <param name="worldPosition">The world position of the voxel data that should be increased</param>
-        public void IncreaseVoxelData(int3 worldPosition, float increaseAmount)
-        {
-            IEnumerable<int3> affectedChunkCoordinates = GetChunkCoordinatesContainingPoint(worldPosition, VoxelWorld.WorldSettings.ChunkSize);
-
-            foreach(int3 chunkCoordinate in affectedChunkCoordinates)
-            {
-                if (!_chunks.ContainsKey(chunkCoordinate)) { continue; }
-
-                if (TryGetVoxelDataChunk(chunkCoordinate, out VoxelDataVolume voxelDataVolume))
-                {
-                    int3 localPos = (worldPosition - chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize).Mod(VoxelWorld.WorldSettings.ChunkSize + 1);
-                    voxelDataVolume.IncreaseVoxelData(increaseAmount, localPos);
-
-                    if (VoxelWorld.ChunkStore.TryGetChunkAtCoordinate(chunkCoordinate, out ChunkProperties chunkProperties))
-                    {
-                        chunkProperties.HasChanges = true;
-                    }
-                }
-            }
-        }
-
-        /// <summary>
         /// Sets the voxel data for a world position
         /// </summary>
         /// <param name="voxelData">The new voxel data</param>
@@ -198,6 +173,31 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                     chunkProperties.HasChanges = true;
                 }
             });
+        }
+
+        /// <summary>
+        /// Increases the voxel data at <paramref name="worldPosition"/> by <paramref name="increaseAmount"/>.
+        /// </summary>
+        /// <param name="worldPosition">The world position of the voxel data that should be increased</param>
+        public void IncreaseVoxelData(int3 worldPosition, float increaseAmount)
+        {
+            IEnumerable<int3> affectedChunkCoordinates = GetChunkCoordinatesContainingPoint(worldPosition, VoxelWorld.WorldSettings.ChunkSize);
+
+            foreach (int3 chunkCoordinate in affectedChunkCoordinates)
+            {
+                if (!_chunks.ContainsKey(chunkCoordinate)) { continue; }
+
+                if (TryGetVoxelDataChunk(chunkCoordinate, out VoxelDataVolume voxelDataVolume))
+                {
+                    int3 localPos = (worldPosition - chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize).Mod(VoxelWorld.WorldSettings.ChunkSize + 1);
+                    voxelDataVolume.IncreaseVoxelData(increaseAmount, localPos);
+
+                    if (VoxelWorld.ChunkStore.TryGetChunkAtCoordinate(chunkCoordinate, out ChunkProperties chunkProperties))
+                    {
+                        chunkProperties.HasChanges = true;
+                    }
+                }
+            }
         }
 
         /// <summary>

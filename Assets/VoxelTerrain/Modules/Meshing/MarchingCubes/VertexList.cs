@@ -93,7 +93,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
                     case 9: return _c10;
                     case 10: return _c11;
                     case 11: return _c12;
-                    default: throw new ArgumentOutOfRangeException($"There are only 12 vertices! You tried to access the vertex at index {index.ToString()}");
+                    default: throw new ArgumentOutOfRangeException($"There are only 12 vertices! You tried to access the vertex at index {index}");
                 }
             }
             set
@@ -136,7 +136,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
                     case 11:
                         _c12 = value;
                         break;
-                    default: throw new ArgumentOutOfRangeException($"There are only 12 vertices! You tried to access the vertex at index {index.ToString()}");
+                    default: throw new ArgumentOutOfRangeException($"There are only 12 vertices! You tried to access the vertex at index {index}");
                 }
             }
         }

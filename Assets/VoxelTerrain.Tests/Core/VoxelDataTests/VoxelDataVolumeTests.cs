@@ -157,12 +157,21 @@ namespace Eldemarkki.VoxelTerrain.VoxelData.Tests
         // This was needed because math.round rounded 0.5 => 0, which was incorrect when comparing voxel datas.
         private static int RoundUpIfDecimal5(float x)
         {
-            if (x < 0) throw new System.ArgumentException("This function only works with positive numbers!");
+            if (x < 0)
+            {
+                throw new System.ArgumentException("This function only works with positive numbers!");
+            }
 
             int result;
             float decimals = x % 1;
-            if (decimals < 0.5f) result = (int)math.floor(x);
-            else result = (int)math.ceil(x);
+            if (decimals < 0.5f)
+            {
+                result = (int)math.floor(x);
+            }
+            else
+            {
+                result = (int)math.ceil(x);
+            }
 
             return result;
         }

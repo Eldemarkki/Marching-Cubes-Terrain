@@ -69,7 +69,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.Data
                     case 5: return Corner6;
                     case 6: return Corner7;
                     case 7: return Corner8;
-                    default: throw new ArgumentOutOfRangeException($"There are only 8 corners! You tried to access the corner at index {index.ToString()}");
+                    default: throw new ArgumentOutOfRangeException($"There are only 8 corners! You tried to access the corner at index {index}");
                 }
             }
             set
@@ -100,7 +100,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.Data
                     case 7:
                         Corner8 = value;
                         break;
-                    default: throw new ArgumentOutOfRangeException($"There are only 8 corners! You tried to access the corner at index {index.ToString()}");
+                    default: throw new ArgumentOutOfRangeException($"There are only 8 corners! You tried to access the corner at index {index}");
                 }
             }
         }

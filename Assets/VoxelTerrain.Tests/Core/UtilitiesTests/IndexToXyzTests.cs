@@ -5,7 +5,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities.Tests
 {
     public class IndexToXyzTests
     {
-        public void TestIndexToXyz(int index, int expectedX, int expectedY, int expectedZ, int width, int height)
+        private static void TestIndexToXyz(int index, int expectedX, int expectedY, int expectedZ, int width, int height)
         {
             Assert.AreEqual(new int3(expectedX, expectedY, expectedZ), IndexUtilities.IndexToXyz(index, width, height));
         }
@@ -22,7 +22,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities.Tests
             TestIndexToXyz(index, expectedX, expectedY, expectedZ, 2, 5);
         }
 
-        static object[] Width_1_Height_5_Cases =
+        private static object[] Width_1_Height_5_Cases =
         {
             new object[] { 1, 0, 1, 0},
             new object[] { 2, 0, 2, 0},
@@ -32,7 +32,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities.Tests
             new object[] { 5, 0, 0, 1}
         };
 
-        static object[] Width_2_Height_5_Cases =
+        private static object[] Width_2_Height_5_Cases =
         {
             new object[] { 1 , 1, 0, 0},
             new object[] { 2 , 0, 1, 0},

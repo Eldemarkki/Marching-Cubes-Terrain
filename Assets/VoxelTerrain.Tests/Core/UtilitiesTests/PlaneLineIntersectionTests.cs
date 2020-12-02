@@ -12,8 +12,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities.Intersection.Tests
             float3 planeNormal = math.normalize(new float3(0, 1, 0));
             float3 lineOrigin = new float3(0, 10, 0);
             float3 lineDirection = new float3(0, -1, 0);
-
-            PlaneLineIntersectionResult result = IntersectionUtilities.PlaneLineIntersection(planeOrigin, planeNormal, lineOrigin, lineDirection, out float3 intersectionPoint);
+            PlaneLineIntersectionResult result = IntersectionUtilities.PlaneLineIntersection(planeOrigin, planeNormal, lineOrigin, lineDirection, out _);
             Assert.AreEqual(PlaneLineIntersectionResult.OneHit, result);
         }
 
@@ -24,8 +23,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities.Intersection.Tests
             float3 planeNormal = math.normalize(new float3(0, 1, 0));
             float3 lineOrigin = new float3(0, 10, 0);
             float3 lineDirection = new float3(0, -1, 0);
-
-            PlaneLineIntersectionResult result = IntersectionUtilities.PlaneLineIntersection(planeOrigin, planeNormal, lineOrigin, lineDirection, out float3 intersectionPoint);
+            _ = IntersectionUtilities.PlaneLineIntersection(planeOrigin, planeNormal, lineOrigin, lineDirection, out float3 intersectionPoint);
             Assert.AreEqual(new float3(0, 0, 0), intersectionPoint);
         }
 
@@ -36,8 +34,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities.Intersection.Tests
             float3 planeNormal = math.normalize(new float3(0, 1, 0));
             float3 lineOrigin = new float3(10, 4, 5);
             float3 lineDirection = new float3(0, -1, 0);
-
-            PlaneLineIntersectionResult result = IntersectionUtilities.PlaneLineIntersection(planeOrigin, planeNormal, lineOrigin, lineDirection, out float3 intersectionPoint);
+            _ = IntersectionUtilities.PlaneLineIntersection(planeOrigin, planeNormal, lineOrigin, lineDirection, out float3 intersectionPoint);
             Assert.AreEqual(new float3(10, 0, 5), intersectionPoint);
         }
 
@@ -49,8 +46,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities.Intersection.Tests
             float3 planeNormal = math.normalize(new float3(0, 1, 0));
             float3 lineOrigin = new float3(0, 10, 0);
             float3 lineDirection = new float3(1, 0, 0);
-
-            PlaneLineIntersectionResult result = IntersectionUtilities.PlaneLineIntersection(planeOrigin, planeNormal, lineOrigin, lineDirection, out float3 intersectionPoint);
+            PlaneLineIntersectionResult result = IntersectionUtilities.PlaneLineIntersection(planeOrigin, planeNormal, lineOrigin, lineDirection, out _);
             Assert.AreEqual(PlaneLineIntersectionResult.NoHit, result);
         }
 
@@ -61,8 +57,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities.Intersection.Tests
             float3 planeNormal = math.normalize(new float3(0, 1, 0));
             float3 lineOrigin = new float3(0, 4, 0);
             float3 lineDirection = new float3(1, 0, 0);
-
-            PlaneLineIntersectionResult result = IntersectionUtilities.PlaneLineIntersection(planeOrigin, planeNormal, lineOrigin, lineDirection, out float3 intersectionPoint);
+            PlaneLineIntersectionResult result = IntersectionUtilities.PlaneLineIntersection(planeOrigin, planeNormal, lineOrigin, lineDirection, out _);
             Assert.AreEqual(PlaneLineIntersectionResult.ParallelInsidePlane, result);
         }
 
@@ -73,8 +68,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities.Intersection.Tests
             float3 planeNormal = math.normalize(new float3(1, 1, 0));
             float3 lineOrigin = new float3(1, 0, 0);
             float3 lineDirection = new float3(0, -1, 0);
-
-            PlaneLineIntersectionResult result = IntersectionUtilities.PlaneLineIntersection(planeOrigin, planeNormal, lineOrigin, lineDirection, out float3 intersectionPoint);
+            _ = IntersectionUtilities.PlaneLineIntersection(planeOrigin, planeNormal, lineOrigin, lineDirection, out float3 intersectionPoint);
             Assert.AreEqual(new float3(1, -1, 0), intersectionPoint);
         }
 
@@ -86,8 +80,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities.Intersection.Tests
             float3 planeNormal = math.normalize(new float3(1, 1, 0));
             float3 lineOrigin = new float3(1, 0, 0);
             float3 lineDirection = new float3(0, -1, 0);
-
-            PlaneLineIntersectionResult result = IntersectionUtilities.PlaneLineIntersection(planeOrigin, planeNormal, lineOrigin, lineDirection, out float3 intersectionPoint);
+            _ = IntersectionUtilities.PlaneLineIntersection(planeOrigin, planeNormal, lineOrigin, lineDirection, out float3 intersectionPoint);
             Assert.AreEqual(new float3(1, -2, 0), intersectionPoint);
         }
 
@@ -99,8 +92,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities.Intersection.Tests
             float3 planeNormal = math.normalize(new float3(1,0.5f, 0));
             float3 lineOrigin = new float3(1, 0, 0);
             float3 lineDirection = new float3(0, -1, 0);
-
-            PlaneLineIntersectionResult result = IntersectionUtilities.PlaneLineIntersection(planeOrigin, planeNormal, lineOrigin, lineDirection, out float3 intersectionPoint);
+            _ = IntersectionUtilities.PlaneLineIntersection(planeOrigin, planeNormal, lineOrigin, lineDirection, out float3 intersectionPoint);
             Assert.AreEqual(new float3(1, -2, 0), intersectionPoint);
         }
     }

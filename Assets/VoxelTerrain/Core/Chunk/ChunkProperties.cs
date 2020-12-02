@@ -27,7 +27,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         /// <returns>The name of the chunk</returns>
         public static string GetName(int3 chunkCoordinate)
         {
-            return $"Chunk_{chunkCoordinate.x.ToString()}_{chunkCoordinate.y.ToString()}_{chunkCoordinate.z.ToString()}";
+            return $"Chunk_{chunkCoordinate.x}_{chunkCoordinate.y}_{chunkCoordinate.z}";
         }
     }
 }

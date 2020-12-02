@@ -34,9 +34,11 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
             
             JobHandle jobHandle = job.Schedule();
 
-            JobHandleWithData<IVoxelDataGenerationJob> jobHandleWithData = new JobHandleWithData<IVoxelDataGenerationJob>();
-            jobHandleWithData.JobHandle = jobHandle;
-            jobHandleWithData.JobData = job;
+            JobHandleWithData<IVoxelDataGenerationJob> jobHandleWithData = new JobHandleWithData<IVoxelDataGenerationJob>
+            {
+                JobHandle = jobHandle,
+                JobData = job
+            };
 
             return jobHandleWithData;
         }

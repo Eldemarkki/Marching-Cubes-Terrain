@@ -59,9 +59,11 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
 
             JobHandle jobHandle = marchingCubesJob.Schedule();
 
-            JobHandleWithData<IMesherJob> jobHandleWithData = new JobHandleWithData<IMesherJob>();
-            jobHandleWithData.JobHandle = jobHandle;
-            jobHandleWithData.JobData = marchingCubesJob;
+            JobHandleWithData<IMesherJob> jobHandleWithData = new JobHandleWithData<IMesherJob>
+            {
+                JobHandle = jobHandle,
+                JobData = marchingCubesJob
+            };
 
             return jobHandleWithData;
         }
