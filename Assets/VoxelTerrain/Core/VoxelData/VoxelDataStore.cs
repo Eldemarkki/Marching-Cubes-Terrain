@@ -88,7 +88,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// </summary>
         /// <param name="bounds">The world-space volume to get the voxel data for</param>
         /// <returns>The voxel data volume inside the bounds</returns>
-        public VoxelDataVolume GetVoxelDataCustom(Bounds bounds)
+        public VoxelDataVolume GetVoxelDataCustom(BoundsInt bounds)
         {
             return GetVoxelDataCustom(bounds, Allocator.Persistent);
         }
@@ -96,14 +96,12 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <summary>
         /// Gets the voxel data of a custom volume in the world
         /// </summary>
-        /// <param name="bounds">The world-space volume to get the voxel data for</param>
+        /// <param name="worldSpaceQuery">The world-space volume to get the voxel data for</param>
         /// <param name="allocator">How the new voxel data volume should be allocated</param>
         /// <returns>The voxel data volume inside the bounds</returns>
-        public VoxelDataVolume GetVoxelDataCustom(Bounds bounds, Allocator allocator)
+        public VoxelDataVolume GetVoxelDataCustom(BoundsInt worldSpaceQuery, Allocator allocator)
         {
-            VoxelDataVolume voxelDataVolume = new VoxelDataVolume(bounds.size.ToInt3(), allocator);
-
-            Bounds worldSpaceQuery = bounds;
+            VoxelDataVolume voxelDataVolume = new VoxelDataVolume(worldSpaceQuery.size, allocator);
 
             int3 chunkSize = VoxelWorld.WorldSettings.ChunkSize;
 
@@ -122,13 +120,12 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                             continue;
                         }
 
-                        Vector3 chunkBoundsSize = new Vector3(voxelDataChunk.Width - 1, voxelDataChunk.Height - 1, voxelDataChunk.Depth - 1);
+                        int3 chunkBoundsSize = new int3(voxelDataChunk.Width - 1, voxelDataChunk.Height - 1, voxelDataChunk.Depth - 1);
                         int3 chunkWorldSpaceOrigin = chunkCoordinate * chunkSize;
 
-                        Bounds chunkWorldSpaceBounds = new Bounds();
-                        chunkWorldSpaceBounds.SetMinMax(chunkWorldSpaceOrigin.ToVectorInt(), chunkWorldSpaceOrigin.ToVectorInt() + chunkBoundsSize);
+                        BoundsInt chunkWorldSpaceBounds = new BoundsInt(chunkWorldSpaceOrigin.ToVectorInt(), chunkBoundsSize.ToVectorInt());
 
-                        Bounds intersectionVolume = IntersectionUtilities.GetIntersectionVolume(worldSpaceQuery, chunkWorldSpaceBounds);
+                        BoundsInt intersectionVolume = IntersectionUtilities.GetIntersectionVolume(worldSpaceQuery, chunkWorldSpaceBounds);
                         int3 intersectionVolumeMin = intersectionVolume.min.ToInt3();
                         int3 intersectionVolumeMax = intersectionVolume.max.ToInt3();
 
@@ -143,7 +140,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
 
                                     if (voxelDataChunk.TryGetVoxelData(voxelDataLocalPosition, out float voxelData))
                                     {
-                                        voxelDataVolume.SetVoxelData(voxelData, voxelDataWorldPosition - bounds.min.ToInt3());
+                                        voxelDataVolume.SetVoxelData(voxelData, voxelDataWorldPosition - worldSpaceQuery.min.ToInt3());
                                     }
                                 }
                             }
@@ -235,9 +232,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <param name="originPosition">The world position of the origin where the voxel data should be set</param>
         public void SetVoxelDataCustom(VoxelDataVolume voxelDataVolume, int3 originPosition)
         {
-            Bounds worldSpaceQuery = new Bounds();
-
-            worldSpaceQuery.SetMinMax(originPosition.ToVectorInt(), (originPosition + voxelDataVolume.Size - new int3(1, 1, 1)).ToVectorInt());
+            BoundsInt worldSpaceQuery = new BoundsInt(originPosition.ToVectorInt(), (voxelDataVolume.Size - new int3(1, 1, 1)).ToVectorInt());
 
             int3 chunkSize = VoxelWorld.WorldSettings.ChunkSize;
 
@@ -256,13 +251,12 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                             continue;
                         }
 
-                        Vector3 chunkBoundsSize = new Vector3(voxelDataChunk.Width - 1, voxelDataChunk.Height - 1, voxelDataChunk.Depth - 1);
+                        int3 chunkBoundsSize = new int3(voxelDataChunk.Width - 1, voxelDataChunk.Height - 1, voxelDataChunk.Depth - 1);
                         int3 chunkWorldSpaceOrigin = chunkCoordinate * chunkSize;
 
-                        Bounds chunkWorldSpaceBounds = new Bounds();
-                        chunkWorldSpaceBounds.SetMinMax(chunkWorldSpaceOrigin.ToVectorInt(), chunkWorldSpaceOrigin.ToVectorInt() + chunkBoundsSize);
+                        BoundsInt chunkWorldSpaceBounds = new BoundsInt(chunkWorldSpaceOrigin.ToVectorInt(), chunkBoundsSize.ToVectorInt());
 
-                        Bounds intersectionVolume = IntersectionUtilities.GetIntersectionVolume(worldSpaceQuery, chunkWorldSpaceBounds);
+                        BoundsInt intersectionVolume = IntersectionUtilities.GetIntersectionVolume(worldSpaceQuery, chunkWorldSpaceBounds);
                         int3 intersectionVolumeMin = intersectionVolume.min.ToInt3();
                         int3 intersectionVolumeMax = intersectionVolume.max.ToInt3();
 
@@ -296,7 +290,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// </summary>
         /// <param name="worldSpaceQuery">The volume where the voxel datas should be increased</param>
         /// <param name="increaseFunction">The function that calculates how much a voxel data should be increased by. The first argument is the world space position of the voxel data, and the second argument is the current voxel data. The return value is how much the voxel data should be increased by.</param>
-        public void IncreaseVoxelDataCustom(Bounds worldSpaceQuery, Func<int3, float, float> increaseFunction)
+        public void IncreaseVoxelDataCustom(BoundsInt worldSpaceQuery, Func<int3, float, float> increaseFunction)
         {            
             int3 chunkSize = VoxelWorld.WorldSettings.ChunkSize;
 
@@ -315,13 +309,12 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                             continue;
                         }
 
-                        Vector3 chunkBoundsSize = new Vector3(voxelDataChunk.Width - 1, voxelDataChunk.Height - 1, voxelDataChunk.Depth - 1);
+                        int3 chunkBoundsSize = new int3(voxelDataChunk.Width - 1, voxelDataChunk.Height - 1, voxelDataChunk.Depth - 1);
                         int3 chunkWorldSpaceOrigin = chunkCoordinate * chunkSize;
 
-                        Bounds chunkWorldSpaceBounds = new Bounds();
-                        chunkWorldSpaceBounds.SetMinMax(chunkWorldSpaceOrigin.ToVectorInt(), chunkWorldSpaceOrigin.ToVectorInt() + chunkBoundsSize);
+                        BoundsInt chunkWorldSpaceBounds = new BoundsInt(chunkWorldSpaceOrigin.ToVectorInt(), chunkBoundsSize.ToVectorInt());
 
-                        Bounds intersectionVolume = IntersectionUtilities.GetIntersectionVolume(worldSpaceQuery, chunkWorldSpaceBounds);
+                        BoundsInt intersectionVolume = IntersectionUtilities.GetIntersectionVolume(worldSpaceQuery, chunkWorldSpaceBounds);
                         int3 intersectionVolumeMin = intersectionVolume.min.ToInt3();
                         int3 intersectionVolumeMax = intersectionVolume.max.ToInt3();
 

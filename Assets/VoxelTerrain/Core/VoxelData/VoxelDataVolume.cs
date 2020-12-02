@@ -2,6 +2,7 @@
 using Eldemarkki.VoxelTerrain.Utilities;
 using Unity.Collections;
 using Unity.Mathematics;
+using UnityEngine;
 
 namespace Eldemarkki.VoxelTerrain.VoxelData
 {
@@ -105,6 +106,21 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <param name="allocator">How the memory should be allocated</param>
         /// <exception cref="ArgumentException">Thrown when any of the dimensions is negative</exception>
         public VoxelDataVolume(int3 size, Allocator allocator) : this(size.x, size.y, size.z, allocator) { }
+
+        /// <summary>
+        /// Creates a <see cref="VoxelDataVolume"/> with a persistent allocator
+        /// </summary>
+        /// <param name="size">The 3-dimensional size of this volume</param>
+        /// <exception cref="ArgumentException">Thrown when any of the dimensions is negative</exception>
+        public VoxelDataVolume(Vector3Int size) : this(size.x, size.y, size.z, Allocator.Persistent) { }
+
+        /// <summary>
+        /// Creates a <see cref="VoxelDataVolume"/>
+        /// </summary>
+        /// <param name="size">The 3-dimensional size of this volume</param>
+        /// <param name="allocator">How the memory should be allocated</param>
+        /// <exception cref="ArgumentException">Thrown when any of the dimensions is negative</exception>
+        public VoxelDataVolume(Vector3Int size, Allocator allocator) : this(size.x, size.y, size.z, allocator) { }
 
         /// <summary>
         /// Disposes the native voxel data array

@@ -45,7 +45,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         /// </summary>
         public void GenerateVoxelDataAndMesh(ChunkProperties chunkProperties)
         {
-            Bounds chunkBounds = BoundsUtilities.GetChunkBounds(chunkProperties.ChunkCoordinate, VoxelWorld.WorldSettings.ChunkSize);
+            BoundsInt chunkBounds = BoundsUtilities.GetChunkBounds(chunkProperties.ChunkCoordinate, VoxelWorld.WorldSettings.ChunkSize);
             JobHandleWithData<IVoxelDataGenerationJob> jobHandleWithData = VoxelWorld.VoxelDataGenerator.GenerateVoxelData(chunkBounds);
             VoxelWorld.VoxelDataStore.SetVoxelDataJobHandle(jobHandleWithData, chunkProperties.ChunkCoordinate);
 

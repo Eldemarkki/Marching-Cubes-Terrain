@@ -160,11 +160,7 @@ namespace Eldemarkki.VoxelTerrain.Player
             int intRange = Mathf.CeilToInt(range);
             int3 rangeInt3 = new int3(intRange, intRange, intRange);
 
-            Bounds queryBounds = new Bounds();
-
-            int3 min = hitPoint - rangeInt3;
-            int3 max = hitPoint + rangeInt3;
-            queryBounds.SetMinMax(min.ToVectorInt(), max.ToVectorInt());
+            BoundsInt queryBounds = new BoundsInt((hitPoint - rangeInt3).ToVectorInt(), new int3(intRange * 2).ToVectorInt());
 
             voxelWorld.VoxelDataStore.IncreaseVoxelDataCustom(queryBounds, (voxelDataWorldPosition, voxelData) =>
             {
