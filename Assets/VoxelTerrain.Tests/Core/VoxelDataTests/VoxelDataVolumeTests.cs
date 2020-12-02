@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using System;
 using Unity.Collections;
 using Unity.Mathematics;
 
@@ -89,37 +90,41 @@ namespace Eldemarkki.VoxelTerrain.VoxelData.Tests
             }
         }
 
+        private void TestSetGetVoxelData(Func<float> function, float newVoxelData)
+        {
+            voxelDataVolume = new VoxelDataVolume(5, Allocator.Temp);
+            float actualVoxelData = function();
+            Assert.IsTrue(AreVoxelDatasSame(newVoxelData, actualVoxelData), $"Expected {newVoxelData}, actual was {actualVoxelData}");
+        }
+
         [Test]
         public void Test_SetGetVoxelData_Index([Random(0, 1f, 5)] float newVoxelData, [Random(0, 5 * 5 * 5 - 1, 5)] int index)
         {
-            voxelDataVolume = new VoxelDataVolume(5, Allocator.Temp);
-
-            voxelDataVolume.SetVoxelData(newVoxelData, index);
-            float actualVoxelData = voxelDataVolume.GetVoxelData(index);
-
-            Assert.IsTrue(AreVoxelDatasSame(newVoxelData, actualVoxelData), $"Expected {newVoxelData}, actual was {actualVoxelData}");
+            TestSetGetVoxelData(() =>
+            {
+                voxelDataVolume.SetVoxelData(newVoxelData, index);
+                return voxelDataVolume.GetVoxelData(index);
+            }, newVoxelData);
         }
 
         [Test]
         public void Test_SetGetVoxelData_Xyz([Random(0, 1f, 5)] float newVoxelData, [Random(0, 4, 3)] int x, [Random(0, 4, 3)] int y, [Random(0, 4, 3)] int z)
         {
-            voxelDataVolume = new VoxelDataVolume(5, Allocator.Temp);
-
-            voxelDataVolume.SetVoxelData(newVoxelData, x, y, z);
-            float actualVoxelData = voxelDataVolume.GetVoxelData(x, y, z);
-
-            Assert.IsTrue(AreVoxelDatasSame(newVoxelData, actualVoxelData), $"Expected {newVoxelData}, actual was {actualVoxelData}");
+            TestSetGetVoxelData(() =>
+            {
+                voxelDataVolume.SetVoxelData(newVoxelData, x, y, z);
+                return voxelDataVolume.GetVoxelData(x, y, z);
+            }, newVoxelData);
         }
 
         [Test]
         public void Test_SetGetVoxelData_Int3([Random(0, 1f, 5)] float newVoxelData, [Random(0, 4, 3)] int x, [Random(0, 4, 3)] int y, [Random(0, 4, 3)] int z)
         {
-            voxelDataVolume = new VoxelDataVolume(5, Allocator.Temp);
-
-            voxelDataVolume.SetVoxelData(newVoxelData, new int3(x, y, z));
-            float actualVoxelData = voxelDataVolume.GetVoxelData(new int3(x, y, z));
-
-            Assert.IsTrue(AreVoxelDatasSame(newVoxelData, actualVoxelData), $"Expected {newVoxelData}, actual was {actualVoxelData}");
+            TestSetGetVoxelData(() =>
+            {
+                voxelDataVolume.SetVoxelData(newVoxelData, new int3(x, y, z));
+                return voxelDataVolume.GetVoxelData(new int3(x, y, z));
+            }, newVoxelData);
         }
 
         [TestCase(0.1f, 0.55f, 0.65f)]
