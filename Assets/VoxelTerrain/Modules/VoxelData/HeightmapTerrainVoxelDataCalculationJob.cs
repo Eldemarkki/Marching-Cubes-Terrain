@@ -54,7 +54,6 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <summary>
         /// The execute method required for Unity's IJobParallelFor job type
         /// </summary>
-        /// <param name="index">The iteration index provided by Unity's Job System</param>
         public void Execute()
         {
             int index = 0;

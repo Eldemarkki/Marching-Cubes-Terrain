@@ -29,7 +29,6 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <summary>
         /// The execute method required for Unity's IJobParallelFor job type
         /// </summary>
-        /// <param name="index">The iteration index provided by Unity's Job System</param>
         public void Execute()
         {
             for (int x = 0; x < OutputVoxelData.Width; x++)
@@ -42,30 +41,12 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                     for (int y = 0; y < OutputVoxelData.Height; y++)
                     {
                         int3 worldPosition = new int3(terrainPosition.x, y + WorldPositionOffset.y, terrainPosition.y);
-
+                        
                         float voxelData = (worldPosition.y - ProceduralTerrainSettings.HeightOffset - terrainNoise) * 0.5f;
                         OutputVoxelData.SetVoxelData(voxelData, x, y, z);
-
-                    }
+                     }
                 }
             }
-        }
-
-        /// <summary>
-        /// Calculates the voxel data at the world-space position
-        /// </summary>
-        /// <param name="worldPositionX">Sampling point's world-space x position</param>
-        /// <param name="worldPositionY">Sampling point's world-space y position</param>
-        /// <param name="worldPositionZ">Sampling point's world-space z position</param>
-        /// <returns>The voxel data sampled from the world-space position</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public float CalculateVoxelData(int worldPositionX, int worldPositionY, int worldPositionZ)
-        {
-            float voxelData = worldPositionY;
-            voxelData -= OctaveNoise(worldPositionX, worldPositionZ, ProceduralTerrainSettings.NoiseFrequency * 0.001f, ProceduralTerrainSettings.NoiseOctaveCount) * ProceduralTerrainSettings.Amplitude;
-            voxelData -= ProceduralTerrainSettings.HeightOffset;
-            voxelData *= 0.5f;
-            return voxelData;
         }
 
         /// <summary>
