@@ -84,16 +84,6 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         }
 
         /// <summary>
-        /// Gets the voxel data of a custom volume in the world with a persistent allocator
-        /// </summary>
-        /// <param name="bounds">The world-space volume to get the voxel data for</param>
-        /// <returns>The voxel data volume inside the bounds</returns>
-        public VoxelDataVolume GetVoxelDataCustom(BoundsInt bounds)
-        {
-            return GetVoxelDataCustom(bounds, Allocator.Persistent);
-        }
-
-        /// <summary>
         /// Gets the voxel data of a custom volume in the world
         /// </summary>
         /// <param name="worldSpaceQuery">The world-space volume to get the voxel data for</param>
@@ -103,51 +93,13 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         {
             VoxelDataVolume voxelDataVolume = new VoxelDataVolume(worldSpaceQuery.size, allocator);
 
-            int3 chunkSize = VoxelWorld.WorldSettings.ChunkSize;
-
-            int3 minChunkCoordinate = VectorUtilities.WorldPositionToCoordinate(worldSpaceQuery.min - Vector3Int.one, chunkSize);
-            int3 maxChunkCoordinate = VectorUtilities.WorldPositionToCoordinate(worldSpaceQuery.max + Vector3Int.one, chunkSize);
-
-            for (int chunkCoordinateX = minChunkCoordinate.x; chunkCoordinateX <= maxChunkCoordinate.x; chunkCoordinateX++)
+            ForEachVoxelDataVolumeInQuery(worldSpaceQuery, (chunkCoordinate, voxelDataChunk) =>
             {
-                for (int chunkCoordinateY = minChunkCoordinate.y; chunkCoordinateY <= maxChunkCoordinate.y; chunkCoordinateY++)
+                ForEachVoxelDataInQueryInChunk(worldSpaceQuery, chunkCoordinate, voxelDataChunk, (voxelDataWorldPosition, voxelDataLocalPosition, voxelDataIndex, voxelData) =>
                 {
-                    for (int chunkCoordinateZ = minChunkCoordinate.z; chunkCoordinateZ <= maxChunkCoordinate.z; chunkCoordinateZ++)
-                    {
-                        int3 chunkCoordinate = new int3(chunkCoordinateX, chunkCoordinateY, chunkCoordinateZ);
-                        if (!TryGetVoxelDataChunk(chunkCoordinate, out VoxelDataVolume voxelDataChunk))
-                        {
-                            continue;
-                        }
-
-                        int3 chunkBoundsSize = new int3(voxelDataChunk.Width - 1, voxelDataChunk.Height - 1, voxelDataChunk.Depth - 1);
-                        int3 chunkWorldSpaceOrigin = chunkCoordinate * chunkSize;
-
-                        BoundsInt chunkWorldSpaceBounds = new BoundsInt(chunkWorldSpaceOrigin.ToVectorInt(), chunkBoundsSize.ToVectorInt());
-
-                        BoundsInt intersectionVolume = IntersectionUtilities.GetIntersectionVolume(worldSpaceQuery, chunkWorldSpaceBounds);
-                        int3 intersectionVolumeMin = intersectionVolume.min.ToInt3();
-                        int3 intersectionVolumeMax = intersectionVolume.max.ToInt3();
-
-                        for (int voxelDataWorldPositionX = intersectionVolumeMin.x; voxelDataWorldPositionX < intersectionVolumeMax.x; voxelDataWorldPositionX++)
-                        {
-                            for (int voxelDataWorldPositionY = intersectionVolumeMin.y; voxelDataWorldPositionY < intersectionVolumeMax.y; voxelDataWorldPositionY++)
-                            {
-                                for (int voxelDataWorldPositionZ = intersectionVolumeMin.z; voxelDataWorldPositionZ < intersectionVolumeMax.z; voxelDataWorldPositionZ++)
-                                {
-                                    int3 voxelDataWorldPosition = new int3(voxelDataWorldPositionX, voxelDataWorldPositionY, voxelDataWorldPositionZ);
-                                    int3 voxelDataLocalPosition = voxelDataWorldPosition - chunkWorldSpaceOrigin;
-
-                                    if (voxelDataChunk.TryGetVoxelData(voxelDataLocalPosition, out float voxelData))
-                                    {
-                                        voxelDataVolume.SetVoxelData(voxelData, voxelDataWorldPosition - worldSpaceQuery.min.ToInt3());
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+                    voxelDataVolume.SetVoxelData(voxelData, voxelDataWorldPosition - worldSpaceQuery.min.ToInt3());
+                });
+            });
 
             return voxelDataVolume;
         }
@@ -234,55 +186,18 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         {
             BoundsInt worldSpaceQuery = new BoundsInt(originPosition.ToVectorInt(), (voxelDataVolume.Size - new int3(1, 1, 1)).ToVectorInt());
 
-            int3 chunkSize = VoxelWorld.WorldSettings.ChunkSize;
-
-            int3 minChunkCoordinate = VectorUtilities.WorldPositionToCoordinate(worldSpaceQuery.min - Vector3Int.one, chunkSize);
-            int3 maxChunkCoordinate = VectorUtilities.WorldPositionToCoordinate(worldSpaceQuery.max + Vector3Int.one, chunkSize);
-
-            for (int chunkCoordinateX = minChunkCoordinate.x; chunkCoordinateX <= maxChunkCoordinate.x; chunkCoordinateX++)
+            ForEachVoxelDataVolumeInQuery(worldSpaceQuery, (chunkCoordinate, voxelDataChunk) =>
             {
-                for (int chunkCoordinateY = minChunkCoordinate.y; chunkCoordinateY <= maxChunkCoordinate.y; chunkCoordinateY++)
+                ForEachVoxelDataInQueryInChunk(worldSpaceQuery, chunkCoordinate, voxelDataChunk, (voxelDataWorldPosition, voxelDataLocalPosition, voxelDataIndex, voxelData) =>
                 {
-                    for (int chunkCoordinateZ = minChunkCoordinate.z; chunkCoordinateZ <= maxChunkCoordinate.z; chunkCoordinateZ++)
-                    {
-                        int3 chunkCoordinate = new int3(chunkCoordinateX, chunkCoordinateY, chunkCoordinateZ);
-                        if (!TryGetVoxelDataChunk(chunkCoordinate, out VoxelDataVolume voxelDataChunk))
-                        {
-                            continue;
-                        }
+                    voxelDataChunk.SetVoxelData(voxelData, voxelDataWorldPosition - chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize);
+                });
 
-                        int3 chunkBoundsSize = new int3(voxelDataChunk.Width - 1, voxelDataChunk.Height - 1, voxelDataChunk.Depth - 1);
-                        int3 chunkWorldSpaceOrigin = chunkCoordinate * chunkSize;
-
-                        BoundsInt chunkWorldSpaceBounds = new BoundsInt(chunkWorldSpaceOrigin.ToVectorInt(), chunkBoundsSize.ToVectorInt());
-
-                        BoundsInt intersectionVolume = IntersectionUtilities.GetIntersectionVolume(worldSpaceQuery, chunkWorldSpaceBounds);
-                        int3 intersectionVolumeMin = intersectionVolume.min.ToInt3();
-                        int3 intersectionVolumeMax = intersectionVolume.max.ToInt3();
-
-                        for (int voxelDataWorldPositionX = intersectionVolumeMin.x; voxelDataWorldPositionX <= intersectionVolumeMax.x; voxelDataWorldPositionX++)
-                        {
-                            for (int voxelDataWorldPositionY = intersectionVolumeMin.y; voxelDataWorldPositionY <= intersectionVolumeMax.y; voxelDataWorldPositionY++)
-                            {
-                                for (int voxelDataWorldPositionZ = intersectionVolumeMin.z; voxelDataWorldPositionZ <= intersectionVolumeMax.z; voxelDataWorldPositionZ++)
-                                {
-                                    int3 voxelDataWorldPosition = new int3(voxelDataWorldPositionX, voxelDataWorldPositionY, voxelDataWorldPositionZ);
-
-                                    if (voxelDataVolume.TryGetVoxelData(voxelDataWorldPosition - worldSpaceQuery.min.ToInt3(), out float voxelData))
-                                    {
-                                        voxelDataChunk.SetVoxelData(voxelData, voxelDataWorldPosition - chunkWorldSpaceOrigin);
-                                    }
-                                }
-                            }
-                        }
-
-                        if (VoxelWorld.ChunkStore.TryGetChunkAtCoordinate(chunkCoordinate, out ChunkProperties chunkProperties))
-                        {
-                            chunkProperties.HasChanges = true;
-                        }
-                    }
+                if (VoxelWorld.ChunkStore.TryGetChunkAtCoordinate(chunkCoordinate, out ChunkProperties chunkProperties))
+                {
+                    chunkProperties.HasChanges = true;
                 }
-            }
+            });
         }
 
         /// <summary>
@@ -291,7 +206,29 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <param name="worldSpaceQuery">The volume where the voxel datas should be increased</param>
         /// <param name="increaseFunction">The function that calculates how much a voxel data should be increased by. The first argument is the world space position of the voxel data, and the second argument is the current voxel data. The return value is how much the voxel data should be increased by.</param>
         public void IncreaseVoxelDataCustom(BoundsInt worldSpaceQuery, Func<int3, float, float> increaseFunction)
-        {            
+        {
+            ForEachVoxelDataVolumeInQuery(worldSpaceQuery, (chunkCoordinate, voxelDataChunk) =>
+            {
+                ForEachVoxelDataInQueryInChunk(worldSpaceQuery, chunkCoordinate, voxelDataChunk, (voxelDataWorldPosition, voxelDataLocalPosition, voxelDataIndex, voxelData) =>
+                {
+                    float increaseAmount = increaseFunction(voxelDataWorldPosition, voxelData);
+                    voxelDataChunk.IncreaseVoxelData(increaseAmount, voxelDataIndex);
+                });
+
+                if (VoxelWorld.ChunkStore.TryGetChunkAtCoordinate(chunkCoordinate, out ChunkProperties chunkProperties))
+                {
+                    chunkProperties.HasChanges = true;
+                }
+            });
+        }
+
+        /// <summary>
+        /// Loops through each voxel data volume that intersects with <paramref name="worldSpaceQuery"/> and performs <paramref name="function"/> on them.
+        /// </summary>
+        /// <param name="worldSpaceQuery">The query which will be used to determine all the chunks that should be looped through</param>
+        /// <param name="function">The function that will be performed on every chunk. The arguments are as follows: 1) The chunk's coordinate, 2) The chunk's voxel data</param>
+        public void ForEachVoxelDataVolumeInQuery(BoundsInt worldSpaceQuery, Action<int3, VoxelDataVolume> function)
+        {
             int3 chunkSize = VoxelWorld.WorldSettings.ChunkSize;
 
             int3 minChunkCoordinate = VectorUtilities.WorldPositionToCoordinate(worldSpaceQuery.min - Vector3Int.one, chunkSize);
@@ -309,37 +246,43 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                             continue;
                         }
 
-                        int3 chunkBoundsSize = new int3(voxelDataChunk.Width - 1, voxelDataChunk.Height - 1, voxelDataChunk.Depth - 1);
-                        int3 chunkWorldSpaceOrigin = chunkCoordinate * chunkSize;
+                        function(chunkCoordinate, voxelDataChunk);
+                    }
+                }
+            }
+        }
 
-                        BoundsInt chunkWorldSpaceBounds = new BoundsInt(chunkWorldSpaceOrigin.ToVectorInt(), chunkBoundsSize.ToVectorInt());
+        /// <summary>
+        /// Loops through each voxel data point that is contained in <paramref name="voxelDataChunk"/> AND in <paramref name="worldSpaceQuery"/>, and performs <paramref name="function"/> on it
+        /// </summary>
+        /// <param name="worldSpaceQuery">The query that determines whether or not a voxel data point is contained.</param>
+        /// <param name="chunkCoordinate">The coordinate of <paramref name="voxelDataChunk"/></param>
+        /// <param name="voxelDataChunk">The voxel datas of the chunk</param>
+        /// <param name="function">The function that will be performed on each voxel data point. The arguments are as follows: 1) The world space position of the voxel data point, 2) The chunk space position of the voxel data point, 3) The index of the voxel data point inside of <paramref name="voxelDataChunk"/>, 4) The value of the voxel data</param>
+        public void ForEachVoxelDataInQueryInChunk(BoundsInt worldSpaceQuery, int3 chunkCoordinate, VoxelDataVolume voxelDataChunk, Action<int3, int3, int, float> function)
+        {
+            int3 chunkBoundsSize = new int3(voxelDataChunk.Width - 1, voxelDataChunk.Height - 1, voxelDataChunk.Depth - 1);
+            int3 chunkWorldSpaceOrigin = chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize;
 
-                        BoundsInt intersectionVolume = IntersectionUtilities.GetIntersectionVolume(worldSpaceQuery, chunkWorldSpaceBounds);
-                        int3 intersectionVolumeMin = intersectionVolume.min.ToInt3();
-                        int3 intersectionVolumeMax = intersectionVolume.max.ToInt3();
+            BoundsInt chunkWorldSpaceBounds = new BoundsInt(chunkWorldSpaceOrigin.ToVectorInt(), chunkBoundsSize.ToVectorInt());
 
-                        for (int voxelDataWorldPositionX = intersectionVolumeMin.x; voxelDataWorldPositionX <= intersectionVolumeMax.x; voxelDataWorldPositionX++)
+            BoundsInt intersectionVolume = IntersectionUtilities.GetIntersectionVolume(worldSpaceQuery, chunkWorldSpaceBounds);
+            int3 intersectionVolumeMin = intersectionVolume.min.ToInt3();
+            int3 intersectionVolumeMax = intersectionVolume.max.ToInt3();
+
+            for (int voxelDataWorldPositionX = intersectionVolumeMin.x; voxelDataWorldPositionX <= intersectionVolumeMax.x; voxelDataWorldPositionX++)
+            {
+                for (int voxelDataWorldPositionY = intersectionVolumeMin.y; voxelDataWorldPositionY <= intersectionVolumeMax.y; voxelDataWorldPositionY++)
+                {
+                    for (int voxelDataWorldPositionZ = intersectionVolumeMin.z; voxelDataWorldPositionZ <= intersectionVolumeMax.z; voxelDataWorldPositionZ++)
+                    {
+                        int3 voxelDataWorldPosition = new int3(voxelDataWorldPositionX, voxelDataWorldPositionY, voxelDataWorldPositionZ);
+
+                        int3 voxelDataLocalPosition = voxelDataWorldPosition - chunkWorldSpaceOrigin;
+                        int voxelDataIndex = voxelDataChunk.GetIndex(voxelDataLocalPosition);
+                        if (voxelDataChunk.TryGetVoxelData(voxelDataIndex, out float voxelData))
                         {
-                            for (int voxelDataWorldPositionY = intersectionVolumeMin.y; voxelDataWorldPositionY <= intersectionVolumeMax.y; voxelDataWorldPositionY++)
-                            {
-                                for (int voxelDataWorldPositionZ = intersectionVolumeMin.z; voxelDataWorldPositionZ <= intersectionVolumeMax.z; voxelDataWorldPositionZ++)
-                                {
-                                    int3 voxelDataWorldPosition = new int3(voxelDataWorldPositionX, voxelDataWorldPositionY, voxelDataWorldPositionZ);
-
-                                    int3 voxelDataLocalPosition = voxelDataWorldPosition - chunkWorldSpaceOrigin;
-                                    int voxelDataIndex = voxelDataChunk.GetIndex(voxelDataLocalPosition);
-                                    if (voxelDataChunk.TryGetVoxelData(voxelDataIndex, out float voxelData))
-                                    {
-                                        float increaseAmount = increaseFunction(voxelDataWorldPosition, voxelData);
-                                        voxelDataChunk.IncreaseVoxelData(increaseAmount, voxelDataIndex);
-                                    }
-                                }
-                            }
-                        }
-
-                        if (VoxelWorld.ChunkStore.TryGetChunkAtCoordinate(chunkCoordinate, out ChunkProperties chunkProperties))
-                        {
-                            chunkProperties.HasChanges = true;
+                            function(voxelDataWorldPosition, voxelDataLocalPosition, voxelDataIndex, voxelData);
                         }
                     }
                 }
