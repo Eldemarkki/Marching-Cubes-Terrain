@@ -5,13 +5,13 @@ namespace Eldemarkki.VoxelTerrain.Utilities.Tests
 {
     public class XyzToIndexTests
     {
-        public void TestXyzToIndex_Using_int3(int3 xyz, int expectedIndex, int width, int height)
+        private static void TestXyzToIndex_Using_int3(int3 xyz, int expectedIndex, int width, int height)
         {
             int actualIndex = IndexUtilities.XyzToIndex(xyz, width, height);
             Assert.AreEqual(expectedIndex, actualIndex);
         }
 
-        public void TestXyzToIndex_Using_int_xyz(int x, int y, int z, int expectedIndex, int width, int height)
+        private static void TestXyzToIndex_Using_int_xyz(int x, int y, int z, int expectedIndex, int width, int height)
         {
             int actualIndex = IndexUtilities.XyzToIndex(x, y, z, width, height);
             Assert.AreEqual(expectedIndex, actualIndex);
