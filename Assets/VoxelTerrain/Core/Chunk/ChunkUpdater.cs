@@ -52,7 +52,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
             NativeArray<Color32> colors = new NativeArray<Color32>((VoxelWorld.WorldSettings.ChunkSize.x + 1) * (VoxelWorld.WorldSettings.ChunkSize.y + 1) * (VoxelWorld.WorldSettings.ChunkSize.z + 1), Allocator.Persistent);
 
             Color32 defaultColor = new Color32(11, 91, 33, 255);
-            NativeArray<Color32> defaultColorArray = new NativeArray<Color32>(new Color32[] { defaultColor }, Allocator.Temp);
+            NativeArray<Color32> defaultColorArray = new NativeArray<Color32>(new [] { defaultColor }, Allocator.Temp);
 
             unsafe
             {

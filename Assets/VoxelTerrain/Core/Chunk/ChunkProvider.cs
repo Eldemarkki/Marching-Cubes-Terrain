@@ -24,7 +24,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
             int3 worldPosition = chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize;
             GameObject chunkGameObject = Instantiate(VoxelWorld.WorldSettings.ChunkPrefab, worldPosition.ToVectorInt(), Quaternion.identity);
 
-            ChunkProperties chunkProperties = new ChunkProperties()
+            ChunkProperties chunkProperties = new ChunkProperties
             {
                 ChunkGameObject = chunkGameObject,
                 MeshCollider = chunkGameObject.GetComponent<MeshCollider>(),
