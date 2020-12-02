@@ -277,23 +277,10 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         }
 
         /// <summary>
-        /// Loops through each point in this volume, and calls <paramref name="function"/> on each of them
+        /// Gets the index for point <paramref name="voxelDataLocalPosition"/> for this container.
         /// </summary>
-        /// <param name="function">The function that should be called on each of the points</param>
-        public void ForEach(Action<int3> function)
-        {
-            for (int x = 0; x < Width; x++)
-            {
-                for (int y = 0; y < Height; y++)
-                {
-                    for (int z = 0; z < Depth; z++)
-                    {
-                        function(new int3(x, y, z));
-                    }
-                }
-            }
-        }
-
+        /// <param name="voxelDataLocalPosition">The voxel data position inside of this container to get the index for</param>
+        /// <returns>The voxel data index for <paramref name="voxelDataLocalPosition"/></returns>
         public int GetIndex(int3 voxelDataLocalPosition)
         {
             return IndexUtilities.XyzToIndex(voxelDataLocalPosition.x, voxelDataLocalPosition.y, voxelDataLocalPosition.z, Width, Height);
