@@ -76,6 +76,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
             if (_chunkColors.TryGetValue(chunkCoordinate, out NativeArray<Color32> oldColors))
             {
                 oldColors.CopyFrom(newColors);
+                newColors.Dispose();
             }
             else
             {
