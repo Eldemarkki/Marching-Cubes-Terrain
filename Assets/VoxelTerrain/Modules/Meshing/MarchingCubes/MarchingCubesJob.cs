@@ -14,9 +14,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
     [BurstCompile]
     public struct MarchingCubesJob : IMesherJob
     {
-        /// <summary>
-        /// The densities to generate the mesh off of
-        /// </summary>
+        /// <inheritdoc cref="VoxelData"/>
         [ReadOnly] private VoxelDataVolume _voxelData;
 
         /// <inheritdoc cref="VoxelColors"/>
@@ -28,37 +26,25 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         /// </summary>
         public float Isolevel { get; set; }
 
-        /// <summary>
-        /// The counter to keep track of the triangle index
-        /// </summary>
+        /// <inheritdoc/>
         public NativeCounter VertexCountCounter { get; set; }
 
-        /// <summary>
-        /// The generated vertices
-        /// </summary>
+        /// <inheritdoc cref="OutputVertices"/>
         [NativeDisableParallelForRestriction, WriteOnly] private NativeArray<MeshingVertexData> _vertices;
 
-        /// <summary>
-        /// The generated triangles
-        /// </summary>
+        /// <inheritdoc cref="OutputTriangles"/>
         [NativeDisableParallelForRestriction, WriteOnly] private NativeArray<ushort> _triangles;
 
-        /// <summary>
-        /// The voxel data to generate the mesh from
-        /// </summary>
+        /// <inheritdoc/>
         public VoxelDataVolume VoxelData { get => _voxelData; set => _voxelData = value; }
 
         /// <inheritdoc/>
         public NativeArray<Color32> VoxelColors { get => _voxelColors; set => _voxelColors = value; }
-       
-        /// <summary>
-        /// The generated vertices
-        /// </summary>
+
+        /// <inheritdoc/>
         public NativeArray<MeshingVertexData> OutputVertices { get => _vertices; set => _vertices = value; }
 
-        /// <summary>
-        /// The generated triangles
-        /// </summary>
+        /// <inheritdoc/>
         public NativeArray<ushort> OutputTriangles { get => _triangles; set => _triangles = value; }
 
         /// <summary>
@@ -89,7 +75,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
                         // Index at the beginning of the row
                         int rowIndex = 15 * cubeIndex;
 
-                        for (int i = 0; MarchingCubesLookupTables.TriangleTable[rowIndex+i] != -1 && i < 15; i += 3)
+                        for (int i = 0; MarchingCubesLookupTables.TriangleTable[rowIndex + i] != -1 && i < 15; i += 3)
                         {
                             float3 vertex1 = vertexList[MarchingCubesLookupTables.TriangleTable[rowIndex + i + 0]];
                             float3 vertex2 = vertexList[MarchingCubesLookupTables.TriangleTable[rowIndex + i + 1]];
@@ -98,7 +84,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
                             if (!vertex1.Equals(vertex2) && !vertex1.Equals(vertex3) && !vertex2.Equals(vertex3))
                             {
                                 float3 normal = math.normalize(math.cross(vertex2 - vertex1, vertex3 - vertex1));
-     
+
                                 int triangleIndex = VertexCountCounter.Increment() * 3;
 
                                 float3 triangleMiddlePoint = (vertex1 + vertex2 + vertex3) / 3f;
@@ -112,8 +98,8 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
                                 _triangles[triangleIndex + 0] = (ushort)(triangleIndex + 0);
 
                                 _vertices[triangleIndex + 1] = new MeshingVertexData(vertex2, normal, color);
-                                _triangles[triangleIndex + 1] = (ushort)(triangleIndex + 1);          
-                                                                                                      
+                                _triangles[triangleIndex + 1] = (ushort)(triangleIndex + 1);
+
                                 _vertices[triangleIndex + 2] = new MeshingVertexData(vertex3, normal, color);
                                 _triangles[triangleIndex + 2] = (ushort)(triangleIndex + 2);
                             }

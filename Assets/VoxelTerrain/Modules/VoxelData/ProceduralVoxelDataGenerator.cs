@@ -16,12 +16,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// </summary>
         [SerializeField] private ProceduralTerrainSettings proceduralTerrainSettings = new ProceduralTerrainSettings(1, 9, 120, 0);
 
-        /// <summary>
-        /// Starts generating the voxel data for a specified volume
-        /// </summary>
-        /// <param name="bounds">The volume to generate the voxel data for</param>
-        /// <param name="allocator">The allocator for the new <see cref="VoxelDataVolume"/></param>
-        /// <returns>The job handle and the voxel data generation job</returns>
+        /// <inheritdoc/>
         public override JobHandleWithData<IVoxelDataGenerationJob> GenerateVoxelData(BoundsInt bounds, Allocator allocator)
         {
             VoxelDataVolume voxelData = new VoxelDataVolume(bounds.size, allocator);

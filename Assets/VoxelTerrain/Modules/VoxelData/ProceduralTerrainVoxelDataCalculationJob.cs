@@ -16,14 +16,10 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// </summary>
         public ProceduralTerrainSettings ProceduralTerrainSettings { get; set; }
 
-        /// <summary>
-        /// The sampling point's world position offset
-        /// </summary>
+        /// <inheritdoc/>
         public int3 WorldPositionOffset { get; set; }
 
-        /// <summary>
-        /// The generated voxel data
-        /// </summary>
+        /// <inheritdoc/>
         public VoxelDataVolume OutputVoxelData { get; set; }
 
         /// <summary>
