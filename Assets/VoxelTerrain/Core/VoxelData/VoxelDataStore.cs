@@ -176,6 +176,29 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         }
 
         /// <summary>
+        /// Sets the voxel data for a volume in the world
+        /// </summary>
+        /// <param name="worldSpaceQuery">The volume where the voxel datas should be set to</param>
+        /// <param name="setVoxelDataFunction">The function that calculates what the voxel data should be set to at the specific location. The first argument is the world space position of the voxel data, and the second argument is the current voxel data. The return value is what the new voxel data should be set to.</param>
+
+        public void SetVoxelDataCustom(BoundsInt worldSpaceQuery, Func<int3, float, float> setVoxelDataFunction)
+        {
+            ForEachVoxelDataVolumeInQuery(worldSpaceQuery, (chunkCoordinate, voxelDataChunk) =>
+            {
+                ForEachVoxelDataInQueryInChunk(worldSpaceQuery, chunkCoordinate, voxelDataChunk, (voxelDataWorldPosition, voxelDataLocalPosition, voxelDataIndex, voxelData) =>
+                {
+                    float newVoxelData = setVoxelDataFunction(voxelDataWorldPosition, voxelData);
+                    voxelDataChunk.SetVoxelData(newVoxelData, voxelDataIndex);
+                });
+
+                if (VoxelWorld.ChunkStore.TryGetChunkAtCoordinate(chunkCoordinate, out ChunkProperties chunkProperties))
+                {
+                    chunkProperties.HasChanges = true;
+                }
+            });
+        }
+
+        /// <summary>
         /// Increases the voxel data at <paramref name="worldPosition"/> by <paramref name="increaseAmount"/>.
         /// </summary>
         /// <param name="worldPosition">The world position of the voxel data that should be increased</param>

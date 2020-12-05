@@ -192,30 +192,21 @@ namespace Eldemarkki.VoxelTerrain.Player
             }
 
             int intRange = (int)math.ceil(deformRange);
-            for (int x = -intRange; x <= intRange; x++)
+            int size = 2 * intRange + 1;
+            int3 queryPosition = (int3)(intersectionPoint - new int3(intRange));
+            BoundsInt worldSpaceQuery = new BoundsInt(queryPosition.ToVectorInt(), new Vector3Int(size, size, size));
+
+            voxelWorld.VoxelDataStore.SetVoxelDataCustom(worldSpaceQuery, (voxelDataWorldPosition, voxelData) =>
             {
-                for (int y = -intRange; y <= intRange; y++)
+                float distance = math.distance(voxelDataWorldPosition, intersectionPoint);
+                if (distance > deformRange)
                 {
-                    for (int z = -intRange; z <= intRange; z++)
-                    {
-                        int3 localPosition = new int3(x, y, z);
-                        float3 offsetPoint = intersectionPoint + localPosition;
-
-                        float distance = math.distance(offsetPoint, intersectionPoint);
-                        if (distance > deformRange)
-                        {
-                            continue;
-                        }
-
-                        int3 voxelDataWorldPosition = (int3)offsetPoint;
-                        if (voxelWorld.VoxelDataStore.TryGetVoxelData(voxelDataWorldPosition, out float oldVoxelData))
-                        {
-                            float voxelDataChange = (math.dot(_flatteningNormal, voxelDataWorldPosition) - math.dot(_flatteningNormal, _flatteningOrigin)) / deformRange;
-                            voxelWorld.VoxelDataStore.SetVoxelData((voxelDataChange * 0.5f + oldVoxelData - flattenOffset) * 0.8f + flattenOffset, voxelDataWorldPosition);
-                        }
-                    }
+                    return voxelData;
                 }
-            }
+
+                float voxelDataChange = (math.dot(_flatteningNormal, voxelDataWorldPosition) - math.dot(_flatteningNormal, _flatteningOrigin)) / deformRange;
+                return (voxelDataChange * 0.5f + voxelData - flattenOffset) * 0.8f + flattenOffset;
+            });
         }
 
         /// <summary>
