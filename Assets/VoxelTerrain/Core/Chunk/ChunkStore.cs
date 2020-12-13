@@ -47,7 +47,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         }
 
         /// <summary>
-        /// Gets a collection of chunk coordinates whose Manhattan Distance to the coordinate parameter is more than <see cref="renderDistance"/>
+        /// Gets a collection of chunk coordinates whose Manhattan Distance to the coordinate parameter is more than <paramref name="renderDistance"/>
         /// </summary>
         /// <param name="coordinate">Central coordinate</param>
         /// <param name="renderDistance">The radius of the chunks the player can see</param>

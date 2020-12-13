@@ -1,9 +1,6 @@
 ﻿using Eldemarkki.VoxelTerrain.Meshing;
 using Eldemarkki.VoxelTerrain.Meshing.Data;
 using Eldemarkki.VoxelTerrain.Utilities;
-using Eldemarkki.VoxelTerrain.VoxelData;
-using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -23,7 +20,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
             {
                 if (chunkProperties.HasChanges)
                 {
-                    GenerateMesh(chunkProperties);
+                    GenerateMeshImmediate(chunkProperties);
                 }
             }
         }
@@ -43,31 +40,22 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         /// <summary>
         /// Generates the voxel data and colors for this chunk and generates the mesh
         /// </summary>
-        public void GenerateVoxelDataAndMesh(ChunkProperties chunkProperties)
+        public void GenerateVoxelDataAndMeshImmediate(ChunkProperties chunkProperties)
         {
-            BoundsInt chunkBounds = BoundsUtilities.GetChunkBounds(chunkProperties.ChunkCoordinate, VoxelWorld.WorldSettings.ChunkSize);
-            JobHandleWithData<IVoxelDataGenerationJob> jobHandleWithData = VoxelWorld.VoxelDataGenerator.GenerateVoxelData(chunkBounds);
-            VoxelWorld.VoxelDataStore.SetVoxelDataJobHandle(jobHandleWithData, chunkProperties.ChunkCoordinate);
+            StartGeneratingData(chunkProperties.ChunkCoordinate);
+            GenerateMeshImmediate(chunkProperties);
+        }
 
-            NativeArray<Color32> colors = new NativeArray<Color32>((VoxelWorld.WorldSettings.ChunkSize.x + 1) * (VoxelWorld.WorldSettings.ChunkSize.y + 1) * (VoxelWorld.WorldSettings.ChunkSize.z + 1), Allocator.Persistent);
-
-            Color32 defaultColor = new Color32(11, 91, 33, 255);
-            NativeArray<Color32> defaultColorArray = new NativeArray<Color32>(new [] { defaultColor }, Allocator.Temp);
-
-            unsafe
-            {
-                UnsafeUtility.MemCpyReplicate(colors.GetUnsafePtr(), defaultColorArray.GetUnsafeReadOnlyPtr(), sizeof(Color32), colors.Length);
-            }
-
-            VoxelWorld.VoxelColorStore.SetVoxelColorsChunk(chunkProperties.ChunkCoordinate, colors);
-
-            GenerateMesh(chunkProperties);
+        public void StartGeneratingData(int3 chunkCoordinate)
+        {
+            VoxelWorld.VoxelDataStore.StartGeneratingVoxelData(chunkCoordinate);
+            VoxelWorld.VoxelColorStore.GenerateColorsForChunk(chunkCoordinate);
         }
 
         /// <summary>
         /// Forces the regeneration of the mesh
         /// </summary>
-        public void GenerateMesh(ChunkProperties chunkProperties)
+        public void GenerateMeshImmediate(ChunkProperties chunkProperties)
         {
             JobHandleWithData<IMesherJob> jobHandleWithData = VoxelWorld.VoxelMesher.CreateMesh(VoxelWorld.VoxelDataStore, VoxelWorld.VoxelColorStore, chunkProperties.ChunkCoordinate);
             if (jobHandleWithData == null) { return; }

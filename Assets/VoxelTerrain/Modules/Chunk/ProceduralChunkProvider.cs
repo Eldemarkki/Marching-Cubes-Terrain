@@ -37,7 +37,7 @@ namespace Eldemarkki.VoxelTerrain.Chunks
                 {
                     if (!chunkProperties.IsMeshGenerated)
                     {
-                        VoxelWorld.ChunkUpdater.GenerateVoxelDataAndMesh(chunkProperties);
+                        VoxelWorld.ChunkUpdater.GenerateVoxelDataAndMeshImmediate(chunkProperties);
                         chunksGenerated++;
                     }
                 }
@@ -58,23 +58,21 @@ namespace Eldemarkki.VoxelTerrain.Chunks
         }
 
         /// <summary>
-        /// Unloads every coordinate in the list
+        /// Hides (= destroys the GameObjects) the chunks in <paramref name="coordinatesToHide"/>
         /// </summary>
-        /// <param name="coordinatesToUnload">A list of the coordinates to unload</param>
-        public void UnloadCoordinates(IEnumerable<int3> coordinatesToUnload)
+        /// <param name="coordinatesToHide">A list of the coordinates to hide</param>
+        public void HideChunks(IEnumerable<int3> coordinatesToHide)
         {
             // Remove the coordinates from the generation queue
-            foreach(int3 coordinateToUnload in coordinatesToUnload)
+            foreach (int3 coordinateToHide in coordinatesToHide)
             {
-                if (_generationQueue.Contains(coordinateToUnload))
+                if (_generationQueue.Contains(coordinateToHide))
                 {
-                    _generationQueue.Remove(coordinateToUnload);
+                    _generationQueue.Remove(coordinateToHide);
                 }
             }
 
-            VoxelWorld.VoxelDataStore.UnloadCoordinates(coordinatesToUnload);
-
-            foreach(int3 chunkCoordinate in coordinatesToUnload)
+            foreach (int3 chunkCoordinate in coordinatesToHide)
             {
                 VoxelWorld.ChunkStore.DestroyChunk(chunkCoordinate);
             }

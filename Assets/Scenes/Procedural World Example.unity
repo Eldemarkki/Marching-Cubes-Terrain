@@ -225,6 +225,7 @@ MonoBehaviour:
   voxelWorld: {fileID: 35699114}
   chunkProvider: {fileID: 35699119}
   renderDistance: 5
+  loadingBufferSize: 2
   player: {fileID: 534669905}
 --- !u!114 &35699119
 MonoBehaviour:
@@ -293,6 +294,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e66f3dd9a72a0f2449b26a410bde7d38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  defaultTerrainColor:
+    serializedVersion: 2
+    rgba: 4280376075
 --- !u!1 &86590905
 GameObject:
   m_ObjectHideFlags: 0

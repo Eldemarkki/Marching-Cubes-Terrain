@@ -43,10 +43,10 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         /// </summary>
         /// <param name="chunkCoordinate">The coordinate of the chunk to create</param>
         /// <returns>The new chunk</returns>
-        public ChunkProperties CreateLoadedChunkToCoordinate(int3 chunkCoordinate)
+        public ChunkProperties CreateLoadedChunkToCoordinateImmediate(int3 chunkCoordinate)
         {
             ChunkProperties chunkProperties = CreateUnloadedChunkToCoordinate(chunkCoordinate);
-            VoxelWorld.ChunkUpdater.GenerateVoxelDataAndMesh(chunkProperties);
+            VoxelWorld.ChunkUpdater.GenerateVoxelDataAndMeshImmediate(chunkProperties);
             return chunkProperties;
         }
     }

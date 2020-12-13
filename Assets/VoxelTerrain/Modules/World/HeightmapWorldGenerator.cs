@@ -31,7 +31,7 @@ namespace Eldemarkki.VoxelTerrain.World
 
         private void Start()
         {
-            CreateHeightmapTerrain();
+            CreateHeightmapTerrainImmediate();
         }
 
         private void OnDestroy()
@@ -42,7 +42,7 @@ namespace Eldemarkki.VoxelTerrain.World
         /// <summary>
         /// Creates the heightmap terrain and loads the chunks.
         /// </summary>
-        private void CreateHeightmapTerrain()
+        private void CreateHeightmapTerrainImmediate()
         {
             int chunkCountX = Mathf.CeilToInt((float)(heightmapTerrainSettings.Width - 1) / voxelWorld.WorldSettings.ChunkSize.x);
             int chunkCountZ = Mathf.CeilToInt((float)(heightmapTerrainSettings.Height - 1) / voxelWorld.WorldSettings.ChunkSize.z);
@@ -54,7 +54,7 @@ namespace Eldemarkki.VoxelTerrain.World
                 {
                     for (int z = 0; z < chunkCountZ; z++)
                     {
-                        voxelWorld.ChunkProvider.CreateLoadedChunkToCoordinate(new int3(x, y, z));
+                        voxelWorld.ChunkProvider.CreateLoadedChunkToCoordinateImmediate(new int3(x, y, z));
                     }
                 }
             }
