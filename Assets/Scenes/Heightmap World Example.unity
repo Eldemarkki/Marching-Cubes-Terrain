@@ -420,6 +420,9 @@ MonoBehaviour:
   deformRange: 3
   maxReachDistance: Infinity
   flatteningKey: 306
+  paintColor:
+    serializedVersion: 2
+    rgba: 4294954496
   playerCamera: {fileID: 597380020}
 --- !u!81 &597380023
 AudioListener:
@@ -581,6 +584,7 @@ GameObject:
   - component: {fileID: 1406068211}
   - component: {fileID: 1406068210}
   - component: {fileID: 1406068208}
+  - component: {fileID: 1406068217}
   m_Layer: 0
   m_Name: VoxelWorld
   m_TagString: Untagged
@@ -690,11 +694,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   worldSettings:
-    chunkSize: 16
+    chunkSize:
+      x: 16
+      y: 16
+      z: 16
     chunkPrefab: {fileID: 1042568357287805991, guid: d3008c1365ac1cb49b849d43fffdc19e,
       type: 3}
   voxelMesher: {fileID: 1406068214}
   voxelDataStore: {fileID: 1406068213}
+  voxelColorStore: {fileID: 1406068217}
   voxelDataGenerator: {fileID: 1406068212}
   chunkProvider: {fileID: 1406068210}
   chunkStore: {fileID: 1406068209}
@@ -713,3 +721,15 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1406068217
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1406068207}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e66f3dd9a72a0f2449b26a410bde7d38, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
