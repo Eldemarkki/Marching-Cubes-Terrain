@@ -36,16 +36,14 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static byte CalculateCubeIndex(VoxelCorners<float> voxelDensities, float isolevel)
         {
-            byte cubeIndex = 0;
-
-            if (voxelDensities.Corner1 < isolevel) { cubeIndex |= 1; }
-            if (voxelDensities.Corner2 < isolevel) { cubeIndex |= 2; }
-            if (voxelDensities.Corner3 < isolevel) { cubeIndex |= 4; }
-            if (voxelDensities.Corner4 < isolevel) { cubeIndex |= 8; }
-            if (voxelDensities.Corner5 < isolevel) { cubeIndex |= 16; }
-            if (voxelDensities.Corner6 < isolevel) { cubeIndex |= 32; }
-            if (voxelDensities.Corner7 < isolevel) { cubeIndex |= 64; }
-            if (voxelDensities.Corner8 < isolevel) { cubeIndex |= 128; }
+            byte cubeIndex = (byte)math.select(0, 1, voxelDensities.Corner1 < isolevel);
+            cubeIndex |= (byte)math.select(0, 2, voxelDensities.Corner2 < isolevel);
+            cubeIndex |= (byte)math.select(0, 4, voxelDensities.Corner3 < isolevel);
+            cubeIndex |= (byte)math.select(0, 8, voxelDensities.Corner4 < isolevel);
+            cubeIndex |= (byte)math.select(0, 16, voxelDensities.Corner5 < isolevel);
+            cubeIndex |= (byte)math.select(0, 32, voxelDensities.Corner6 < isolevel);
+            cubeIndex |= (byte)math.select(0, 64, voxelDensities.Corner7 < isolevel);
+            cubeIndex |= (byte)math.select(0, 128, voxelDensities.Corner8 < isolevel);
 
             return cubeIndex;
         }
