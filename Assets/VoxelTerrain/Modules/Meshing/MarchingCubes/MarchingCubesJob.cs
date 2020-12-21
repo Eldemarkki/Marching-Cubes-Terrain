@@ -75,7 +75,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
                         // Index at the beginning of the row
                         int rowIndex = 15 * cubeIndex;
 
-                        for (int i = 0; MarchingCubesLookupTables.TriangleTable[rowIndex + i] != -1; i += 3)
+                        for (int i = 0; MarchingCubesLookupTables.TriangleTable[rowIndex + i] != -1 && i < 15; i += 3)
                         {
                             float3 vertex1 = vertexList[MarchingCubesLookupTables.TriangleTable[rowIndex + i + 0]];
                             float3 vertex2 = vertexList[MarchingCubesLookupTables.TriangleTable[rowIndex + i + 1]];
