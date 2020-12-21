@@ -26,18 +26,6 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         }
 
         /// <summary>
-        /// Initializes the chunk's properties.
-        /// </summary>
-        /// <param name="chunkProperties">The chunk to initialize</param>
-        /// <param name="chunkCoordinate">The new coordinate of the chunk</param>
-        public void Initialize(ChunkProperties chunkProperties, int3 chunkCoordinate)
-        {
-            chunkProperties.ChunkGameObject.transform.position = (chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize).ToVectorInt();
-            chunkProperties.ChunkGameObject.name = ChunkProperties.GetName(chunkCoordinate);
-            chunkProperties.ChunkCoordinate = chunkCoordinate;
-        }
-
-        /// <summary>
         /// Generates the voxel data and colors for this chunk and generates the mesh
         /// </summary>
         public void GenerateVoxelDataAndMeshImmediate(ChunkProperties chunkProperties)

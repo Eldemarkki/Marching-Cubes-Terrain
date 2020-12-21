@@ -1,4 +1,5 @@
-﻿using Unity.Mathematics;
+﻿using Eldemarkki.VoxelTerrain.Utilities;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace Eldemarkki.VoxelTerrain.World.Chunks
@@ -19,6 +20,18 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         /// </summary>
         public bool HasChanges { get; set; }
         public bool IsMeshGenerated { get; set; }
+
+        /// <summary>
+        /// Initializes the chunk's properties.
+        /// </summary>
+        /// <param name="chunkProperties">The chunk to initialize</param>
+        /// <param name="chunkCoordinate">The new coordinate of the chunk</param>
+        public void Initialize(int3 chunkCoordinate, int3 chunkSize)
+        {
+            ChunkGameObject.transform.position = (chunkCoordinate * chunkSize).ToVectorInt();
+            ChunkGameObject.name = GetName(chunkCoordinate);
+            ChunkCoordinate = chunkCoordinate;
+        }
 
         /// <summary>
         /// Generates a chunk name from a chunk coordinate

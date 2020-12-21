@@ -31,7 +31,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
                 MeshFilter = chunkGameObject.GetComponent<MeshFilter>(),
             };
 
-            VoxelWorld.ChunkUpdater.Initialize(chunkProperties, chunkCoordinate);
+            chunkProperties.Initialize(chunkCoordinate, VoxelWorld.WorldSettings.ChunkSize);
 
             VoxelWorld.ChunkStore.AddChunk(chunkProperties);
 

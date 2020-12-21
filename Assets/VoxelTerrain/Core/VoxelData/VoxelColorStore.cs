@@ -76,34 +76,36 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// Generates the colors for a chunk at <paramref name="chunkCoordinate"/>; fills the color array with the default color
         /// </summary>
         /// <param name="chunkCoordinate">The coordinate of the chunk which to generate the colors for</param>
-        public void GenerateColorsForChunk(int3 chunkCoordinate)
+        public unsafe void GenerateColorsForChunk(int3 chunkCoordinate)
         {
             if (!_chunkColors.ContainsKey(chunkCoordinate))
             {
                 NativeArray<Color32> colors = new NativeArray<Color32>((VoxelWorld.WorldSettings.ChunkSize.x + 1) * (VoxelWorld.WorldSettings.ChunkSize.y + 1) * (VoxelWorld.WorldSettings.ChunkSize.z + 1), Allocator.Persistent);
 
-                NativeArray<Color32> defaultColorArray = new NativeArray<Color32>(new[] { defaultTerrainColor }, Allocator.Temp);
+                Color32* defaultColorArray = stackalloc Color32[1]
+                {
+                    defaultTerrainColor
+                };
 
                 unsafe
                 {
-                    UnsafeUtility.MemCpyReplicate(colors.GetUnsafePtr(), defaultColorArray.GetUnsafeReadOnlyPtr(), sizeof(Color32), colors.Length);
+                    UnsafeUtility.MemCpyReplicate(colors.GetUnsafePtr(), defaultColorArray, sizeof(Color32), colors.Length);
                 }
 
-                defaultColorArray.Dispose();
-
-                SetVoxelColorsChunk(chunkCoordinate, colors);
+                SetVoxelColorsChunkUnchecked(chunkCoordinate, colors, false);
             }
         }
 
         /// <summary>
-        /// Sets the voxel colors of a chunk at <paramref name="chunkCoordinate"/>
+        /// Sets the voxel colors of a chunk at <paramref name="chunkCoordinate"/> without checking if colors already exist for that chunk
         /// </summary>
         /// <param name="chunkCoordinate">The coordinate of the chunk</param>
         /// <param name="newColors">The colors to set the chunk's colors to</param>
-        public void SetVoxelColorsChunk(int3 chunkCoordinate, NativeArray<Color32> newColors)
+        public void SetVoxelColorsChunkUnchecked(int3 chunkCoordinate, NativeArray<Color32> newColors, bool exists)
         {
-            if (_chunkColors.TryGetValue(chunkCoordinate, out NativeArray<Color32> oldColors))
+            if (exists)
             {
+                NativeArray<Color32> oldColors = _chunkColors[chunkCoordinate];
                 oldColors.CopyFrom(newColors);
                 newColors.Dispose();
             }
