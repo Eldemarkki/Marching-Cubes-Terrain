@@ -78,9 +78,10 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
             if (from.Equals(to)) { return; }
 
             // Check that a chunk exists at 'from'
-            if (TryGetVoxelColorsChunk(from, out _))
+            if (TryGetVoxelColorsChunk(from, out NativeArray<Color32> fromColors))
             {
                 _chunkColors.Remove(from);
+                fromColors.Dispose();
 
                 GenerateColorsForChunk(to);
             }

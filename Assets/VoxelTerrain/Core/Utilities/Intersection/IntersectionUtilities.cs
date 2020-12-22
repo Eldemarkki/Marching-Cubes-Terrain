@@ -47,6 +47,13 @@ namespace Eldemarkki.VoxelTerrain.Utilities.Intersection
             int3 max = new int3(Mathf.Min(a.max.x, b.max.x), Mathf.Min(a.max.y, b.max.y), Mathf.Min(a.max.z, b.max.z));
 
             int3 size = max - min;
+            
+            // If there is no intersection, return (0,0,0), (0,0,0)
+            if(math.any(size <= int3.zero))
+            {
+                return new BoundsInt();
+            }
+
             return new BoundsInt(min.ToVectorInt(), size.ToVectorInt());
         }
     }

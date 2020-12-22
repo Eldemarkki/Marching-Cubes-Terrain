@@ -148,7 +148,10 @@ namespace Eldemarkki.VoxelTerrain.World
         private static int3[] GetCoordinatesThatNeedChunks(BoundsInt oldChunks, BoundsInt newChunks)
         {
             BoundsInt intersection = IntersectionUtilities.GetIntersectionVolume(oldChunks, newChunks);
-            int count = newChunks.CalculateVolume() - intersection.CalculateVolume();
+
+            int newChunksCount = newChunks.CalculateVolume();
+            int intersectionChunkCount = intersection.CalculateVolume();
+            int count = newChunksCount - intersectionChunkCount;
             int3[] coordinates = new int3[count];
 
             // Cache the min/max values because accessing them repeatedly in a loop is surprisingly costly
