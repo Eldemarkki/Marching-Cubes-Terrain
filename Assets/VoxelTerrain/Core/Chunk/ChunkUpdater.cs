@@ -14,7 +14,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         /// </summary>
         public VoxelWorld VoxelWorld { get; set; }
 
-        protected void Update()
+        private void Update()
         {
             foreach (ChunkProperties chunkProperties in VoxelWorld.ChunkStore.Chunks)
             {
@@ -75,6 +75,9 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
 
             chunkProperties.MeshFilter.sharedMesh = mesh;
             chunkProperties.MeshCollider.sharedMesh = mesh;
+
+            chunkProperties.MeshCollider.enabled = true;
+            chunkProperties.MeshRenderer.enabled = true;
 
             chunkProperties.HasChanges = false;
 

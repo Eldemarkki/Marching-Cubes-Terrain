@@ -41,6 +41,7 @@ namespace Eldemarkki.VoxelTerrain.World
             voxelColorStore.VoxelWorld = this;
             chunkProvider.VoxelWorld = this;
             chunkUpdater.VoxelWorld = this;
+            chunkStore.VoxelWorld = this;
         }
     }
 }

@@ -2,6 +2,7 @@
 using Eldemarkki.VoxelTerrain.Utilities;
 using Unity.Collections;
 using Unity.Jobs;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace Eldemarkki.VoxelTerrain.VoxelData
@@ -17,13 +18,12 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         [SerializeField] private ProceduralTerrainSettings proceduralTerrainSettings = new ProceduralTerrainSettings(1, 9, 120, 0);
 
         /// <inheritdoc/>
-        public override JobHandleWithData<IVoxelDataGenerationJob> GenerateVoxelData(BoundsInt bounds, Allocator allocator)
+        public override JobHandleWithData<IVoxelDataGenerationJob> GenerateVoxelData(int3 worldSpaceOrigin, VoxelDataVolume outputVoxelDataVolume)
         {
-            VoxelDataVolume voxelData = new VoxelDataVolume(bounds.size, allocator);
             ProceduralTerrainVoxelDataCalculationJob job = new ProceduralTerrainVoxelDataCalculationJob
             {
-                WorldPositionOffset = bounds.min.ToInt3(),
-                OutputVoxelData = voxelData,
+                WorldPositionOffset = worldSpaceOrigin,
+                OutputVoxelData = outputVoxelDataVolume,
                 ProceduralTerrainSettings = proceduralTerrainSettings
             };
             

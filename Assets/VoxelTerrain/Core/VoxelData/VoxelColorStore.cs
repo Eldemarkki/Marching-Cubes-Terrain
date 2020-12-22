@@ -72,6 +72,20 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
             }
         }
 
+        public void MoveChunk(int3 from, int3 to)
+        {
+            // Check that 'from' and 'to' are not equal
+            if (from.Equals(to)) { return; }
+
+            // Check that a chunk exists at 'from'
+            if (TryGetVoxelColorsChunk(from, out _))
+            {
+                _chunkColors.Remove(from);
+
+                GenerateColorsForChunk(to);
+            }
+        }
+
         /// <summary>
         /// Generates the colors for a chunk at <paramref name="chunkCoordinate"/>; fills the color array with the default color
         /// </summary>
@@ -129,26 +143,6 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         public bool TryGetVoxelColorsChunk(int3 chunkCoordinate, out NativeArray<Color32> colors)
         {
             return _chunkColors.TryGetValue(chunkCoordinate, out colors);
-        }
-
-        /// <summary>
-        /// Unloads the specified chunks' colors from memory
-        /// </summary>
-        /// <param name="coordinatesToUnload">The coordinates of the chunks to unload</param>
-        public void UnloadCoordinates(IEnumerable<int3> coordinatesToUnload)
-        {
-            foreach (int3 coordinateToUnload in coordinatesToUnload)
-            {
-                if (TryGetVoxelColorsChunk(coordinateToUnload, out NativeArray<Color32> colors))
-                {
-                    if (colors.IsCreated)
-                    {
-                        colors.Dispose();
-                    }
-
-                    _chunkColors.Remove(coordinateToUnload);
-                }
-            }
         }
     }
 }

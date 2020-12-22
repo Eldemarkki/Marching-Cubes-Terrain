@@ -2,6 +2,7 @@
 using Eldemarkki.VoxelTerrain.World;
 using Unity.Collections;
 using Unity.Jobs;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace Eldemarkki.VoxelTerrain.VoxelData
@@ -17,14 +18,12 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         [SerializeField] private HeightmapWorldGenerator heightmapWorldGenerator;
 
         /// <inheritdoc/>
-        public override JobHandleWithData<IVoxelDataGenerationJob> GenerateVoxelData(BoundsInt bounds, Allocator allocator)
+        public override JobHandleWithData<IVoxelDataGenerationJob> GenerateVoxelData(int3 worldSpaceOrigin, VoxelDataVolume outputVoxelDataVolume)
         {
-            VoxelDataVolume voxelData = new VoxelDataVolume(bounds.size, allocator);
-
             HeightmapTerrainVoxelDataCalculationJob job = new HeightmapTerrainVoxelDataCalculationJob
             {
-                WorldPositionOffset = bounds.min.ToInt3(),
-                OutputVoxelData = voxelData,
+                WorldPositionOffset = worldSpaceOrigin,
+                OutputVoxelData = outputVoxelDataVolume,
                 HeightmapData = heightmapWorldGenerator.HeightmapTerrainSettings.HeightmapData,
                 HeightmapWidth = heightmapWorldGenerator.HeightmapTerrainSettings.Width,
                 HeightmapHeight = heightmapWorldGenerator.HeightmapTerrainSettings.Height,

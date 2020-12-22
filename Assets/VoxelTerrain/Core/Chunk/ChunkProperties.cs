@@ -12,6 +12,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         public GameObject ChunkGameObject { get; set; }
         public MeshFilter MeshFilter { get; set; }
         public MeshCollider MeshCollider { get; set; }
+        public MeshRenderer MeshRenderer { get; set; }
 
         public int3 ChunkCoordinate { get; set; }
 

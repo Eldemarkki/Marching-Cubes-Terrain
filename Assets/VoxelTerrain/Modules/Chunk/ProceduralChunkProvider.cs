@@ -53,29 +53,13 @@ namespace Eldemarkki.VoxelTerrain.Chunks
             if (!VoxelWorld.ChunkStore.DoesChunkExistAtCoordinate(chunkCoordinate))
             {
                 CreateUnloadedChunkToCoordinate(chunkCoordinate);
-                _generationQueue.Add(chunkCoordinate);
+                AddChunkToGenerationQueue(chunkCoordinate);
             }
         }
 
-        /// <summary>
-        /// Hides (= destroys the GameObjects) the chunks in <paramref name="coordinatesToHide"/>
-        /// </summary>
-        /// <param name="coordinatesToHide">A list of the coordinates to hide</param>
-        public void HideChunks(IEnumerable<int3> coordinatesToHide)
+        public void AddChunkToGenerationQueue(int3 chunkCoordinate)
         {
-            // Remove the coordinates from the generation queue
-            foreach (int3 coordinateToHide in coordinatesToHide)
-            {
-                if (_generationQueue.Contains(coordinateToHide))
-                {
-                    _generationQueue.Remove(coordinateToHide);
-                }
-            }
-
-            foreach (int3 chunkCoordinate in coordinatesToHide)
-            {
-                VoxelWorld.ChunkStore.DestroyChunk(chunkCoordinate);
-            }
+            _generationQueue.Add(chunkCoordinate);
         }
     }
 }

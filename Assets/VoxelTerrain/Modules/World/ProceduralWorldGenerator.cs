@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using Eldemarkki.VoxelTerrain.Chunks;
 using Eldemarkki.VoxelTerrain.Utilities;
+using Eldemarkki.VoxelTerrain.Utilities.Intersection;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -45,26 +46,45 @@ namespace Eldemarkki.VoxelTerrain.World
         {
             int3 playerCoordinate = GetPlayerCoordinate();
             GenerateTerrainAroundCoordinate(playerCoordinate);
-
         }
 
         private void Update()
         {
-            int3 playerCoordinate = GetPlayerCoordinate();
-            if (!playerCoordinate.Equals(_lastGenerationCoordinate))
+            int3 newPlayerCoordinate = GetPlayerCoordinate();
+            if (!newPlayerCoordinate.Equals(_lastGenerationCoordinate))
             {
-                // Hide the chunks that are out of render distance, but preserve their data
-                IEnumerable<int3> coordinatesToHide = voxelWorld.ChunkStore.GetChunkCoordinatesOutsideOfRenderDistance(playerCoordinate, renderDistance);
-                chunkProvider.HideChunks(coordinatesToHide);
+                var newlyFreedCoordinates = voxelWorld.ChunkStore.GetChunkCoordinatesOutsideOfRenderDistance(newPlayerCoordinate, renderDistance);
 
-                // Unload data that is outside of 'renderDistance + loadBuffer'
-                var coordinatesToUnload = voxelWorld.VoxelDataStore.GetChunkCoordinatesOutsideOfRenderDistance(playerCoordinate, renderDistance + loadingBufferSize);
-                
-                voxelWorld.VoxelDataStore.UnloadCoordinates(coordinatesToUnload);
-                voxelWorld.VoxelColorStore.UnloadCoordinates(coordinatesToUnload);
+                int3 renderSize = new int3(renderDistance * 2 + 1);
 
-                // Generate new terrain
-                GenerateTerrainAroundCoordinate(playerCoordinate);
+                int3 oldPos = _lastGenerationCoordinate - new int3(renderDistance);
+                BoundsInt oldCoords = new BoundsInt(oldPos.ToVectorInt(), renderSize.ToVectorInt());
+
+                int3 newPos = newPlayerCoordinate - new int3(renderDistance);
+                BoundsInt newCoords = new BoundsInt(newPos.ToVectorInt(), renderSize.ToVectorInt());
+
+                int3[] coordinatesThatNeedChunks = GetCoordinatesThatNeedChunks(oldCoords, newCoords);
+
+                int i = 0;
+                foreach (int3 source in newlyFreedCoordinates)
+                {
+                    int3 target = coordinatesThatNeedChunks[i];
+
+                    // Move chunk gameobjects
+                    voxelWorld.ChunkStore.MoveChunk(source, target);
+
+                    // Move voxel data and generate new
+                    voxelWorld.VoxelDataStore.MoveChunk(source, target);
+
+                    // Move colors and generate new
+                    voxelWorld.VoxelColorStore.MoveChunk(source, target);
+
+                    chunkProvider.AddChunkToGenerationQueue(target);
+
+                    i++;
+                }
+
+                _lastGenerationCoordinate = newPlayerCoordinate;
             }
         }
 
@@ -90,9 +110,10 @@ namespace Eldemarkki.VoxelTerrain.World
             }
 
             // Generate chunks with radius 'renderDistance'
-            foreach (int3 chunkCoordinate in GetChunkGenerationCoordinates(coordinate, renderDistance))
+            int3[] chunkGenerationCoordinates = GetChunkGenerationCoordinates(coordinate, renderDistance);
+            for (int i = 0; i < chunkGenerationCoordinates.Length; i++)
             {
-                chunkProvider.EnsureChunkExistsAtCoordinate(chunkCoordinate);
+                chunkProvider.EnsureChunkExistsAtCoordinate(chunkGenerationCoordinates[i]);
             }
 
             _lastGenerationCoordinate = coordinate;
@@ -104,8 +125,10 @@ namespace Eldemarkki.VoxelTerrain.World
         /// <param name="centerChunkCoordinate">The chunk coordinate to generate the coordinates around</param>
         /// <param name="renderDistance">The radius the chunks the player sees</param>
         /// <returns>A collection of coordinates that should be generated</returns>
-        private static IEnumerable<int3> GetChunkGenerationCoordinates(int3 centerChunkCoordinate, int renderDistance)
+        private static int3[] GetChunkGenerationCoordinates(int3 centerChunkCoordinate, int renderDistance)
         {
+            int3[] coordinates = new int3[(int)math.pow(renderDistance * 2 + 1, 3)];
+            int i = 0;
             for (int x = -renderDistance; x <= renderDistance; x++)
             {
                 for (int y = -renderDistance; y <= renderDistance; y++)
@@ -113,10 +136,58 @@ namespace Eldemarkki.VoxelTerrain.World
                     for (int z = -renderDistance; z <= renderDistance; z++)
                     {
                         int3 chunkCoordinate = centerChunkCoordinate + new int3(x, y, z);
-                        yield return chunkCoordinate;
+                        coordinates[i] = chunkCoordinate;
+                        i++;
                     }
                 }
             }
+
+            return coordinates;
+        }
+
+        private static int3[] GetCoordinatesThatNeedChunks(BoundsInt oldChunks, BoundsInt newChunks)
+        {
+            BoundsInt intersection = IntersectionUtilities.GetIntersectionVolume(oldChunks, newChunks);
+            int count = newChunks.CalculateVolume() - intersection.CalculateVolume();
+            int3[] coordinates = new int3[count];
+
+            // Cache the min/max values because accessing them repeatedly in a loop is surprisingly costly
+            var intersectionMinX = intersection.xMin;
+            var intersectionMinY = intersection.yMin;
+            var intersectionMinZ = intersection.zMin;
+
+            var intersectionMaxX = intersection.xMax;
+            var intersectionMaxY = intersection.yMax;
+            var intersectionMaxZ = intersection.zMax;
+
+            int newChunksMinX = newChunks.xMin;
+            int newChunksMaxX = newChunks.xMax;
+            int newChunksMinY = newChunks.yMin;
+            int newChunksMaxY = newChunks.yMax;
+            int newChunksMinZ = newChunks.zMin;
+            int newChunksMaxZ = newChunks.zMax;
+
+            int i = 0;
+            for (int x = newChunksMinX; x < newChunksMaxX; x++)
+            {
+                for (int y = newChunksMinY; y < newChunksMaxY; y++)
+                {
+                    for (int z = newChunksMinZ; z < newChunksMaxZ; z++)
+                    {
+                        if (intersectionMinX <= x && x < intersectionMaxX &&
+                            intersectionMinY <= y && y < intersectionMaxY &&
+                            intersectionMinZ <= z && z < intersectionMaxZ)
+                        {
+                            continue;
+                        }
+
+                        coordinates[i] = new int3(x, y, z);
+                        i++;
+                    }
+                }
+            }
+
+            return coordinates;
         }
 
         /// <summary>

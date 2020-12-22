@@ -20,6 +20,8 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         /// </summary>
         public IEnumerable<ChunkProperties> Chunks => _chunks.Values;
 
+        public VoxelWorld VoxelWorld { get; set; }
+
         private void Awake()
         {
             _chunks = new Dictionary<int3, ChunkProperties>();
@@ -56,11 +58,9 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         {
             foreach (int3 chunkCoordinate in _chunks.Keys.ToList())
             {
-                int dX = math.abs(coordinate.x - chunkCoordinate.x);
-                int dY = math.abs(coordinate.y - chunkCoordinate.y);
-                int dZ = math.abs(coordinate.z - chunkCoordinate.z);
+                int3 difference = math.abs(coordinate - chunkCoordinate);
 
-                if (dX > renderDistance || dY > renderDistance || dZ > renderDistance)
+                if(math.any(difference > renderDistance))
                 {
                     yield return chunkCoordinate;
                 }
@@ -79,6 +79,11 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
             }
         }
 
+        public void AddChunkUnchecked(ChunkProperties chunkProperties)
+        {
+            _chunks.Add(chunkProperties.ChunkCoordinate, chunkProperties);
+        }
+
         /// <summary>
         /// Removes a chunk from a coordinate
         /// </summary>
@@ -88,17 +93,23 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
             _chunks.Remove(chunkCoordinate);
         }
 
-        /// <summary>
-        /// Removes a chunk from a coordinate and destroys its GameObject
-        /// </summary>
-        /// <param name="chunkCoordinate">The coordinate of the chunk to remove and destroy</param>
-        public void DestroyChunk(int3 chunkCoordinate)
+        public void MoveChunk(int3 from, int3 to)
         {
-            if (TryGetChunkAtCoordinate(chunkCoordinate, out ChunkProperties chunk))
-            {
-                Destroy(chunk.ChunkGameObject);
-                RemoveChunk(chunkCoordinate);
-            }
+            // Check that 'from' and 'to' are not equal
+            if (from.Equals(to)) { return; }
+
+            // Check that a chunk does NOT already exist at 'to'
+            if (DoesChunkExistAtCoordinate(to)) { return; }
+
+            // Check that a chunk exists at 'from'
+            if (!TryGetChunkAtCoordinate(from, out ChunkProperties chunk)) { return; }
+
+            RemoveChunk(from);
+            chunk.MeshCollider.enabled = false;
+            chunk.MeshRenderer.enabled = false;
+            chunk.Initialize(to, VoxelWorld.WorldSettings.ChunkSize);
+
+            AddChunkUnchecked(chunk);
         }
     }
 }

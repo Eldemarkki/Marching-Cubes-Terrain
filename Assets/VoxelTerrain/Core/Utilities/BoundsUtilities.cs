@@ -18,5 +18,11 @@ namespace Eldemarkki.VoxelTerrain.Utilities
 
             return new BoundsInt(min.ToVectorInt(), size.ToVectorInt());
         }
+
+        public static int CalculateVolume(this BoundsInt bounds)
+        {
+            Vector3Int size = bounds.size;
+            return size.x * size.y * size.z;
+        }
     }
 }

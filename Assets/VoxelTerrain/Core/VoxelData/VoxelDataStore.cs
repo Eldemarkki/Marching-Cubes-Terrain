@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Eldemarkki.VoxelTerrain.Utilities;
 using Eldemarkki.VoxelTerrain.Utilities.Intersection;
 using Eldemarkki.VoxelTerrain.World;
@@ -62,24 +61,35 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
             }
         }
 
-        /// <summary>
-        /// Gets a collection of chunk coordinates whose Manhattan Distance to the coordinate parameter is more than <paramref name="renderDistance"/>
-        /// </summary>
-        /// <param name="coordinate">The coordinate where the distances should be measured from</param>
-        /// <param name="renderDistance">The radius of the chunks the player can see</param>
-        /// <returns>A collection of chunk coordinates outside of the viewing range from the coordinate parameter</returns>
-        public IEnumerable<int3> GetChunkCoordinatesOutsideOfRenderDistance(int3 coordinate, int renderDistance)
+        public void MoveChunk(int3 from, int3 to)
         {
-            foreach (int3 chunkCoordinate in _chunks.Keys.ToList())
-            {
-                int dX = math.abs(coordinate.x - chunkCoordinate.x);
-                int dY = math.abs(coordinate.y - chunkCoordinate.y);
-                int dZ = math.abs(coordinate.z - chunkCoordinate.z);
+            // Check that 'from' and 'to' are not equal
+            if (from.Equals(to)) { return; }
 
-                if (dX > renderDistance || dY > renderDistance || dZ > renderDistance)
+            // Check that a chunk does NOT already exist at 'to'
+            if (!DoesChunkExistAtCoordinate(to))
+            {             
+                // Check that a chunk exists at 'from'
+                if (TryGetVoxelDataChunk(from, out VoxelDataVolume chunk))
                 {
-                    yield return chunkCoordinate;
+                    _chunks.Remove(from);
+                    StartGeneratingVoxelData(to, chunk);
                 }
+            }
+        }
+
+        private bool DoesChunkExistAtCoordinate(int3 chunkCoordinate)
+        {
+            return _chunks.ContainsKey(chunkCoordinate) || _generationJobHandles.ContainsKey(chunkCoordinate);
+        }
+
+        private void StartGeneratingVoxelData(int3 chunkCoordinate, VoxelDataVolume voxelDataVolume)
+        {
+            if (!_generationJobHandles.ContainsKey(chunkCoordinate))
+            {
+                int3 chunkWorldOrigin = chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize;
+                JobHandleWithData<IVoxelDataGenerationJob> jobHandleWithData = VoxelWorld.VoxelDataGenerator.GenerateVoxelData(chunkWorldOrigin, voxelDataVolume);
+                SetVoxelDataJobHandle(jobHandleWithData, chunkCoordinate);
             }
         }
 
@@ -382,29 +392,6 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                 jobHandle.JobHandle.Complete();
                 SetVoxelDataChunk(jobHandle.JobData.OutputVoxelData, chunkCoordinate);
                 _generationJobHandles.Remove(chunkCoordinate);
-            }
-        }
-
-        /// <summary>
-        /// Unloads the voxel data of chunks from the coordinates
-        /// </summary>
-        /// <param name="coordinatesToUnload">The list of chunk coordinates to unload</param>
-        public void UnloadCoordinates(IEnumerable<int3> coordinatesToUnload)
-        {
-            foreach (int3 coordinate in coordinatesToUnload)
-            {
-                if (_chunks.TryGetValue(coordinate, out VoxelDataVolume voxelDataVolume))
-                {
-                    voxelDataVolume.Dispose();
-                    _chunks.Remove(coordinate);
-                }
-
-                if (_generationJobHandles.TryGetValue(coordinate, out JobHandleWithData<IVoxelDataGenerationJob> job))
-                {
-                    job.JobHandle.Complete();
-                    job.JobData.OutputVoxelData.Dispose();
-                    _generationJobHandles.Remove(coordinate);
-                }
             }
         }
 
