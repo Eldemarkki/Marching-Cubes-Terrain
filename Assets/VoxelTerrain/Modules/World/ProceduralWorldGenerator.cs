@@ -147,22 +147,7 @@ namespace Eldemarkki.VoxelTerrain.World
 
         private static int3[] GetCoordinatesThatNeedChunks(BoundsInt oldChunks, BoundsInt newChunks)
         {
-            BoundsInt intersection = IntersectionUtilities.GetIntersectionVolume(oldChunks, newChunks);
-
-            int newChunksCount = newChunks.CalculateVolume();
-            int intersectionChunkCount = intersection.CalculateVolume();
-            int count = newChunksCount - intersectionChunkCount;
-            int3[] coordinates = new int3[count];
-
             // Cache the min/max values because accessing them repeatedly in a loop is surprisingly costly
-            var intersectionMinX = intersection.xMin;
-            var intersectionMinY = intersection.yMin;
-            var intersectionMinZ = intersection.zMin;
-
-            var intersectionMaxX = intersection.xMax;
-            var intersectionMaxY = intersection.yMax;
-            var intersectionMaxZ = intersection.zMax;
-
             int newChunksMinX = newChunks.xMin;
             int newChunksMaxX = newChunks.xMax;
             int newChunksMinY = newChunks.yMin;
@@ -170,22 +155,56 @@ namespace Eldemarkki.VoxelTerrain.World
             int newChunksMinZ = newChunks.zMin;
             int newChunksMaxZ = newChunks.zMax;
 
-            int i = 0;
-            for (int x = newChunksMinX; x < newChunksMaxX; x++)
-            {
-                for (int y = newChunksMinY; y < newChunksMaxY; y++)
-                {
-                    for (int z = newChunksMinZ; z < newChunksMaxZ; z++)
-                    {
-                        if (intersectionMinX <= x && x < intersectionMaxX &&
-                            intersectionMinY <= y && y < intersectionMaxY &&
-                            intersectionMinZ <= z && z < intersectionMaxZ)
-                        {
-                            continue;
-                        }
+            int3[] coordinates;
 
-                        coordinates[i] = new int3(x, y, z);
-                        i++;
+            BoundsInt intersection = IntersectionUtilities.GetIntersectionVolume(oldChunks, newChunks);
+            if (math.any(intersection.size.ToInt3() < int3.zero))
+            {
+                coordinates = new int3[newChunks.CalculateVolume()];
+                int i = 0;
+                for (int x = newChunksMinX; x < newChunksMaxX; x++)
+                {
+                    for (int y = newChunksMinY; y < newChunksMaxY; y++)
+                    {
+                        for (int z = newChunksMinZ; z < newChunksMaxZ; z++)
+                        {
+
+                            coordinates[i] = new int3(x, y, z);
+                            i++;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var intersectionMinX = intersection.xMin;
+                var intersectionMinY = intersection.yMin;
+                var intersectionMinZ = intersection.zMin;
+
+                var intersectionMaxX = intersection.xMax;
+                var intersectionMaxY = intersection.yMax;
+                var intersectionMaxZ = intersection.zMax;
+
+                int count = newChunks.CalculateVolume() - intersection.CalculateVolume();
+                coordinates = new int3[count];
+
+                int i = 0;
+                for (int x = newChunksMinX; x < newChunksMaxX; x++)
+                {
+                    for (int y = newChunksMinY; y < newChunksMaxY; y++)
+                    {
+                        for (int z = newChunksMinZ; z < newChunksMaxZ; z++)
+                        {
+                            if (intersectionMinX <= x && x < intersectionMaxX &&
+                                intersectionMinY <= y && y < intersectionMaxY &&
+                                intersectionMinZ <= z && z < intersectionMaxZ)
+                            {
+                                continue;
+                            }
+
+                            coordinates[i] = new int3(x, y, z);
+                            i++;
+                        }
                     }
                 }
             }
