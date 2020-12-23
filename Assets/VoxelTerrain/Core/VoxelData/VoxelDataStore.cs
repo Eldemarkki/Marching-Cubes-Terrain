@@ -66,15 +66,19 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
             // Check that 'from' and 'to' are not equal
             if (from.Equals(to)) { return; }
 
-            // Check that a chunk does NOT already exist at 'to'
-            if (!DoesChunkExistAtCoordinate(to))
-            {             
-                // Check that a chunk exists at 'from'
-                if (TryGetVoxelDataChunk(from, out VoxelDataVolume chunk))
-                {
-                    _chunks.Remove(from);
-                    StartGeneratingVoxelData(to, chunk);
-                }
+            // Check that a chunk exists at 'from'
+            if (TryGetVoxelDataChunk(from, out VoxelDataVolume chunk))
+            {
+                StartGeneratingVoxelData(to, chunk);
+            }
+            else
+            {
+                StartGeneratingVoxelData(to);
+            }
+
+            if (DoesChunkExistAtCoordinate(to))
+            {
+                _chunks.Remove(from);
             }
         }
 

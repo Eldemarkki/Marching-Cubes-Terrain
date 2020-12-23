@@ -3,7 +3,7 @@ using Unity.Mathematics;
 
 namespace Eldemarkki.VoxelTerrain.World
 {
-    struct LoadingCoordinates
+    public struct LoadingCoordinates
     {
         private int3 centerCoordinate;
         private int innerSize;
@@ -49,6 +49,37 @@ namespace Eldemarkki.VoxelTerrain.World
 
                         yield return new int3(x, y, z) + centerCoordinate;
                     }
+                }
+            }
+        }
+
+        public bool Contains(int3 point)
+        {
+            // Bigger cube should contain, and the smaller one should not contain
+            int3 smallCubeMin = centerCoordinate - new int3(innerSize);
+            int3 smallCubeMax = centerCoordinate + new int3(innerSize);
+
+            int3 bigCubeMin = centerCoordinate - new int3(innerSize + outerSize);
+            int3 bigCubeMax = centerCoordinate + new int3(innerSize + outerSize);
+
+            bool smallCubeContains = smallCubeMin.x <= point.x && point.x <= smallCubeMax.x &&
+                                     smallCubeMin.y <= point.y && point.y <= smallCubeMax.y &&
+                                     smallCubeMin.z <= point.z && point.z <= smallCubeMax.z;
+
+            bool bigCubeContains = bigCubeMin.x <= point.x && point.x <= bigCubeMax.x &&
+                                   bigCubeMin.y <= point.y && point.y <= bigCubeMax.y &&
+                                   bigCubeMin.z <= point.z && point.z <= bigCubeMax.z;
+
+            return !smallCubeContains && bigCubeContains;
+        }
+
+        public IEnumerable<int3> GetCoordinatesExcept(LoadingCoordinates except)
+        {
+            foreach(int3 point in GetCoordinates())
+            {
+                if (!except.Contains(point))
+                {
+                    yield return point;
                 }
             }
         }

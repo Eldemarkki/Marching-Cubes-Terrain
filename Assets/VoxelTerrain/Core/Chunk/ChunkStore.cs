@@ -109,7 +109,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
             chunk.MeshRenderer.enabled = false;
             chunk.Initialize(to, VoxelWorld.WorldSettings.ChunkSize);
 
-            AddChunkUnchecked(chunk);
+            AddChunk(chunk);
         }
     }
 }

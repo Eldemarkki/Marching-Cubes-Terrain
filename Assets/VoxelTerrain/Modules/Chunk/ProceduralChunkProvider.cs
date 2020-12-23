@@ -34,7 +34,7 @@ namespace Eldemarkki.VoxelTerrain.Chunks
                 _generationQueue.RemoveAt(0);
 
                 if (VoxelWorld.ChunkStore.TryGetChunkAtCoordinate(chunkCoordinate, out ChunkProperties chunkProperties))
-                {
+                {               
                     if (!chunkProperties.IsMeshGenerated)
                     {
                         VoxelWorld.ChunkUpdater.GenerateVoxelDataAndMeshImmediate(chunkProperties);

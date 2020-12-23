@@ -32,6 +32,9 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
             ChunkGameObject.transform.position = (chunkCoordinate * chunkSize).ToVectorInt();
             ChunkGameObject.name = GetName(chunkCoordinate);
             ChunkCoordinate = chunkCoordinate;
+
+            IsMeshGenerated = false;
+            HasChanges = false;
         }
 
         /// <summary>

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Eldemarkki.VoxelTerrain.Chunks;
+﻿using Eldemarkki.VoxelTerrain.Chunks;
 using Eldemarkki.VoxelTerrain.Utilities;
 using Eldemarkki.VoxelTerrain.Utilities.Intersection;
 using Unity.Mathematics;
@@ -53,6 +52,8 @@ namespace Eldemarkki.VoxelTerrain.World
             int3 newPlayerCoordinate = GetPlayerCoordinate();
             if (!newPlayerCoordinate.Equals(_lastGenerationCoordinate))
             {
+                MoveVoxelData(_lastGenerationCoordinate, newPlayerCoordinate);
+
                 var newlyFreedCoordinates = voxelWorld.ChunkStore.GetChunkCoordinatesOutsideOfRenderDistance(newPlayerCoordinate, renderDistance);
 
                 int3 renderSize = new int3(renderDistance * 2 + 1);
@@ -73,9 +74,6 @@ namespace Eldemarkki.VoxelTerrain.World
                     // Move chunk gameobjects
                     voxelWorld.ChunkStore.MoveChunk(source, target);
 
-                    // Move voxel data and generate new
-                    voxelWorld.VoxelDataStore.MoveChunk(source, target);
-
                     // Move colors and generate new
                     voxelWorld.VoxelColorStore.MoveChunk(source, target);
 
@@ -85,6 +83,29 @@ namespace Eldemarkki.VoxelTerrain.World
                 }
 
                 _lastGenerationCoordinate = newPlayerCoordinate;
+            }
+        }
+
+        private void MoveVoxelData(int3 from, int3 to)
+        {
+            int3 renderSize = new int3(renderDistance * 2 + 1);
+
+            int3 oldPos = from - new int3(renderDistance + loadingBufferSize);
+            BoundsInt oldCoords = new BoundsInt(oldPos.ToVectorInt(), renderSize.ToVectorInt());
+
+            int3 newPos = to - new int3(renderDistance + loadingBufferSize);
+            BoundsInt newCoords = new BoundsInt(newPos.ToVectorInt(), renderSize.ToVectorInt());
+
+            int3[] coordinatesThatNeedChunks = GetCoordinatesThatNeedChunks(oldCoords, newCoords);
+
+            var newlyFreedCoordinates = voxelWorld.ChunkStore.GetChunkCoordinatesOutsideOfRenderDistance(to, renderDistance + loadingBufferSize);
+
+            int i = 0;
+            foreach(int3 freeCoordinate in newlyFreedCoordinates)
+            {
+                var targetCoordinate = coordinatesThatNeedChunks[i];
+                voxelWorld.VoxelDataStore.MoveChunk(freeCoordinate, targetCoordinate);
+                i++;
             }
         }
 
@@ -105,7 +126,6 @@ namespace Eldemarkki.VoxelTerrain.World
         {
             // Start generating voxel data for chunks with radius 'renderDistance + additionalLoadSize'
             LoadingCoordinates loadingCoordinates = new LoadingCoordinates(coordinate, renderDistance, loadingBufferSize);
-
             foreach (int3 loadingCoordinate in loadingCoordinates.GetCoordinates())
             {
                 voxelWorld.ChunkUpdater.StartGeneratingData(loadingCoordinate);
@@ -213,6 +233,6 @@ namespace Eldemarkki.VoxelTerrain.World
 
             return coordinates;
         }
-        
+
     }
 }
