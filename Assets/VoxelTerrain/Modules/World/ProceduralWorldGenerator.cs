@@ -104,7 +104,9 @@ namespace Eldemarkki.VoxelTerrain.World
         private void GenerateTerrainAroundCoordinate(int3 coordinate)
         {
             // Start generating voxel data for chunks with radius 'renderDistance + additionalLoadSize'
-            foreach (int3 loadingCoordinate in GetLoadingCoordinates(coordinate, renderDistance, loadingBufferSize))
+            LoadingCoordinates loadingCoordinates = new LoadingCoordinates(coordinate, renderDistance, loadingBufferSize);
+
+            foreach (int3 loadingCoordinate in loadingCoordinates.GetCoordinates())
             {
                 voxelWorld.ChunkUpdater.StartGeneratingData(loadingCoordinate);
             }
@@ -211,39 +213,6 @@ namespace Eldemarkki.VoxelTerrain.World
 
             return coordinates;
         }
-
-        /// <summary>
-        /// Gets the coordinates of the chunks whose voxel data should be generated. The coordinates are in a cubical shape, with the inside of the cube being empty; generates the coordinates of the outer part of the cube
-        /// </summary>
-        /// <param name="coordinate">The point which the coordinates should be generated around</param>
-        /// <param name="renderDistance">The radius of the chunks the player sees; the inner radius</param>
-        /// <param name="loadingBufferSize">The size of the outer layer</param>
-        /// <returns>The coordinates for the outer parts of the cube</returns>
-        private static IEnumerable<int3> GetLoadingCoordinates(int3 coordinate, int renderDistance, int loadingBufferSize)
-        {
-            int3 min = -new int3(renderDistance + loadingBufferSize);
-            int3 max = new int3(renderDistance + loadingBufferSize);
-
-            int3 innerMin = -new int3(renderDistance);
-            int3 innerMax = new int3(renderDistance);
-
-            for (int x = min.x; x <= max.x; x++)
-            {
-                for (int y = min.y; y <= max.y; y++)
-                {
-                    for (int z = min.z; z <= max.z; z++)
-                    {
-                        if (innerMin.x <= x && x <= innerMax.x &&
-                            innerMin.y <= y && y <= innerMax.y &&
-                            innerMin.z <= z && z <= innerMax.z)
-                        {
-                            continue;
-                        }
-
-                        yield return new int3(x, y, z) + coordinate;
-                    }
-                }
-            }
-        }
+        
     }
 }
