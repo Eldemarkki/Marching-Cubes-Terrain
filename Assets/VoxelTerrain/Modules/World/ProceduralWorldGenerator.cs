@@ -88,22 +88,23 @@ namespace Eldemarkki.VoxelTerrain.World
 
         private void MoveVoxelData(int3 from, int3 to)
         {
-            int3 renderSize = new int3(renderDistance * 2 + 1);
+            int range = renderDistance + loadingBufferSize;
+            int3 renderSize = new int3(range * 2 + 1);
 
-            int3 oldPos = from - new int3(renderDistance + loadingBufferSize);
+            int3 oldPos = from - new int3(range);
             BoundsInt oldCoords = new BoundsInt(oldPos.ToVectorInt(), renderSize.ToVectorInt());
 
-            int3 newPos = to - new int3(renderDistance + loadingBufferSize);
+            int3 newPos = to - new int3(range);
             BoundsInt newCoords = new BoundsInt(newPos.ToVectorInt(), renderSize.ToVectorInt());
 
-            int3[] coordinatesThatNeedChunks = GetCoordinatesThatNeedChunks(oldCoords, newCoords);
+            int3[] coordinatesThatNeedData = GetCoordinatesThatNeedChunks(oldCoords, newCoords);
 
-            var newlyFreedCoordinates = voxelWorld.ChunkStore.GetChunkCoordinatesOutsideOfRenderDistance(to, renderDistance + loadingBufferSize);
+            var newlyFreedCoordinates = voxelWorld.VoxelDataStore.GetChunkCoordinatesOutsideOfRange(to, range);
 
             int i = 0;
-            foreach(int3 freeCoordinate in newlyFreedCoordinates)
+            foreach (int3 freeCoordinate in newlyFreedCoordinates)
             {
-                var targetCoordinate = coordinatesThatNeedChunks[i];
+                var targetCoordinate = coordinatesThatNeedData[i];
                 voxelWorld.VoxelDataStore.MoveChunk(freeCoordinate, targetCoordinate);
                 i++;
             }

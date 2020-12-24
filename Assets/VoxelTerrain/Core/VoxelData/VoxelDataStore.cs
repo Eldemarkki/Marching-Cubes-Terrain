@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Eldemarkki.VoxelTerrain.Utilities;
 using Eldemarkki.VoxelTerrain.Utilities.Intersection;
 using Eldemarkki.VoxelTerrain.World;
@@ -71,10 +72,6 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
             {
                 StartGeneratingVoxelData(to, chunk);
             }
-            else
-            {
-                StartGeneratingVoxelData(to);
-            }
 
             if (DoesChunkExistAtCoordinate(to))
             {
@@ -108,6 +105,19 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                 BoundsInt chunkBounds = BoundsUtilities.GetChunkBounds(chunkCoordinate, VoxelWorld.WorldSettings.ChunkSize);
                 JobHandleWithData<IVoxelDataGenerationJob> jobHandleWithData = VoxelWorld.VoxelDataGenerator.GenerateVoxelData(chunkBounds);
                 SetVoxelDataJobHandle(jobHandleWithData, chunkCoordinate);
+            }
+        }
+
+        public IEnumerable<int3> GetChunkCoordinatesOutsideOfRange(int3 coordinate, int range)
+        {
+            foreach (int3 chunkCoordinate in _chunks.Keys.ToList())
+            {
+                int3 difference = math.abs(coordinate - chunkCoordinate);
+
+                if (math.any(difference > range))
+                {
+                    yield return chunkCoordinate;
+                }
             }
         }
 
