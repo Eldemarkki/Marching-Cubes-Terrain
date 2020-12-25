@@ -97,7 +97,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// </summary>
         /// <param name="size">The 3-dimensional size of this volume</param>
         /// <exception cref="ArgumentException">Thrown when any of the dimensions is negative</exception>
-        public VoxelDataVolume(int3 size) : this(size.x, size.y, size.z, Allocator.Persistent) { }
+        public VoxelDataVolume(int3 size) : this(size, Allocator.Persistent) { }
 
         /// <summary>
         /// Creates a <see cref="VoxelDataVolume"/>
@@ -112,7 +112,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// </summary>
         /// <param name="size">The 3-dimensional size of this volume</param>
         /// <exception cref="ArgumentException">Thrown when any of the dimensions is negative</exception>
-        public VoxelDataVolume(Vector3Int size) : this(size.x, size.y, size.z, Allocator.Persistent) { }
+        public VoxelDataVolume(Vector3Int size) : this(size, Allocator.Persistent) { }
 
         /// <summary>
         /// Creates a <see cref="VoxelDataVolume"/>
@@ -120,7 +120,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <param name="size">The 3-dimensional size of this volume</param>
         /// <param name="allocator">How the memory should be allocated</param>
         /// <exception cref="ArgumentException">Thrown when any of the dimensions is negative</exception>
-        public VoxelDataVolume(Vector3Int size, Allocator allocator) : this(size.x, size.y, size.z, allocator) { }
+        public VoxelDataVolume(Vector3Int size, Allocator allocator) : this(size.ToInt3(), allocator) { }
 
         /// <summary>
         /// Disposes the native voxel data array
@@ -199,7 +199,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         {
             if (index >= 0 && index < _voxelData.Length)
             {
-                voxelData = _voxelData[index] / 255f;
+                voxelData = GetVoxelData(index);
                 return true;
             }
 
@@ -271,9 +271,8 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <param name="index">The index of the voxel data that should be increased</param>
         public void IncreaseVoxelData(float increaseAmount, int index)
         {
-            float voxelData = GetVoxelData(index);
-            byte newVoxelData = (byte)math.round(math.clamp((voxelData + increaseAmount) * 255, 0, 255));
-            _voxelData[index] = newVoxelData;
+            float originalVoxelData = GetVoxelData(index);
+            SetVoxelData(originalVoxelData + increaseAmount, index);
         }
 
         /// <summary>
@@ -299,7 +298,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <returns>The voxel data index for <paramref name="voxelDataLocalPosition"/></returns>
         public int GetIndex(int3 voxelDataLocalPosition)
         {
-            return IndexUtilities.XyzToIndex(voxelDataLocalPosition.x, voxelDataLocalPosition.y, voxelDataLocalPosition.z, Width, Height);
+            return IndexUtilities.XyzToIndex(voxelDataLocalPosition, Width, Height);
         }
     }
 }

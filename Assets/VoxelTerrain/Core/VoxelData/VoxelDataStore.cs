@@ -165,7 +165,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
             if (_chunks.TryGetValue(chunkCoordinate, out VoxelDataVolume chunk))
             {
                 int3 voxelDataLocalPosition = worldPosition.Mod(VoxelWorld.WorldSettings.ChunkSize);
-                return chunk.TryGetVoxelData(voxelDataLocalPosition.x, voxelDataLocalPosition.y, voxelDataLocalPosition.z, out voxelData);
+                return chunk.TryGetVoxelData(voxelDataLocalPosition, out voxelData);
             }
             else
             {
@@ -223,7 +223,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                 if (TryGetVoxelDataChunk(chunkCoordinate, out VoxelDataVolume voxelDataVolume))
                 {
                     int3 localPos = (worldPosition - chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize).Mod(VoxelWorld.WorldSettings.ChunkSize + 1);
-                    voxelDataVolume.SetVoxelData(voxelData, localPos.x, localPos.y, localPos.z);
+                    voxelDataVolume.SetVoxelData(voxelData, localPos);
 
                     if (VoxelWorld.ChunkStore.TryGetChunkAtCoordinate(chunkCoordinate, out ChunkProperties chunkProperties))
                     {

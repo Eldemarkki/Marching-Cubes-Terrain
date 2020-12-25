@@ -43,8 +43,8 @@ namespace Eldemarkki.VoxelTerrain.Utilities.Intersection
         /// <returns>The volume that is contained in both bounds</returns>
         public static BoundsInt GetIntersectionVolume(BoundsInt a, BoundsInt b)
         {
-            int3 min = new int3(Mathf.Max(a.min.x, b.min.x), Mathf.Max(a.min.y, b.min.y), Mathf.Max(a.min.z, b.min.z));
-            int3 max = new int3(Mathf.Min(a.max.x, b.max.x), Mathf.Min(a.max.y, b.max.y), Mathf.Min(a.max.z, b.max.z));
+            int3 min = math.max(a.min.ToInt3(), b.min.ToInt3());
+            int3 max = math.min(a.max.ToInt3(), b.max.ToInt3());
 
             int3 size = max - min;
             return new BoundsInt(min.ToVectorInt(), size.ToVectorInt());

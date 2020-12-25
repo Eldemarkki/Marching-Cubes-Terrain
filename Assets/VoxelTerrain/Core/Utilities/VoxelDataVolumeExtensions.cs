@@ -21,7 +21,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities
             for (int i = 0; i < 8; i++)
             {
                 int3 voxelCorner = localPosition + LookupTables.CubeCorners[i];
-                if (voxelDataVolume.TryGetVoxelData(voxelCorner.x, voxelCorner.y, voxelCorner.z, out float voxelData))
+                if (voxelDataVolume.TryGetVoxelData(voxelCorner, out float voxelData))
                 {
                     voxelDataCorners[i] = voxelData;
                 }
