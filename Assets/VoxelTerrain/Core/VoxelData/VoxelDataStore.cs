@@ -119,6 +119,16 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                     yield return chunkCoordinate;
                 }
             }
+
+            foreach(int3 generationCoordinate in _generationJobHandles.Keys.ToList())
+            {
+                int3 difference = math.abs(coordinate - generationCoordinate);
+
+                if (math.any(difference > range))
+                {
+                    yield return generationCoordinate;
+                }
+            }
         }
 
         /// <summary>
