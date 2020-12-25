@@ -72,6 +72,11 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
             }
         }
 
+        /// <summary>
+        /// Moves a chunk from coordinate <paramref name="from"/> to the coordinate <paramref name="to"/> and generates the colors for the chunk at <paramref name="to"/>
+        /// </summary>
+        /// <param name="from">The coordinate to move the chunk from</param>
+        /// <param name="to">The new coordinate of the chunk</param>
         public void MoveChunk(int3 from, int3 to)
         {
             // Check that 'from' and 'to' are not equal

@@ -20,6 +20,9 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         /// </summary>
         public IEnumerable<ChunkProperties> Chunks => _chunks.Values;
 
+        /// <summary>
+        /// The voxel world that "owns" this chunk store
+        /// </summary>
         public VoxelWorld VoxelWorld { get; set; }
 
         private void Awake()
@@ -79,11 +82,6 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
             }
         }
 
-        public void AddChunkUnchecked(ChunkProperties chunkProperties)
-        {
-            _chunks.Add(chunkProperties.ChunkCoordinate, chunkProperties);
-        }
-
         /// <summary>
         /// Removes a chunk from a coordinate
         /// </summary>
@@ -93,6 +91,11 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
             _chunks.Remove(chunkCoordinate);
         }
 
+        /// <summary>
+        /// Moves a chunk from coordinate <paramref name="from"/> to the coordinate <paramref name="to"/>
+        /// </summary>
+        /// <param name="from">The coordinate to move the chunk from</param>
+        /// <param name="to">The new coordinate of the chunk</param>
         public void MoveChunk(int3 from, int3 to)
         {
             // Check that 'from' and 'to' are not equal
@@ -104,11 +107,11 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
             // Check that a chunk exists at 'from'
             if (!TryGetChunkAtCoordinate(from, out ChunkProperties chunk)) { return; }
 
-            RemoveChunk(from);
             chunk.MeshCollider.enabled = false;
             chunk.MeshRenderer.enabled = false;
             chunk.Initialize(to, VoxelWorld.WorldSettings.ChunkSize);
 
+            RemoveChunk(from);
             AddChunk(chunk);
         }
     }

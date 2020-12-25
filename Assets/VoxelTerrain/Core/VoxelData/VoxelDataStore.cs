@@ -62,6 +62,11 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
             }
         }
 
+        /// <summary>
+        /// Moves a chunk from coordinate <paramref name="from"/> to the coordinate <paramref name="to"/> and starts generating the voxel data for the chunk at <paramref name="to"/>
+        /// </summary>
+        /// <param name="from">The coordinate to move the chunk from</param>
+        /// <param name="to">The new coordinate of the chunk</param>
         public void MoveChunk(int3 from, int3 to)
         {
             // Check that 'from' and 'to' are not equal
@@ -79,23 +84,33 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
             }
         }
 
+        /// <summary>
+        /// Checks if a chunk exists or is currently being generated at the coordinate <paramref name="chunkCoordinate"/>
+        /// </summary>
+        /// <param name="chunkCoordinate">The coordinate to check for</param>
+        /// <returns>Returns true if a chunk exists or is currently being generated at <paramref name="chunkCoordinate"/>, otherwise returns false</returns>
         private bool DoesChunkExistAtCoordinate(int3 chunkCoordinate)
         {
             return _chunks.ContainsKey(chunkCoordinate) || _generationJobHandles.ContainsKey(chunkCoordinate);
         }
 
-        private void StartGeneratingVoxelData(int3 chunkCoordinate, VoxelDataVolume voxelDataVolume)
+        /// <summary>
+        /// Starts generating the voxel data for the chunk at <paramref name="chunkCoordinate"/>, where the output volume is <paramref name="outputVoxelDataVolume"/>
+        /// </summary>
+        /// <param name="chunkCoordinate"></param>
+        /// <param name="outputVoxelDataVolume"></param>
+        private void StartGeneratingVoxelData(int3 chunkCoordinate, VoxelDataVolume outputVoxelDataVolume)
         {
             if (!_generationJobHandles.ContainsKey(chunkCoordinate))
             {
                 int3 chunkWorldOrigin = chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize;
-                JobHandleWithData<IVoxelDataGenerationJob> jobHandleWithData = VoxelWorld.VoxelDataGenerator.GenerateVoxelData(chunkWorldOrigin, voxelDataVolume);
+                JobHandleWithData<IVoxelDataGenerationJob> jobHandleWithData = VoxelWorld.VoxelDataGenerator.GenerateVoxelData(chunkWorldOrigin, outputVoxelDataVolume);
                 SetVoxelDataJobHandle(jobHandleWithData, chunkCoordinate);
             }
         }
 
         /// <summary>
-        /// Starts generating the voxel data for the chunk at <paramref name="chunkCoordinate"/>
+        /// Starts generating the voxel data for the chunk at <paramref name="chunkCoordinate"/> and generates a new <see cref="VoxelDataVolume"/> for the new data with a persistent allocator
         /// </summary>
         /// <param name="chunkCoordinate"></param>
         public void StartGeneratingVoxelData(int3 chunkCoordinate)
@@ -108,6 +123,12 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
             }
         }
 
+        /// <summary>
+        /// Gets all the coordinates of the chunks that already exist or are currently being generated, where the manhattan distance from <paramref name="coordinate"/> to the chunk's coordinate is more than <paramref name="range"/>
+        /// </summary>
+        /// <param name="coordinate">The central coordinate where the distances should be measured from</param>
+        /// <param name="range">The maximum allowed manhattan distance</param>
+        /// <returns></returns>
         public IEnumerable<int3> GetChunkCoordinatesOutsideOfRange(int3 coordinate, int range)
         {
             foreach (int3 chunkCoordinate in _chunks.Keys.ToList())

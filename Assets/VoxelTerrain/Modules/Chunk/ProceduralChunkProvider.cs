@@ -34,7 +34,7 @@ namespace Eldemarkki.VoxelTerrain.Chunks
                 _generationQueue.RemoveAt(0);
 
                 if (VoxelWorld.ChunkStore.TryGetChunkAtCoordinate(chunkCoordinate, out ChunkProperties chunkProperties))
-                {               
+                {
                     if (!chunkProperties.IsMeshGenerated)
                     {
                         VoxelWorld.ChunkUpdater.GenerateVoxelDataAndMeshImmediate(chunkProperties);
@@ -57,6 +57,10 @@ namespace Eldemarkki.VoxelTerrain.Chunks
             }
         }
 
+        /// <summary>
+        /// Adds the coordinate <paramref name="chunkCoordinate"/> to the list of chunks that will eventually have to be generated
+        /// </summary>
+        /// <param name="chunkCoordinate"></param>
         public void AddChunkToGenerationQueue(int3 chunkCoordinate)
         {
             _generationQueue.Add(chunkCoordinate);

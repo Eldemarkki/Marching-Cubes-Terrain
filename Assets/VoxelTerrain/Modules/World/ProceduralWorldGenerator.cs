@@ -86,20 +86,25 @@ namespace Eldemarkki.VoxelTerrain.World
             }
         }
 
-        private void MoveVoxelData(int3 from, int3 to)
+        /// <summary>
+        /// Moves all of the voxel data that existed when the player was at the coordinate <paramref name="playerFromCoordinate"/> to the coordinates that don't yet have data but should have when the player is at coordinate <paramref name="playerToCoordinate"/>
+        /// </summary>
+        /// <param name="playerFromCoordinate">The old coordinate of the player</param>
+        /// <param name="playerToCoordinate">The new coordinate of the player</param>
+        private void MoveVoxelData(int3 playerFromCoordinate, int3 playerToCoordinate)
         {
             int range = renderDistance + loadingBufferSize;
             int3 renderSize = new int3(range * 2 + 1);
 
-            int3 oldPos = from - new int3(range);
+            int3 oldPos = playerFromCoordinate - new int3(range);
             BoundsInt oldCoords = new BoundsInt(oldPos.ToVectorInt(), renderSize.ToVectorInt());
 
-            int3 newPos = to - new int3(range);
+            int3 newPos = playerToCoordinate - new int3(range);
             BoundsInt newCoords = new BoundsInt(newPos.ToVectorInt(), renderSize.ToVectorInt());
 
             int3[] coordinatesThatNeedData = GetCoordinatesThatNeedChunks(oldCoords, newCoords);
 
-            var newlyFreedCoordinates = voxelWorld.VoxelDataStore.GetChunkCoordinatesOutsideOfRange(to, range);
+            var newlyFreedCoordinates = voxelWorld.VoxelDataStore.GetChunkCoordinatesOutsideOfRange(playerToCoordinate, range);
 
             int i = 0;
             foreach (int3 freeCoordinate in newlyFreedCoordinates)
@@ -167,7 +172,12 @@ namespace Eldemarkki.VoxelTerrain.World
 
             return coordinates;
         }
-
+        /// <summary>
+        /// Gets the list of new coordinates that should be generated when the player moved from <paramref name="oldChunks"/> to <paramref name="newChunks"/>; Every coordinate in <paramref name="newChunks"/> that is not in <paramref name="oldChunks"/>
+        /// </summary>
+        /// <param name="oldChunks">The old rendering bounds of the chunks the player saw</param>
+        /// <param name="newChunks">The new rendering bounds of the chunks the player sees</param>
+        /// <returns>Returns the new coordinates that need chunks</returns>
         private static int3[] GetCoordinatesThatNeedChunks(BoundsInt oldChunks, BoundsInt newChunks)
         {
             // Cache the min/max values because accessing them repeatedly in a loop is surprisingly costly
@@ -191,7 +201,6 @@ namespace Eldemarkki.VoxelTerrain.World
                     {
                         for (int z = newChunksMinZ; z < newChunksMaxZ; z++)
                         {
-
                             coordinates[i] = new int3(x, y, z);
                             i++;
                         }

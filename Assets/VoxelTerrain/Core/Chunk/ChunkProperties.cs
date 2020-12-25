@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace Eldemarkki.VoxelTerrain.World.Chunks
 {
+    /// <summary>
+    /// A class that contains properties for a chunk
+    /// </summary>
     public class ChunkProperties
     {
         /// <summary>
@@ -25,8 +28,8 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         /// <summary>
         /// Initializes the chunk's properties.
         /// </summary>
-        /// <param name="chunkProperties">The chunk to initialize</param>
-        /// <param name="chunkCoordinate">The new coordinate of the chunk</param>
+        /// <param name="chunkCoordinate">The coordinate of this chunk</param>
+        /// <param name="chunkSize">The size of this chunk</param>
         public void Initialize(int3 chunkCoordinate, int3 chunkSize)
         {
             ChunkGameObject.transform.position = (chunkCoordinate * chunkSize).ToVectorInt();
