@@ -86,9 +86,8 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
             if (TryGetVoxelColorsChunk(from, out NativeArray<Color32> fromColors))
             {
                 _chunkColors.Remove(from);
-                fromColors.Dispose();
 
-                GenerateColorsForChunk(to);
+                GenerateColorsForChunk(to, fromColors);
             }
         }
 
@@ -96,24 +95,48 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// Generates the colors for a chunk at <paramref name="chunkCoordinate"/>; fills the color array with the default color
         /// </summary>
         /// <param name="chunkCoordinate">The coordinate of the chunk which to generate the colors for</param>
-        public unsafe void GenerateColorsForChunk(int3 chunkCoordinate)
+        public void GenerateColorsForChunk(int3 chunkCoordinate)
         {
             if (!_chunkColors.ContainsKey(chunkCoordinate))
             {
                 NativeArray<Color32> colors = new NativeArray<Color32>((VoxelWorld.WorldSettings.ChunkSize.x + 1) * (VoxelWorld.WorldSettings.ChunkSize.y + 1) * (VoxelWorld.WorldSettings.ChunkSize.z + 1), Allocator.Persistent);
 
-                Color32* defaultColorArray = stackalloc Color32[1]
-                {
-                    defaultTerrainColor
-                };
-
-                unsafe
-                {
-                    UnsafeUtility.MemCpyReplicate(colors.GetUnsafePtr(), defaultColorArray, sizeof(Color32), colors.Length);
-                }
-
-                SetVoxelColorsChunkUnchecked(chunkCoordinate, colors, false);
+                GenerateColorsForChunkUnchecked(chunkCoordinate, colors);
             }
+        }
+
+        /// <summary>
+        /// Generates the colors for a chunk at <paramref name="chunkCoordinate"/>, where the output array is <paramref name="outputColors"/> to save memory by not needing to allocate a new array; fills the color array with the default color
+        /// </summary>
+        /// <param name="chunkCoordinate">The coordinate of the chunk which to generate the colors for</param>
+        /// <param name="outputColors">The array that should be filled with the new colors</param>
+        public unsafe void GenerateColorsForChunk(int3 chunkCoordinate, NativeArray<Color32> outputColors)
+        {
+            if (!_chunkColors.ContainsKey(chunkCoordinate))
+            {
+                GenerateColorsForChunkUnchecked(chunkCoordinate, outputColors);
+            }
+        }
+
+        /// <summary>
+        /// Generates the colors for a chunk at <paramref name="chunkCoordinate"/>, where the output array is <paramref name="outputColors"/> to save memory by not needing to allocate a new array. This does not check if a color array already exists at <paramref name="chunkCoordinate"/>
+        /// </summary>
+        /// <param name="chunkCoordinate">The coordinate of the chunk which to generate the colors for</param>
+        /// <param name="outputColors">The array that should be filled with the new colors</param>
+        private unsafe void GenerateColorsForChunkUnchecked(int3 chunkCoordinate, NativeArray<Color32> outputColors)
+        {
+            // Fill the array with the default terrain color
+            Color32* defaultColorArray = stackalloc Color32[1]
+            {
+                defaultTerrainColor
+            };
+
+            unsafe
+            {
+                UnsafeUtility.MemCpyReplicate(outputColors.GetUnsafePtr(), defaultColorArray, sizeof(Color32), outputColors.Length);
+            }
+
+            SetVoxelColorsChunkUnchecked(chunkCoordinate, outputColors, false);
         }
 
         /// <summary>
