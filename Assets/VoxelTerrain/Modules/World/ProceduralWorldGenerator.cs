@@ -134,14 +134,17 @@ namespace Eldemarkki.VoxelTerrain.World
             LoadingCoordinates loadingCoordinates = new LoadingCoordinates(coordinate, renderDistance, loadingBufferSize);
             foreach (int3 loadingCoordinate in loadingCoordinates.GetCoordinates())
             {
-                voxelWorld.ChunkUpdater.StartGeneratingData(loadingCoordinate);
+
+                voxelWorld.VoxelDataStore.StartGeneratingVoxelData(loadingCoordinate);
             }
 
             // Generate chunks with radius 'renderDistance'
             int3[] chunkGenerationCoordinates = GetChunkGenerationCoordinates(coordinate, renderDistance);
             for (int i = 0; i < chunkGenerationCoordinates.Length; i++)
             {
-                chunkProvider.EnsureChunkExistsAtCoordinate(chunkGenerationCoordinates[i]);
+                int3 generationCoordinate = chunkGenerationCoordinates[i];
+                voxelWorld.VoxelColorStore.GenerateColorsForChunk(generationCoordinate);
+                chunkProvider.EnsureChunkExistsAtCoordinate(generationCoordinate);
             }
 
             _lastGenerationCoordinate = coordinate;

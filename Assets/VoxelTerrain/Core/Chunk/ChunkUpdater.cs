@@ -1,7 +1,6 @@
 ﻿using Eldemarkki.VoxelTerrain.Meshing;
 using Eldemarkki.VoxelTerrain.Meshing.Data;
 using Eldemarkki.VoxelTerrain.Utilities;
-using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -30,14 +29,9 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         /// </summary>
         public void GenerateVoxelDataAndMeshImmediate(ChunkProperties chunkProperties)
         {
-            StartGeneratingData(chunkProperties.ChunkCoordinate);
+            VoxelWorld.VoxelDataStore.StartGeneratingVoxelData(chunkProperties.ChunkCoordinate);
+            VoxelWorld.VoxelColorStore.GenerateColorsForChunk(chunkProperties.ChunkCoordinate);
             GenerateMeshImmediate(chunkProperties);
-        }
-
-        public void StartGeneratingData(int3 chunkCoordinate)
-        {
-            VoxelWorld.VoxelDataStore.StartGeneratingVoxelData(chunkCoordinate);
-            VoxelWorld.VoxelColorStore.GenerateColorsForChunk(chunkCoordinate);
         }
 
         /// <summary>
