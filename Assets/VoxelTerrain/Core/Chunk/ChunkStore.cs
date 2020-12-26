@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Eldemarkki.VoxelTerrain.Utilities;
+using System.Collections.Generic;
 using System.Linq;
 using Unity.Mathematics;
 using UnityEngine;
@@ -61,9 +62,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         {
             foreach (int3 chunkCoordinate in _chunks.Keys.ToList())
             {
-                int3 difference = math.abs(coordinate - chunkCoordinate);
-
-                if(math.any(difference > renderDistance))
+                if(DistanceUtilities.ChebyshevDistanceGreaterThan(coordinate, chunkCoordinate, renderDistance))
                 {
                     yield return chunkCoordinate;
                 }
