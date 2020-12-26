@@ -130,11 +130,10 @@ namespace Eldemarkki.VoxelTerrain.World
         /// <param name="coordinate">The coordinate to generate the terrain around</param>
         private void GenerateTerrainAroundCoordinate(int3 coordinate)
         {
-            // Start generating voxel data for chunks with radius 'renderDistance + additionalLoadSize'
+            // Start generating voxel data for chunks with radius 'renderDistance + loadingBufferSize'
             LoadingCoordinates loadingCoordinates = new LoadingCoordinates(coordinate, renderDistance, loadingBufferSize);
             foreach (int3 loadingCoordinate in loadingCoordinates.GetCoordinates())
             {
-
                 voxelWorld.VoxelDataStore.StartGeneratingVoxelData(loadingCoordinate);
             }
 
