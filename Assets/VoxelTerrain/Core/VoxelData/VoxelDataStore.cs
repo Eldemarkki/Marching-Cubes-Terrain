@@ -289,62 +289,23 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         {
             ForEachVoxelDataVolumeInQuery(worldSpaceQuery, (chunkCoordinate, voxelDataChunk) =>
             {
+                bool anyChanged = false;
                 ForEachVoxelDataInQueryInChunk(worldSpaceQuery, chunkCoordinate, voxelDataChunk, (voxelDataWorldPosition, voxelDataLocalPosition, voxelDataIndex, voxelData) =>
                 {
                     float newVoxelData = setVoxelDataFunction(voxelDataWorldPosition, voxelData);
-                    voxelDataChunk.SetVoxelData(newVoxelData, voxelDataIndex);
+                    if (newVoxelData != voxelData)
+                    {
+                        voxelDataChunk.SetVoxelData(newVoxelData, voxelDataIndex);
+                        anyChanged = true;
+                    }
                 });
 
-                if (VoxelWorld.ChunkStore.TryGetChunkAtCoordinate(chunkCoordinate, out ChunkProperties chunkProperties))
+                if (anyChanged)
                 {
-                    chunkProperties.HasChanges = true;
-                }
-            });
-        }
-
-        /// <summary>
-        /// Increases the voxel data at <paramref name="worldPosition"/> by <paramref name="increaseAmount"/>.
-        /// </summary>
-        /// <param name="worldPosition">The world position of the voxel data that should be increased</param>
-        public void IncreaseVoxelData(int3 worldPosition, float increaseAmount)
-        {
-            IEnumerable<int3> affectedChunkCoordinates = GetChunkCoordinatesContainingPoint(worldPosition, VoxelWorld.WorldSettings.ChunkSize);
-
-            foreach (int3 chunkCoordinate in affectedChunkCoordinates)
-            {
-                if (!_chunks.ContainsKey(chunkCoordinate)) { continue; }
-
-                if (TryGetVoxelDataChunk(chunkCoordinate, out VoxelDataVolume voxelDataVolume))
-                {
-                    int3 localPos = (worldPosition - chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize).Mod(VoxelWorld.WorldSettings.ChunkSize + 1);
-                    voxelDataVolume.IncreaseVoxelData(increaseAmount, localPos);
-
                     if (VoxelWorld.ChunkStore.TryGetChunkAtCoordinate(chunkCoordinate, out ChunkProperties chunkProperties))
                     {
                         chunkProperties.HasChanges = true;
                     }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Increases the voxel data for a volume in the world
-        /// </summary>
-        /// <param name="worldSpaceQuery">The volume where the voxel datas should be increased</param>
-        /// <param name="increaseFunction">The function that calculates how much a voxel data should be increased by. The first argument is the world space position of the voxel data, and the second argument is the current voxel data. The return value is how much the voxel data should be increased by.</param>
-        public void IncreaseVoxelDataCustom(BoundsInt worldSpaceQuery, Func<int3, float, float> increaseFunction)
-        {
-            ForEachVoxelDataVolumeInQuery(worldSpaceQuery, (chunkCoordinate, voxelDataChunk) =>
-            {
-                ForEachVoxelDataInQueryInChunk(worldSpaceQuery, chunkCoordinate, voxelDataChunk, (voxelDataWorldPosition, voxelDataLocalPosition, voxelDataIndex, voxelData) =>
-                {
-                    float increaseAmount = increaseFunction(voxelDataWorldPosition, voxelData);
-                    voxelDataChunk.IncreaseVoxelData(increaseAmount, voxelDataIndex);
-                });
-
-                if (VoxelWorld.ChunkStore.TryGetChunkAtCoordinate(chunkCoordinate, out ChunkProperties chunkProperties))
-                {
-                    chunkProperties.HasChanges = true;
                 }
             });
         }

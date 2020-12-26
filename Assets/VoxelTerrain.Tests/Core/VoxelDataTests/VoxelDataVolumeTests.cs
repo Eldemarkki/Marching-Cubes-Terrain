@@ -127,24 +127,6 @@ namespace Eldemarkki.VoxelTerrain.VoxelData.Tests
             }, newVoxelData);
         }
 
-        [TestCase(0.1f, 0.55f, 0.65f)]
-        [TestCase(1f, 0.5f, 1f)]
-        [TestCase(0f, 0.5f, 0.5f)]
-        [TestCase(0.3f, 0.1f, 0.4f)]
-        [TestCase(-0.2f, 0.5f, 0.3f)]
-        [TestCase(-0.7f, 0.7f, 0f)]
-        public void Test_IncreaseVoxelData_Index(float increaseAmount, float originalVoxelData, float expectedVoxelData)
-        {
-            voxelDataVolume = new VoxelDataVolume(5, Allocator.Temp);
-            int index = 36; // Just some arbitrary index to set the voxel data at
-
-            voxelDataVolume.SetVoxelData(originalVoxelData, index);
-            voxelDataVolume.IncreaseVoxelData(increaseAmount, index);
-
-            float actualVoxelData = voxelDataVolume.GetVoxelData(index);
-            Assert.IsTrue(AreVoxelDatasSame(expectedVoxelData, actualVoxelData), $"Expected {expectedVoxelData}, actual was {actualVoxelData}");
-        }
-
         private static bool AreVoxelDatasSame(float a, float b)
         {
             byte aByte = (byte)RoundUpIfDecimal5(255f * a);

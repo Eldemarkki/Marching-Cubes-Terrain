@@ -1,7 +1,6 @@
 ﻿using Eldemarkki.VoxelTerrain.Meshing.MarchingCubes;
 using Eldemarkki.VoxelTerrain.Utilities;
 using Eldemarkki.VoxelTerrain.Utilities.Intersection;
-using Eldemarkki.VoxelTerrain.VoxelData;
 using Eldemarkki.VoxelTerrain.World;
 using Unity.Mathematics;
 using UnityEngine;
@@ -162,16 +161,16 @@ namespace Eldemarkki.VoxelTerrain.Player
 
             BoundsInt queryBounds = new BoundsInt((hitPoint - rangeInt3).ToVectorInt(), new int3(intRange * 2).ToVectorInt());
 
-            voxelWorld.VoxelDataStore.IncreaseVoxelDataCustom(queryBounds, (voxelDataWorldPosition, voxelData) =>
+            voxelWorld.VoxelDataStore.SetVoxelDataCustom(queryBounds, (voxelDataWorldPosition, voxelData) =>
             {
                 float distance = math.distance(voxelDataWorldPosition, point);
                 if (distance <= range)
                 {
                     float modificationAmount = deformSpeed / distance * buildModifier;
-                    return -modificationAmount;
+                    return voxelData - modificationAmount;
                 }
 
-                return 0;
+                return voxelData;
             });
         }
 
