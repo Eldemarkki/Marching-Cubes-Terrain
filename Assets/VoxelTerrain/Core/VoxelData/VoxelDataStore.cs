@@ -124,28 +124,28 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         }
 
         /// <summary>
-        /// Gets all the coordinates of the chunks that already exist or are currently being generated, where the manhattan distance from <paramref name="coordinate"/> to the chunk's coordinate is more than <paramref name="range"/>
+        /// Gets all the coordinates of the chunks that already exist or are currently being generated, where the Chebyshev distance from <paramref name="coordinate"/> to the chunk's coordinate is more than <paramref name="range"/>
         /// </summary>
         /// <param name="coordinate">The central coordinate where the distances should be measured from</param>
         /// <param name="range">The maximum allowed manhattan distance</param>
         /// <returns></returns>
         public IEnumerable<int3> GetChunkCoordinatesOutsideOfRange(int3 coordinate, int range)
         {
-            foreach (int3 chunkCoordinate in _chunks.Keys.ToList())
+            int3[] chunksArray = _chunks.Keys.ToArray();
+            for (int i = 0; i < chunksArray.Length; i++)
             {
-                int3 difference = math.abs(coordinate - chunkCoordinate);
-
-                if (math.any(difference > range))
+                int3 chunkCoordinate = chunksArray[i];
+                if(DistanceUtilities.ChebyshevDistanceGreaterThan(coordinate, chunkCoordinate, range))
                 {
                     yield return chunkCoordinate;
                 }
             }
 
-            foreach(int3 generationCoordinate in _generationJobHandles.Keys.ToList())
+            int3[] generationJobHandleArray = _generationJobHandles.Keys.ToArray();
+            for (int i = 0; i < generationJobHandleArray.Length; i++)
             {
-                int3 difference = math.abs(coordinate - generationCoordinate);
-
-                if (math.any(difference > range))
+                int3 generationCoordinate = generationJobHandleArray[i]; 
+                if (DistanceUtilities.ChebyshevDistanceGreaterThan(coordinate, generationCoordinate, range))
                 {
                     yield return generationCoordinate;
                 }
