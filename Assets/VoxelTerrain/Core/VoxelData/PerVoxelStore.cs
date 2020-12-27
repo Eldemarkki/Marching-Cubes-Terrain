@@ -52,34 +52,6 @@ namespace Eldemarkki.VoxelTerrain.World
             }
         }
 
-        /// <inheritdoc/>
-        public override void GenerateDataForChunk(int3 chunkCoordinate)
-        {
-            if (!DoesChunkExistAtCoordinate(chunkCoordinate))
-            {
-                VoxelDataVolume<T> data = new VoxelDataVolume<T>(VoxelWorld.WorldSettings.ChunkSize + 1, Allocator.Persistent);
-
-                GenerateDataForChunkUnchecked(chunkCoordinate, data);
-            }
-        }
-
-        /// <inheritdoc/>
-        public override void GenerateDataForChunk(int3 chunkCoordinate, VoxelDataVolume<T> existingData)
-        {
-            if (!DoesChunkExistAtCoordinate(chunkCoordinate))
-            {
-                GenerateDataForChunkUnchecked(chunkCoordinate, existingData);
-            }
-        }
-
-
-        /// <summary>
-        /// Generates the data for a chunk at <paramref name="chunkCoordinate"/> by reusing <paramref name="existingData"/> in order to save memory, without checking if data already exists at <paramref name="chunkCoordinate"/>
-        /// </summary>
-        /// <param name="chunkCoordinate">The coordinate of the chunk which to generate the data for</param>
-        /// <param name="existingData">The already existing data that should be reused to generate the new data</param>
-        protected abstract void GenerateDataForChunkUnchecked(int3 chunkCoordinate, VoxelDataVolume<T> existingData);
-
         /// <summary>
         /// Sets the chunk data of the chunk at <paramref name="chunkCoordinate"/>
         /// </summary>
@@ -113,6 +85,13 @@ namespace Eldemarkki.VoxelTerrain.World
             {
                 chunkProperties.HasChanges = true;
             }
+        }
+
+        /// <inheritdoc/>
+        public override void GenerateDataForChunkUnchecked(int3 chunkCoordinate)
+        {
+            VoxelDataVolume<T> data = new VoxelDataVolume<T>(VoxelWorld.WorldSettings.ChunkSize + 1, Allocator.Persistent);
+            GenerateDataForChunkUnchecked(chunkCoordinate, data);
         }
 
         /// <summary>
@@ -153,7 +132,7 @@ namespace Eldemarkki.VoxelTerrain.World
         }
 
         /// <summary>
-        /// Tries to get the voxel data from <paramref name="worldPosition"/>. If the position is not loaded, false will be returned and <paramref name="voxelData"/> will be set to 0 (Note that 0 doesn't directly mean that the position is not loaded). If it is loaded, true will be returned and <paramref name="voxelData"/> will be set to the value.
+        /// Tries to get the voxel data from <paramref name="worldPosition"/>. If the position is not loaded, false will be returned and <paramref name="voxelData"/> will be set to default(T) (Note that default(T) doesn't directly mean that the position is not loaded). If it is loaded, true will be returned and <paramref name="voxelData"/> will be set to the value at <paramref name="worldPosition"/>.
         /// </summary>
         /// <param name="worldPosition">The world position to get the voxel data from</param>
         /// <param name="voxelData">The voxel data value at the world position</param>

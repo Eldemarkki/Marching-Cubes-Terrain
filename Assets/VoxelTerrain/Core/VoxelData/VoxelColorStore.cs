@@ -20,7 +20,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// </summary>
         /// <param name="chunkCoordinate">The coordinate of the chunk which to generate the colors for</param>
         /// <param name="outputColors">The array that should be filled with the new colors</param>
-        protected override unsafe void GenerateDataForChunkUnchecked(int3 chunkCoordinate, VoxelDataVolume<Color32> outputColors)
+        public override unsafe void GenerateDataForChunkUnchecked(int3 chunkCoordinate, VoxelDataVolume<Color32> outputColors)
         {
             // Fill the array with the default terrain color
             Color32* defaultColorArray = stackalloc Color32[1]

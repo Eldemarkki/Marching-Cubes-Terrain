@@ -133,7 +133,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
             }
         }
 
-        protected override void GenerateDataForChunkUnchecked(int3 chunkCoordinate, VoxelDataVolume<byte> existingData)
+        public override void GenerateDataForChunkUnchecked(int3 chunkCoordinate, VoxelDataVolume<byte> existingData)
         {
             int3 chunkWorldOrigin = chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize;
             JobHandleWithData<IVoxelDataGenerationJob> jobHandleWithData = VoxelWorld.VoxelDataGenerator.GenerateVoxelData(chunkWorldOrigin, existingData);

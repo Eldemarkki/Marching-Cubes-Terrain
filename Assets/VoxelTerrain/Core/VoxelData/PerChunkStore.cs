@@ -70,32 +70,57 @@ namespace Eldemarkki.VoxelTerrain.World
             // Check that a chunk exists at 'from'
             if (TryGetDataChunk(from, out T existingData))
             {
-                RemoveChunk(from);
-                GenerateDataForChunk(to, existingData);
+                RemoveChunkUnchecked(from);
+                GenerateDataForChunkUnchecked(to, existingData);
             }
         }
 
         /// <summary>
-        /// Removes a chunk from a coordinate
+        /// Removes a chunk from <paramref name="chunkCoordinate"/> without checking if a chunk exists there
         /// </summary>
         /// <param name="chunkCoordinate">The coordinate of the chunk to remove</param>
-        public void RemoveChunk(int3 chunkCoordinate)
+        public void RemoveChunkUnchecked(int3 chunkCoordinate)
         {
             _chunks.Remove(chunkCoordinate);
+        }
+
+        /// <summary>
+        /// If data does not already exist at <paramref name="chunkCoordinate"/>, it generates the data for a chunk at coordinate <paramref name="chunkCoordinate"/>
+        /// </summary>
+        /// <param name="chunkCoordinate">The coordinate to generate the data for</param>
+        public void GenerateDataForChunk(int3 chunkCoordinate)
+        {
+            if (!DoesChunkExistAtCoordinate(chunkCoordinate))
+            {
+                GenerateDataForChunkUnchecked(chunkCoordinate);
+            }
+        }
+
+        /// <summary>
+        /// If data does not already exist at <paramref name="chunkCoordinate"/>, it generates the data for a chunk at <paramref name="chunkCoordinate"/> by reusing <paramref name="existingData"/> in order to save memory
+        /// </summary>
+        /// <param name="chunkCoordinate">The coordinate of the chunk which to generate the data for</param>
+        /// <param name="existingData">The already existing data that should be reused to generate the new data</param>
+        public void GenerateDataForChunk(int3 chunkCoordinate, T existingData)
+        {
+            if (!DoesChunkExistAtCoordinate(chunkCoordinate))
+            {
+                GenerateDataForChunkUnchecked(chunkCoordinate, existingData);
+            }
         }
 
         /// <summary>
         /// Generates the data for a chunk at <paramref name="chunkCoordinate"/>
         /// </summary>
         /// <param name="chunkCoordinate">The coordinate of the chunk which to generate the data for</param>
-        public abstract void GenerateDataForChunk(int3 chunkCoordinate);
+        public abstract void GenerateDataForChunkUnchecked(int3 chunkCoordinate);
 
         /// <summary>
         /// Generates the data for a chunk at <paramref name="chunkCoordinate"/> by reusing <paramref name="existingData"/> in order to save memory
         /// </summary>
         /// <param name="chunkCoordinate">The coordinate of the chunk which to generate the data for</param>
         /// <param name="existingData">The already existing data that should be reused to generate the new data</param>
-        public abstract void GenerateDataForChunk(int3 chunkCoordinate, T existingData);
+        public abstract void GenerateDataForChunkUnchecked(int3 chunkCoordinate, T existingData);
 
         /// <summary>
         /// Adds a chunk to the chunk store, if one does not already exist
@@ -104,11 +129,22 @@ namespace Eldemarkki.VoxelTerrain.World
         /// <param name="data">The data that will be associated with the chunk</param>
         public void AddChunk(int3 chunkCoordinate, T data)
         {
-            if (!_chunks.ContainsKey(chunkCoordinate))
+            if (!DoesChunkExistAtCoordinate(chunkCoordinate))
             {
-                _chunks.Add(chunkCoordinate, data);
+                AddChunkUnchecked(chunkCoordinate, data);
             }
         }
+
+        /// <summary>
+        /// Adds a chunk to the chunk store, throws error if one already exists at <paramref name="chunkCoordinate"/>
+        /// </summary>
+        /// <param name="chunkCoordinate">The coordinate of the chunk that the data will be associated with</param>
+        /// <param name="data">The data that will be associated with the chunk</param>
+        public void AddChunkUnchecked(int3 chunkCoordinate, T data)
+        {
+            _chunks.Add(chunkCoordinate, data);
+        }
+
         /// <summary>
         /// Gets a collection of chunk coordinates whose Chebyshev distance to <paramref name="coordinate"/> is more than <paramref name="range"/>
         /// </summary>
@@ -145,12 +181,10 @@ namespace Eldemarkki.VoxelTerrain.World
                     for (int chunkCoordinateZ = minChunkCoordinate.z; chunkCoordinateZ <= maxChunkCoordinate.z; chunkCoordinateZ++)
                     {
                         int3 chunkCoordinate = new int3(chunkCoordinateX, chunkCoordinateY, chunkCoordinateZ);
-                        if (!TryGetDataChunk(chunkCoordinate, out T voxelDataChunk))
+                        if (TryGetDataChunk(chunkCoordinate, out T voxelDataChunk))
                         {
-                            continue;
+                            function(chunkCoordinate, voxelDataChunk);
                         }
-
-                        function(chunkCoordinate, voxelDataChunk);
                     }
                 }
             }
