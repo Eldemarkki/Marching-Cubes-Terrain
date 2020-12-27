@@ -15,7 +15,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
 
         private void Update()
         {
-            foreach (ChunkProperties chunkProperties in VoxelWorld.ChunkStore.Chunks)
+            foreach (ChunkProperties chunkProperties in VoxelWorld.ChunkStore.Data)
             {
                 if (chunkProperties.HasChanges)
                 {
@@ -29,8 +29,8 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         /// </summary>
         public void GenerateVoxelDataAndMeshImmediate(ChunkProperties chunkProperties)
         {
-            VoxelWorld.VoxelDataStore.StartGeneratingVoxelData(chunkProperties.ChunkCoordinate);
-            VoxelWorld.VoxelColorStore.GenerateColorsForChunk(chunkProperties.ChunkCoordinate);
+            VoxelWorld.VoxelDataStore.GenerateDataForChunk(chunkProperties.ChunkCoordinate);
+            VoxelWorld.VoxelColorStore.GenerateDataForChunk(chunkProperties.ChunkCoordinate);
             GenerateMeshImmediate(chunkProperties);
         }
 

@@ -54,7 +54,7 @@ namespace Eldemarkki.VoxelTerrain.World
             {
                 MoveVoxelData(_lastGenerationCoordinate, newPlayerCoordinate);
 
-                var newlyFreedCoordinates = voxelWorld.ChunkStore.GetChunkCoordinatesOutsideOfRenderDistance(newPlayerCoordinate, renderDistance);
+                var newlyFreedCoordinates = voxelWorld.ChunkStore.GetChunkCoordinatesOutsideOfRange(newPlayerCoordinate, renderDistance);
 
                 int3 renderSize = new int3(renderDistance * 2 + 1);
 
@@ -134,7 +134,7 @@ namespace Eldemarkki.VoxelTerrain.World
             LoadingCoordinates loadingCoordinates = new LoadingCoordinates(coordinate, renderDistance, loadingBufferSize);
             foreach (int3 loadingCoordinate in loadingCoordinates.GetCoordinates())
             {
-                voxelWorld.VoxelDataStore.StartGeneratingVoxelData(loadingCoordinate);
+                voxelWorld.VoxelDataStore.GenerateDataForChunk(loadingCoordinate);
             }
 
             // Generate chunks with radius 'renderDistance'
@@ -142,7 +142,7 @@ namespace Eldemarkki.VoxelTerrain.World
             for (int i = 0; i < chunkGenerationCoordinates.Length; i++)
             {
                 int3 generationCoordinate = chunkGenerationCoordinates[i];
-                voxelWorld.VoxelColorStore.GenerateColorsForChunk(generationCoordinate);
+                voxelWorld.VoxelColorStore.GenerateDataForChunk(generationCoordinate);
                 chunkProvider.EnsureChunkExistsAtCoordinate(generationCoordinate);
             }
 

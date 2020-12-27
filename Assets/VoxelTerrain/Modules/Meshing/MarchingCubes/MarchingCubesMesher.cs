@@ -25,12 +25,12 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         /// <inheritdoc/>
         public override JobHandleWithData<IMesherJob> CreateMesh(VoxelDataStore voxelDataStore, VoxelColorStore voxelColorStore, int3 chunkCoordinate)
         {
-            if (!voxelDataStore.TryGetVoxelDataChunk(chunkCoordinate, out NativeArray<byte> boundsVoxelData))
+            if (!voxelDataStore.TryGetDataChunk(chunkCoordinate, out NativeArray<byte> boundsVoxelData))
             {
                 return null;
             }
 
-            if (!voxelColorStore.TryGetVoxelColorsChunk(chunkCoordinate, out NativeArray<Color32> boundsVoxelColors))
+            if (!voxelColorStore.TryGetDataChunk(chunkCoordinate, out NativeArray<Color32> boundsVoxelColors))
             {
                 return null;
             }

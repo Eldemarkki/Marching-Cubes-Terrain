@@ -34,7 +34,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
 
             chunkProperties.Initialize(chunkCoordinate, VoxelWorld.WorldSettings.ChunkSize);
 
-            VoxelWorld.ChunkStore.AddChunk(chunkProperties);
+            VoxelWorld.ChunkStore.AddChunk(chunkCoordinate, chunkProperties);
 
             return chunkProperties;
         }

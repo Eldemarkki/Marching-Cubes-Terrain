@@ -243,7 +243,7 @@ namespace Eldemarkki.VoxelTerrain.Player
                             continue;
                         }
 
-                        voxelWorld.VoxelColorStore.SetColor(offsetPoint, paintColor);
+                        voxelWorld.VoxelColorStore.SetData(offsetPoint, paintColor);
                     }
                 }
             }
