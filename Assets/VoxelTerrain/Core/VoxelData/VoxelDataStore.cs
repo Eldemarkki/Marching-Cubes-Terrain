@@ -88,7 +88,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
 
         private bool TryGetDataChunkWithoutApplying(int3 chunkCoordinate, out NativeArray<byte> chunk)
         {
-            return _data.TryGetValue(chunkCoordinate, out chunk);
+            return _chunks.TryGetValue(chunkCoordinate, out chunk);
         }
 
         /// <summary>
@@ -117,14 +117,14 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
 
         public override void SetDataChunk(int3 chunkCoordinate, NativeArray<byte> newData)
         {
-            if (_data.TryGetValue(chunkCoordinate, out NativeArray<byte> oldData))
+            if (_chunks.TryGetValue(chunkCoordinate, out NativeArray<byte> oldData))
             {
                 oldData.CopyFrom(newData);
                 newData.Dispose();
             }
             else
             {
-                _data.Add(chunkCoordinate, newData);
+                _chunks.Add(chunkCoordinate, newData);
             }
 
             if (VoxelWorld.ChunkStore.TryGetDataChunk(chunkCoordinate, out ChunkProperties chunkProperties))

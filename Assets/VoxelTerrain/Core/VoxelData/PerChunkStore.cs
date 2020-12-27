@@ -7,6 +7,10 @@ using UnityEngine;
 
 namespace Eldemarkki.VoxelTerrain.World
 {
+    /// <summary>
+    /// A dictionary that stores a single variable of type <typeparamref name="T"/> for a chunk
+    /// </summary>
+    /// <typeparam name="T">The type of data to store for each chunk</typeparam>
     public abstract class PerChunkStore<T> : MonoBehaviour
     {
         /// <summary>
@@ -15,31 +19,39 @@ namespace Eldemarkki.VoxelTerrain.World
         public VoxelWorld VoxelWorld { get; set; }
 
         /// <summary>
-        /// Every chunk that is currently loaded
+        /// Every value in currently in the dictionary
         /// </summary>
-        public IEnumerable<T> Data => _data.Values;
+        public IEnumerable<T> Chunks => _chunks.Values;
 
-        protected Dictionary<int3, T> _data;
+        /// <summary>
+        /// The dictionary that contains the data, key is the chunk's coordinate and value is the data associated with the chunk
+        /// </summary>
+        protected Dictionary<int3, T> _chunks;
 
         protected virtual void Awake()
         {
-            _data = new Dictionary<int3, T>();
-        }
-
-        public virtual bool DoesChunkExistAtCoordinate(int3 chunkCoordinate)
-        {
-            return _data.ContainsKey(chunkCoordinate);
+            _chunks = new Dictionary<int3, T>();
         }
 
         /// <summary>
-        /// Tries to get the colors of a chunk
+        /// Checks whether or not data exists for the chunk at coordinate <paramref name="chunkCoordinate"/>
         /// </summary>
-        /// <param name="chunkCoordinate">The coordinate of the chunk whose colors should be gotten</param>
-        /// <param name="chunk">The colors of the chunk</param>
-        /// <returns>True if a chunk exists at <paramref name="chunkCoordinate"/>, otherwise false.</returns>
-        public virtual bool TryGetDataChunk(int3 chunkCoordinate, out T chunk)
+        /// <param name="chunkCoordinate">The chunk coordinate to check for</param>
+        /// <returns>Returns true if data exists for the chunk, otherwise returns false</returns>
+        public virtual bool DoesChunkExistAtCoordinate(int3 chunkCoordinate)
         {
-            return _data.TryGetValue(chunkCoordinate, out chunk);
+            return _chunks.ContainsKey(chunkCoordinate);
+        }
+
+        /// <summary>
+        /// Tries to get the data of a chunk. 
+        /// </summary>
+        /// <param name="chunkCoordinate">The coordinate of the chunk whose data should be gotten</param>
+        /// <param name="chunkData">The data associated with chunk</param>
+        /// <returns>True if a chunk exists at <paramref name="chunkCoordinate"/>, otherwise false.</returns>
+        public virtual bool TryGetDataChunk(int3 chunkCoordinate, out T chunkData)
+        {
+            return _chunks.TryGetValue(chunkCoordinate, out chunkData);
         }
 
         /// <summary>
@@ -69,41 +81,43 @@ namespace Eldemarkki.VoxelTerrain.World
         /// <param name="chunkCoordinate">The coordinate of the chunk to remove</param>
         public void RemoveChunk(int3 chunkCoordinate)
         {
-            _data.Remove(chunkCoordinate);
+            _chunks.Remove(chunkCoordinate);
         }
 
         /// <summary>
-        /// Generates the colors for a chunk at <paramref name="chunkCoordinate"/>; fills the color array with the default color
+        /// Generates the data for a chunk at <paramref name="chunkCoordinate"/>
         /// </summary>
-        /// <param name="chunkCoordinate">The coordinate of the chunk which to generate the colors for</param>
+        /// <param name="chunkCoordinate">The coordinate of the chunk which to generate the data for</param>
         public abstract void GenerateDataForChunk(int3 chunkCoordinate);
 
         /// <summary>
-        /// Generates the colors for a chunk at <paramref name="chunkCoordinate"/>; fills the color array with the default color
+        /// Generates the data for a chunk at <paramref name="chunkCoordinate"/> by reusing <paramref name="existingData"/> in order to save memory
         /// </summary>
-        /// <param name="chunkCoordinate">The coordinate of the chunk which to generate the colors for</param>
+        /// <param name="chunkCoordinate">The coordinate of the chunk which to generate the data for</param>
+        /// <param name="existingData">The already existing data that should be reused to generate the new data</param>
         public abstract void GenerateDataForChunk(int3 chunkCoordinate, T existingData);
 
         /// <summary>
-        /// Adds a chunk to the chunk store
+        /// Adds a chunk to the chunk store, if one does not already exist
         /// </summary>
-        /// <param name="chunkProperties">The chunk to add</param>
+        /// <param name="chunkCoordinate">The coordinate of the chunk that the data will be associated with</param>
+        /// <param name="data">The data that will be associated with the chunk</param>
         public void AddChunk(int3 chunkCoordinate, T data)
         {
-            if (!_data.ContainsKey(chunkCoordinate))
+            if (!_chunks.ContainsKey(chunkCoordinate))
             {
-                _data.Add(chunkCoordinate, data);
+                _chunks.Add(chunkCoordinate, data);
             }
         }
         /// <summary>
-        /// Gets a collection of chunk coordinates whose Manhattan Distance to the coordinate parameter is more than <paramref name="range"/>
+        /// Gets a collection of chunk coordinates whose Chebyshev distance to <paramref name="coordinate"/> is more than <paramref name="range"/>
         /// </summary>
         /// <param name="coordinate">Central coordinate</param>
-        /// <param name="range">The radius of the chunks the player can see</param>
-        /// <returns>A collection of chunk coordinates outside of the viewing range from the coordinate parameter</returns>
+        /// <param name="range">The maximum allowed Chebyshev distance</param>
+        /// <returns>A collection of chunk coordinates outside of <paramref name="range"/> from <paramref name="coordinate"/></returns>
         public virtual IEnumerable<int3> GetChunkCoordinatesOutsideOfRange(int3 coordinate, int range)
         {
-            foreach (int3 chunkCoordinate in _data.Keys.ToList())
+            foreach (int3 chunkCoordinate in _chunks.Keys.ToList())
             {
                 if(DistanceUtilities.ChebyshevDistanceGreaterThan(coordinate, chunkCoordinate, range))
                 {
@@ -116,7 +130,7 @@ namespace Eldemarkki.VoxelTerrain.World
         /// Loops through each voxel data array that intersects with <paramref name="worldSpaceQuery"/> and performs <paramref name="function"/> on them.
         /// </summary>
         /// <param name="worldSpaceQuery">The query which will be used to determine all the chunks that should be looped through</param>
-        /// <param name="function">The function that will be performed on every chunk. The arguments are as follows: 1) The chunk's coordinate, 2) The chunk's voxel data</param>
+        /// <param name="function">The function that will be performed on every chunk. The arguments are as follows: 1) The chunk's coordinate, 2) The data associated with the chunk</param>
         public void ForEachVoxelDataArrayInQuery(BoundsInt worldSpaceQuery, Action<int3, T> function)
         {
             int3 chunkSize = VoxelWorld.WorldSettings.ChunkSize;

@@ -9,11 +9,15 @@ using UnityEngine;
 
 namespace Eldemarkki.VoxelTerrain.World
 {
+    /// <summary>
+    /// A store that contains a single variable of type <typeparamref name="T"/> for each voxel data point in a chunk
+    /// </summary>
+    /// <typeparam name="T">The type of variable to associate with each voxel data point</typeparam>
     public abstract class PerVoxelStore<T> : PerChunkStore<NativeArray<T>> where T : struct
     {
         protected virtual void OnApplicationQuit()
         {
-            foreach (NativeArray<T> dataArray in _data.Values)
+            foreach (NativeArray<T> dataArray in _chunks.Values)
             {
                 if (dataArray.IsCreated)
                 {
@@ -25,8 +29,8 @@ namespace Eldemarkki.VoxelTerrain.World
         /// <summary>
         /// Set's the data value of the voxel data point at <paramref name="dataWorldPosition"/> to <paramref name="dataValue"/>
         /// </summary>
-        /// <param name="dataWorldPosition">The world position of the corner</param>
-        /// <param name="dataValue">The new data value of the corner</param>
+        /// <param name="dataWorldPosition">The world position of the data point</param>
+        /// <param name="dataValue">The new data value of the data point</param>
         public void SetData(int3 dataWorldPosition, T dataValue)
         {
             IEnumerable<int3> affectedChunkCoordinates = ChunkUtilities.GetChunkCoordinatesContainingPoint(dataWorldPosition, VoxelWorld.WorldSettings.ChunkSize);
@@ -49,6 +53,7 @@ namespace Eldemarkki.VoxelTerrain.World
             }
         }
 
+        /// <inheritdoc/>
         public override void GenerateDataForChunk(int3 chunkCoordinate)
         {
             if (!DoesChunkExistAtCoordinate(chunkCoordinate))
@@ -59,6 +64,7 @@ namespace Eldemarkki.VoxelTerrain.World
             }
         }
 
+        /// <inheritdoc/>
         public override void GenerateDataForChunk(int3 chunkCoordinate, NativeArray<T> existingData)
         {
             if (!DoesChunkExistAtCoordinate(chunkCoordinate))
@@ -67,27 +73,41 @@ namespace Eldemarkki.VoxelTerrain.World
             }
         }
 
+
         /// <summary>
-        /// Generates the colors for a chunk at <paramref name="chunkCoordinate"/>; fills the color array with the default color
+        /// Generates the data for a chunk at <paramref name="chunkCoordinate"/> by reusing <paramref name="existingData"/> in order to save memory, without checking if data already exists at <paramref name="chunkCoordinate"/>
         /// </summary>
-        /// <param name="chunkCoordinate">The coordinate of the chunk which to generate the colors for</param>
+        /// <param name="chunkCoordinate">The coordinate of the chunk which to generate the data for</param>
+        /// <param name="existingData">The already existing data that should be reused to generate the new data</param>
         protected abstract void GenerateDataForChunkUnchecked(int3 chunkCoordinate, NativeArray<T> existingData);
 
         /// <summary>
-        /// Sets the voxel colors of a chunk at <paramref name="chunkCoordinate"/> without checking if colors already exist for that chunk
+        /// Sets the chunk data of the chunk at <paramref name="chunkCoordinate"/>
         /// </summary>
         /// <param name="chunkCoordinate">The coordinate of the chunk</param>
-        /// <param name="newData">The colors to set the chunk's colors to</param>
+        /// <param name="newData">The data to set the chunk's data to</param>
         public virtual void SetDataChunk(int3 chunkCoordinate, NativeArray<T> newData)
         {
-            if (TryGetDataChunk(chunkCoordinate, out NativeArray<T> oldData))
+            bool dataExistsAtCoordinate = DoesChunkExistAtCoordinate(chunkCoordinate);
+            SetDataChunkUnchecked(chunkCoordinate, newData, dataExistsAtCoordinate);
+        }
+
+        /// <summary>
+        /// Sets the chunk data of the chunk at <paramref name="chunkCoordinate"/> without checking if data already exists at <paramref name="chunkCoordinate"/>
+        /// </summary>
+        /// <param name="chunkCoordinate">The coordinate of the chunk</param>
+        /// <param name="newData">The data to set the chunk's data to</param>
+        /// <param name="dataExistsAtCoordinate">Does data already exist at <paramref name="chunkCoordinate"/></param>
+        public virtual void SetDataChunkUnchecked(int3 chunkCoordinate, NativeArray<T> newData, bool dataExistsAtCoordinate)
+        {
+            if (dataExistsAtCoordinate)
             {
-                oldData.CopyFrom(newData);
+                _chunks[chunkCoordinate].CopyFrom(newData);
                 newData.Dispose();
             }
             else
             {
-                _data.Add(chunkCoordinate, newData);
+                _chunks.Add(chunkCoordinate, newData);
             }
 
             if (VoxelWorld.ChunkStore.TryGetDataChunk(chunkCoordinate, out ChunkProperties chunkProperties))
@@ -203,7 +223,6 @@ namespace Eldemarkki.VoxelTerrain.World
         /// </summary>
         /// <param name="worldSpaceQuery">The volume where the voxel datas should be set to</param>
         /// <param name="setVoxelDataFunction">The function that calculates what the voxel data should be set to at the specific location. The first argument is the world space position of the voxel data, and the second argument is the current voxel data. The return value is what the new voxel data should be set to.</param>
-
         public void SetVoxelDataCustom(BoundsInt worldSpaceQuery, Func<int3, T, T> setVoxelDataFunction)
         {
             ForEachVoxelDataArrayInQuery(worldSpaceQuery, (chunkCoordinate, voxelDataChunk) =>

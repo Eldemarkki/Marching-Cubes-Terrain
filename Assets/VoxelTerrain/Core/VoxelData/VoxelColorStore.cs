@@ -34,7 +34,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                 UnsafeUtility.MemCpyReplicate(outputColors.GetUnsafePtr(), defaultColorArray, sizeof(Color32), outputColors.Length);
             }
 
-            SetDataChunk(chunkCoordinate, outputColors);
+            SetDataChunkUnchecked(chunkCoordinate, outputColors, false);
         }
     }
 }
