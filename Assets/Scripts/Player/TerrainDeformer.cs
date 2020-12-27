@@ -223,30 +223,22 @@ namespace Eldemarkki.VoxelTerrain.Player
             int hitX = Mathf.RoundToInt(point.x);
             int hitY = Mathf.RoundToInt(point.y);
             int hitZ = Mathf.RoundToInt(point.z);
+            int3 hitPoint = new int3(hitX, hitY, hitZ);
+            int3 intRange = new int3(Mathf.CeilToInt(deformRange));
 
-            int intRange = Mathf.CeilToInt(deformRange);
+            BoundsInt queryBounds = new BoundsInt((hitPoint - intRange).ToVectorInt(), (intRange * 2).ToVectorInt());
 
-            for (int x = -intRange; x <= intRange; x++)
+            voxelWorld.VoxelColorStore.SetVoxelDataCustom(queryBounds, (voxelDataWorldPosition, voxelData) =>
             {
-                for (int y = -intRange; y <= intRange; y++)
+                float distance = math.distance(voxelDataWorldPosition, point);
+
+                if (distance <= deformRange)
                 {
-                    for (int z = -intRange; z <= intRange; z++)
-                    {
-                        int offsetX = hitX - x;
-                        int offsetY = hitY - y;
-                        int offsetZ = hitZ - z;
-
-                        int3 offsetPoint = new int3(offsetX, offsetY, offsetZ);
-                        float distance = math.distance(offsetPoint, point);
-                        if (distance > deformRange)
-                        {
-                            continue;
-                        }
-
-                        voxelWorld.VoxelColorStore.SetData(offsetPoint, paintColor);
-                    }
+                    return paintColor;
                 }
-            }
+
+                return voxelData;
+            });
         }
     }
 }
