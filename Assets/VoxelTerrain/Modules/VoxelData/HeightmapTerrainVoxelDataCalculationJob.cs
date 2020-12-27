@@ -41,9 +41,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         public int3 WorldPositionOffset { get; set; }
 
         /// <inheritdoc/>
-        public NativeArray<byte> OutputVoxelData { get; set; }
-
-        public int3 OutputVoxelDataDimensions { get; set; }
+        public VoxelDataVolume<byte> OutputVoxelData { get; set; }
 
         /// <summary>
         /// The height data from the heightmap
@@ -56,11 +54,11 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         public void Execute()
         {
             int index = 0;
-            for (int z = 0; z < OutputVoxelDataDimensions.z; z++)
+            for (int z = 0; z < OutputVoxelData.Depth; z++)
             {
-                for (int y = 0; y < OutputVoxelDataDimensions.y; y++)
+                for (int y = 0; y < OutputVoxelData.Height; y++)
                 {
-                    for (int x = 0; x < OutputVoxelDataDimensions.x; x++)
+                    for (int x = 0; x < OutputVoxelData.Width; x++)
                     {
                         int3 worldPosition = new int3(x, y, z) + WorldPositionOffset;
                         int worldPositionX = worldPosition.x;
@@ -73,7 +71,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                             voxelData = CalculateVoxelData(worldPositionX, worldPositionY, worldPositionZ);
                         }
 
-                        OutputVoxelData.SetElement((byte)math.clamp(voxelData * 255, 0, 255), index);
+                        OutputVoxelData.SetVoxelData((byte)math.clamp(voxelData * 255, 0, 255), index);
                         index++;
                     }
                 }

@@ -18,13 +18,12 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         [SerializeField] private HeightmapWorldGenerator heightmapWorldGenerator;
 
         /// <inheritdoc/>
-        public override JobHandleWithData<IVoxelDataGenerationJob> GenerateVoxelData(int3 worldSpaceOrigin, int3 outputVoxelDataDimensions, NativeArray<byte> outputVoxelDataArray)
+        public override JobHandleWithData<IVoxelDataGenerationJob> GenerateVoxelData(int3 worldSpaceOrigin, VoxelDataVolume<byte> outputVoxelDataArray)
         {
             HeightmapTerrainVoxelDataCalculationJob job = new HeightmapTerrainVoxelDataCalculationJob
             {
                 WorldPositionOffset = worldSpaceOrigin,
                 OutputVoxelData = outputVoxelDataArray,
-                OutputVoxelDataDimensions = outputVoxelDataDimensions,
                 HeightmapData = heightmapWorldGenerator.HeightmapTerrainSettings.HeightmapData,
                 HeightmapWidth = heightmapWorldGenerator.HeightmapTerrainSettings.Width,
                 HeightmapHeight = heightmapWorldGenerator.HeightmapTerrainSettings.Height,

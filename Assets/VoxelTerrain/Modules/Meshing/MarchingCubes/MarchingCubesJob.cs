@@ -1,5 +1,5 @@
 ﻿using Eldemarkki.VoxelTerrain.Meshing.Data;
-using Eldemarkki.VoxelTerrain.Utilities;
+using Eldemarkki.VoxelTerrain.VoxelData;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -14,19 +14,16 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
     public struct MarchingCubesJob : IMesherJob
     {
         /// <inheritdoc cref="VoxelData"/>
-        [ReadOnly] private NativeArray<byte> _voxelData;
+        [ReadOnly] private VoxelDataVolume<byte> _voxelData;
 
         /// <inheritdoc cref="VoxelColors"/>
-        [ReadOnly] private NativeArray<Color32> _voxelColors;
+        [ReadOnly] private VoxelDataVolume<Color32> _voxelColors;
 
         /// <summary>
         /// The density level where a surface will be created. Densities below this will be inside the surface (solid),
         /// and densities above this will be outside the surface (air)
         /// </summary>
         public float Isolevel { get; set; }
-
-        /// <inheritdoc/>
-        public int3 VoxelDataDimensions { get; set; }
 
         /// <inheritdoc/>
         public NativeCounter VertexCountCounter { get; set; }
@@ -38,10 +35,10 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         [NativeDisableParallelForRestriction, WriteOnly] private NativeArray<ushort> _triangles;
 
         /// <inheritdoc/>
-        public NativeArray<byte> VoxelData { get => _voxelData; set => _voxelData = value; }
+        public VoxelDataVolume<byte> VoxelData { get => _voxelData; set => _voxelData = value; }
 
         /// <inheritdoc/>
-        public NativeArray<Color32> VoxelColors { get => _voxelColors; set => _voxelColors = value; }
+        public VoxelDataVolume<Color32> VoxelColors { get => _voxelColors; set => _voxelColors = value; }
 
         /// <inheritdoc/>
         public NativeArray<MeshingVertexData> OutputVertices { get => _vertices; set => _vertices = value; }
@@ -55,15 +52,15 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         public void Execute()
         {
             byte isolevelByte = (byte)math.clamp(Isolevel * 255, 0, 255);
-            for (int x = 0; x < VoxelDataDimensions.x - 1; x++)
+            for (int x = 0; x < VoxelData.Width - 1; x++)
             {
-                for (int y = 0; y < VoxelDataDimensions.y - 1; y++)
+                for (int y = 0; y < VoxelData.Height - 1; y++)
                 {
-                    for (int z = 0; z < VoxelDataDimensions.z - 1; z++)
+                    for (int z = 0; z < VoxelData.Depth - 1; z++)
                     {
                         int3 voxelLocalPosition = new int3(x, y, z);
 
-                        VoxelCorners<byte> densities = _voxelData.GetVoxelDataUnitCube(VoxelDataDimensions, voxelLocalPosition);
+                        VoxelCorners<byte> densities = _voxelData.GetVoxelDataUnitCube(voxelLocalPosition);
 
                         byte cubeIndex = MarchingCubesFunctions.CalculateCubeIndex(densities, isolevelByte);
                         if (cubeIndex == 0 || cubeIndex == 255)
@@ -94,8 +91,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
 
                                 // Take the position of the closest corner of the current voxel
                                 int3 colorSamplePoint = (int3)math.round(triangleMiddlePoint);
-                                int colorSamplePointIndex = IndexUtilities.XyzToIndex(colorSamplePoint, VoxelDataDimensions.x, VoxelDataDimensions.y);
-                                Color32 color = _voxelColors[colorSamplePointIndex];
+                                Color32 color = VoxelColors.GetVoxelData(colorSamplePoint);
 
                                 _vertices[triangleIndex + 0] = new MeshingVertexData(vertex1, normal, color);
                                 _triangles[triangleIndex + 0] = (ushort)(triangleIndex + 0);

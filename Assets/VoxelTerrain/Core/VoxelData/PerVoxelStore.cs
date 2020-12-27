@@ -1,5 +1,6 @@
 ﻿using Eldemarkki.VoxelTerrain.Utilities;
 using Eldemarkki.VoxelTerrain.Utilities.Intersection;
+using Eldemarkki.VoxelTerrain.VoxelData;
 using Eldemarkki.VoxelTerrain.World.Chunks;
 using System;
 using System.Collections.Generic;
@@ -13,11 +14,11 @@ namespace Eldemarkki.VoxelTerrain.World
     /// A store that contains a single variable of type <typeparamref name="T"/> for each voxel data point in a chunk
     /// </summary>
     /// <typeparam name="T">The type of variable to associate with each voxel data point</typeparam>
-    public abstract class PerVoxelStore<T> : PerChunkStore<NativeArray<T>> where T : struct
+    public abstract class PerVoxelStore<T> : PerChunkStore<VoxelDataVolume<T>> where T : struct
     {
         protected virtual void OnApplicationQuit()
         {
-            foreach (NativeArray<T> dataArray in _chunks.Values)
+            foreach (VoxelDataVolume<T> dataArray in _chunks.Values)
             {
                 if (dataArray.IsCreated)
                 {
@@ -37,13 +38,11 @@ namespace Eldemarkki.VoxelTerrain.World
 
             foreach (int3 chunkCoordinate in affectedChunkCoordinates)
             {
-                if (TryGetDataChunk(chunkCoordinate, out NativeArray<T> chunkData))
+                if (TryGetDataChunk(chunkCoordinate, out VoxelDataVolume<T> chunkData))
                 {
                     int3 localPos = (dataWorldPosition - chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize).Mod(VoxelWorld.WorldSettings.ChunkSize + 1);
 
-                    int index = IndexUtilities.XyzToIndex(localPos, VoxelWorld.WorldSettings.ChunkSize.x + 1, VoxelWorld.WorldSettings.ChunkSize.y + 1);
-
-                    chunkData[index] = dataValue;
+                    chunkData.SetVoxelData(dataValue, localPos);
 
                     if (VoxelWorld.ChunkStore.TryGetDataChunk(chunkCoordinate, out ChunkProperties chunkProperties))
                     {
@@ -58,14 +57,14 @@ namespace Eldemarkki.VoxelTerrain.World
         {
             if (!DoesChunkExistAtCoordinate(chunkCoordinate))
             {
-                NativeArray<T> data = new NativeArray<T>((VoxelWorld.WorldSettings.ChunkSize.x + 1) * (VoxelWorld.WorldSettings.ChunkSize.y + 1) * (VoxelWorld.WorldSettings.ChunkSize.z + 1), Allocator.Persistent);
+                VoxelDataVolume<T> data = new VoxelDataVolume<T>(VoxelWorld.WorldSettings.ChunkSize + 1, Allocator.Persistent);
 
                 GenerateDataForChunkUnchecked(chunkCoordinate, data);
             }
         }
 
         /// <inheritdoc/>
-        public override void GenerateDataForChunk(int3 chunkCoordinate, NativeArray<T> existingData)
+        public override void GenerateDataForChunk(int3 chunkCoordinate, VoxelDataVolume<T> existingData)
         {
             if (!DoesChunkExistAtCoordinate(chunkCoordinate))
             {
@@ -79,14 +78,14 @@ namespace Eldemarkki.VoxelTerrain.World
         /// </summary>
         /// <param name="chunkCoordinate">The coordinate of the chunk which to generate the data for</param>
         /// <param name="existingData">The already existing data that should be reused to generate the new data</param>
-        protected abstract void GenerateDataForChunkUnchecked(int3 chunkCoordinate, NativeArray<T> existingData);
+        protected abstract void GenerateDataForChunkUnchecked(int3 chunkCoordinate, VoxelDataVolume<T> existingData);
 
         /// <summary>
         /// Sets the chunk data of the chunk at <paramref name="chunkCoordinate"/>
         /// </summary>
         /// <param name="chunkCoordinate">The coordinate of the chunk</param>
         /// <param name="newData">The data to set the chunk's data to</param>
-        public virtual void SetDataChunk(int3 chunkCoordinate, NativeArray<T> newData)
+        public virtual void SetDataChunk(int3 chunkCoordinate, VoxelDataVolume<T> newData)
         {
             bool dataExistsAtCoordinate = DoesChunkExistAtCoordinate(chunkCoordinate);
             SetDataChunkUnchecked(chunkCoordinate, newData, dataExistsAtCoordinate);
@@ -98,7 +97,7 @@ namespace Eldemarkki.VoxelTerrain.World
         /// <param name="chunkCoordinate">The coordinate of the chunk</param>
         /// <param name="newData">The data to set the chunk's data to</param>
         /// <param name="dataExistsAtCoordinate">Does data already exist at <paramref name="chunkCoordinate"/></param>
-        public virtual void SetDataChunkUnchecked(int3 chunkCoordinate, NativeArray<T> newData, bool dataExistsAtCoordinate)
+        public virtual void SetDataChunkUnchecked(int3 chunkCoordinate, VoxelDataVolume<T> newData, bool dataExistsAtCoordinate)
         {
             if (dataExistsAtCoordinate)
             {
@@ -123,7 +122,7 @@ namespace Eldemarkki.VoxelTerrain.World
         /// <param name="chunkCoordinate">The coordinate of <paramref name="dataChunk"/></param>
         /// <param name="dataChunk">The voxel datas of the chunk</param>
         /// <param name="function">The function that will be performed on each voxel data point. The arguments are as follows: 1) The world space position of the voxel data point, 2) The chunk space position of the voxel data point, 3) The index of the voxel data point inside of <paramref name="dataChunk"/>, 4) The value of the voxel data</param>
-        public void ForEachVoxelDataInQueryInChunk(BoundsInt worldSpaceQuery, int3 chunkCoordinate, NativeArray<T> dataChunk, Action<int3, int3, int, T> function)
+        public void ForEachVoxelDataInQueryInChunk(BoundsInt worldSpaceQuery, int3 chunkCoordinate, VoxelDataVolume<T> dataChunk, Action<int3, int3, int, T> function)
         {
             int3 chunkBoundsSize = VoxelWorld.WorldSettings.ChunkSize;
             int3 chunkWorldSpaceOrigin = chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize;
@@ -144,7 +143,7 @@ namespace Eldemarkki.VoxelTerrain.World
 
                         int3 voxelDataLocalPosition = voxelDataWorldPosition - chunkWorldSpaceOrigin;
                         int voxelDataIndex = IndexUtilities.XyzToIndex(voxelDataLocalPosition, chunkBoundsSize.x + 1, chunkBoundsSize.y + 1);
-                        if (dataChunk.TryGetElement(voxelDataIndex, out T voxelData))
+                        if (dataChunk.TryGetVoxelData(voxelDataIndex, out T voxelData))
                         {
                             function(voxelDataWorldPosition, voxelDataLocalPosition, voxelDataIndex, voxelData);
                         }
@@ -162,10 +161,10 @@ namespace Eldemarkki.VoxelTerrain.World
         public bool TryGetVoxelData(int3 worldPosition, out T voxelData)
         {
             int3 chunkCoordinate = VectorUtilities.WorldPositionToCoordinate(worldPosition, VoxelWorld.WorldSettings.ChunkSize);
-            if (TryGetDataChunk(chunkCoordinate, out NativeArray<T> chunk))
+            if (TryGetDataChunk(chunkCoordinate, out VoxelDataVolume<T> chunk))
             {
                 int3 voxelDataLocalPosition = worldPosition.Mod(VoxelWorld.WorldSettings.ChunkSize);
-                return chunk.TryGetElement(VoxelWorld.WorldSettings.ChunkSize + 1, voxelDataLocalPosition, out voxelData);
+                return chunk.TryGetVoxelData(voxelDataLocalPosition, out voxelData);
             }
             else
             {
@@ -180,15 +179,15 @@ namespace Eldemarkki.VoxelTerrain.World
         /// <param name="worldSpaceQuery">The world-space volume to get the voxel data for</param>
         /// <param name="allocator">How the new voxel data array should be allocated</param>
         /// <returns>The voxel data array inside the bounds</returns>
-        public NativeArray<T> GetVoxelDataCustom(BoundsInt worldSpaceQuery, Allocator allocator)
+        public VoxelDataVolume<T> GetVoxelDataCustom(BoundsInt worldSpaceQuery, Allocator allocator)
         {
-            NativeArray<T> voxelDataArray = new NativeArray<T>(worldSpaceQuery.CalculateVolume(), allocator);
+            VoxelDataVolume<T> voxelDataArray = new VoxelDataVolume<T>(worldSpaceQuery.CalculateVolume(), allocator);
 
             ForEachVoxelDataArrayInQuery(worldSpaceQuery, (chunkCoordinate, voxelDataChunk) =>
             {
                 ForEachVoxelDataInQueryInChunk(worldSpaceQuery, chunkCoordinate, voxelDataChunk, (voxelDataWorldPosition, voxelDataLocalPosition, voxelDataIndex, voxelData) =>
                 {
-                    voxelDataArray.SetElement(voxelData, worldSpaceQuery.size.ToInt3(), voxelDataWorldPosition - worldSpaceQuery.min.ToInt3());
+                    voxelDataArray.SetVoxelData(voxelData, voxelDataWorldPosition - worldSpaceQuery.min.ToInt3());
                 });
             });
 
@@ -200,15 +199,15 @@ namespace Eldemarkki.VoxelTerrain.World
         /// </summary>
         /// <param name="voxelDataArray">The new voxel data array</param>
         /// <param name="originPosition">The world position of the origin where the voxel data should be set</param>
-        public void SetVoxelDataCustom(NativeArray<T> voxelDataArray, int3 voxelDataArrayDimensions, int3 originPosition)
+        public void SetVoxelDataCustom(VoxelDataVolume<T> voxelDataArray, int3 originPosition)
         {
-            BoundsInt worldSpaceQuery = new BoundsInt(originPosition.ToVectorInt(), (voxelDataArrayDimensions - new int3(1, 1, 1)).ToVectorInt());
+            BoundsInt worldSpaceQuery = new BoundsInt(originPosition.ToVectorInt(), (voxelDataArray.Size - new int3(1, 1, 1)).ToVectorInt());
 
             ForEachVoxelDataArrayInQuery(worldSpaceQuery, (chunkCoordinate, voxelDataChunk) =>
             {
                 ForEachVoxelDataInQueryInChunk(worldSpaceQuery, chunkCoordinate, voxelDataChunk, (voxelDataWorldPosition, voxelDataLocalPosition, voxelDataIndex, voxelData) =>
                 {
-                    voxelDataChunk.SetElement(voxelData, voxelDataArrayDimensions, voxelDataWorldPosition - chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize);
+                    voxelDataChunk.SetVoxelData(voxelData, voxelDataWorldPosition - chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize);
                 });
 
                 if (VoxelWorld.ChunkStore.TryGetDataChunk(chunkCoordinate, out ChunkProperties chunkProperties))
@@ -233,7 +232,7 @@ namespace Eldemarkki.VoxelTerrain.World
                     T newVoxelData = setVoxelDataFunction(voxelDataWorldPosition, voxelData);
                     if (!newVoxelData.Equals(voxelData))
                     {
-                        voxelDataChunk.SetElement(newVoxelData, voxelDataIndex);
+                        voxelDataChunk.SetVoxelData(newVoxelData, voxelDataIndex);
                         anyChanged = true;
                     }
                 });

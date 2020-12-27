@@ -80,13 +80,13 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <param name="chunkCoordinate">The coordinate of the chunk whose voxel data should be gotten</param>
         /// <param name="chunk">The voxel data of a chunk at the coordinate</param>
         /// <returns>Does a chunk exists at that coordinate</returns>
-        public override bool TryGetDataChunk(int3 chunkCoordinate, out NativeArray<byte> chunk)
+        public override bool TryGetDataChunk(int3 chunkCoordinate, out VoxelDataVolume<byte> chunk)
         {
             ApplyChunkChanges(chunkCoordinate);
             return TryGetDataChunkWithoutApplying(chunkCoordinate, out chunk);
         }
 
-        private bool TryGetDataChunkWithoutApplying(int3 chunkCoordinate, out NativeArray<byte> chunk)
+        private bool TryGetDataChunkWithoutApplying(int3 chunkCoordinate, out VoxelDataVolume<byte> chunk)
         {
             return _chunks.TryGetValue(chunkCoordinate, out chunk);
         }
@@ -115,9 +115,9 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
             }
         }
 
-        public override void SetDataChunk(int3 chunkCoordinate, NativeArray<byte> newData)
+        public override void SetDataChunk(int3 chunkCoordinate, VoxelDataVolume<byte> newData)
         {
-            if (_chunks.TryGetValue(chunkCoordinate, out NativeArray<byte> oldData))
+            if (_chunks.TryGetValue(chunkCoordinate, out VoxelDataVolume<byte> oldData))
             {
                 oldData.CopyFrom(newData);
                 newData.Dispose();
@@ -133,10 +133,10 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
             }
         }
 
-        protected override void GenerateDataForChunkUnchecked(int3 chunkCoordinate, NativeArray<byte> existingData)
+        protected override void GenerateDataForChunkUnchecked(int3 chunkCoordinate, VoxelDataVolume<byte> existingData)
         {
             int3 chunkWorldOrigin = chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize;
-            JobHandleWithData<IVoxelDataGenerationJob> jobHandleWithData = VoxelWorld.VoxelDataGenerator.GenerateVoxelData(chunkWorldOrigin, VoxelWorld.WorldSettings.ChunkSize + 1, existingData);
+            JobHandleWithData<IVoxelDataGenerationJob> jobHandleWithData = VoxelWorld.VoxelDataGenerator.GenerateVoxelData(chunkWorldOrigin, existingData);
             SetVoxelDataJobHandle(jobHandleWithData, chunkCoordinate);
         }
     }
