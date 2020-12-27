@@ -2,6 +2,7 @@
 using System.Runtime.CompilerServices;
 using Eldemarkki.VoxelTerrain.Meshing.Data;
 using Unity.Mathematics;
+using Unity.Collections;
 
 namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
 {
@@ -34,7 +35,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         /// and densities above this will be outside the surface (air)</param>
         /// <returns>The calculated cube index</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static byte CalculateCubeIndex(VoxelCorners<float> voxelDensities, float isolevel)
+        public static byte CalculateCubeIndex(VoxelCorners<byte> voxelDensities, byte isolevel)
         {
             byte cubeIndex = (byte)math.select(0, 1, voxelDensities.Corner1 < isolevel);
             cubeIndex |= (byte)math.select(0, 2, voxelDensities.Corner2 < isolevel);
@@ -58,8 +59,8 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         /// and densities above this will be outside the surface (air)</param>
         /// <returns>The generated vertex list for the voxel</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static VertexList GenerateVertexList(VoxelCorners<float> voxelDensities, int3 voxelLocalPosition,
-            int edgeIndex, float isolevel)
+        public static VertexList GenerateVertexList(VoxelCorners<byte> voxelDensities, int3 voxelLocalPosition,
+            int edgeIndex, byte isolevel)
         {
             VertexList vertexList = new VertexList();
 
@@ -73,13 +74,34 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
                 int3 corner1 = voxelLocalPosition + LookupTables.CubeCorners[edgeStartIndex];
                 int3 corner2 = voxelLocalPosition + LookupTables.CubeCorners[edgeEndIndex];
 
-                float density1 = voxelDensities[edgeStartIndex];
-                float density2 = voxelDensities[edgeEndIndex];
+                float density1 = voxelDensities[edgeStartIndex] / 255f;
+                float density2 = voxelDensities[edgeEndIndex] / 255f;
 
-                vertexList[i] = VertexInterpolate(corner1, corner2, density1, density2, isolevel);
+                vertexList[i] = VertexInterpolate(corner1, corner2, density1, density2, isolevel / 255f);
             }
 
             return vertexList;
+        }
+
+        /// <summary>
+        /// Gets a cube-shaped volume of voxel data from <paramref name="voxelDataVolume"/>. The size of the cube is 1 unit. 
+        /// </summary>
+        /// <param name="voxelDataVolume">The voxel data volume to get the voxel data from</param>
+        /// <param name="localPosition">The origin of the cube</param>
+        /// <returns>A cube-shaped volume of voxel data. The size of the cube is 1 unit.</returns>
+        public static VoxelCorners<byte> GetVoxelDataUnitCube(this NativeArray<byte> voxelDataVolume, int3 voxelDataVolumeDimensions, int3 localPosition)
+        {
+            VoxelCorners<byte> voxelDataCorners = new VoxelCorners<byte>();
+            for (int i = 0; i < 8; i++)
+            {
+                int3 voxelCorner = localPosition + LookupTables.CubeCorners[i];
+                if (voxelDataVolume.TryGetElement(voxelDataVolumeDimensions, voxelCorner, out byte voxelData))
+                {
+                    voxelDataCorners[i] = voxelData;
+                }
+            }
+
+            return voxelDataCorners;
         }
     }
 }

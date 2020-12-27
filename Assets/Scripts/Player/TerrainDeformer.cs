@@ -167,7 +167,8 @@ namespace Eldemarkki.VoxelTerrain.Player
                 if (distance <= range)
                 {
                     float modificationAmount = deformSpeed / distance * buildModifier;
-                    return voxelData - modificationAmount;
+                    float oldVoxelData = voxelData * MarchingCubesFunctions.ByteToFloat01;
+                    return (byte)math.clamp((oldVoxelData - modificationAmount) * 255, 0, 255);
                 }
 
                 return voxelData;
@@ -185,7 +186,7 @@ namespace Eldemarkki.VoxelTerrain.Player
             float flattenOffset = 0;
 
             // This is a bit hacky. One fix could be that the VoxelMesher class has a flattenOffset property, but I'm not sure if that's a good idea either.
-            if(voxelWorld.VoxelMesher is MarchingCubesMesher marchingCubesMesher)
+            if (voxelWorld.VoxelMesher is MarchingCubesMesher marchingCubesMesher)
             {
                 flattenOffset = marchingCubesMesher.Isolevel;
             }
@@ -204,7 +205,8 @@ namespace Eldemarkki.VoxelTerrain.Player
                 }
 
                 float voxelDataChange = (math.dot(_flatteningNormal, voxelDataWorldPosition) - math.dot(_flatteningNormal, _flatteningOrigin)) / deformRange;
-                return (voxelDataChange * 0.5f + voxelData - flattenOffset) * 0.8f + flattenOffset;
+
+                return (byte)math.clamp(((voxelDataChange * 0.5f + voxelData * MarchingCubesFunctions.ByteToFloat01 - flattenOffset) * 0.8f + flattenOffset) * 255, 0, 255);
             });
         }
 

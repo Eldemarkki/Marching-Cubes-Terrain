@@ -18,12 +18,13 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         [SerializeField] private ProceduralTerrainSettings proceduralTerrainSettings = new ProceduralTerrainSettings(1, 9, 120, 0);
 
         /// <inheritdoc/>
-        public override JobHandleWithData<IVoxelDataGenerationJob> GenerateVoxelData(int3 worldSpaceOrigin, VoxelDataVolume outputVoxelDataVolume)
+        public override JobHandleWithData<IVoxelDataGenerationJob> GenerateVoxelData(int3 worldSpaceOrigin, int3 outputVoxelDataDimensions, NativeArray<byte> outputVoxelDataVolume)
         {
             ProceduralTerrainVoxelDataCalculationJob job = new ProceduralTerrainVoxelDataCalculationJob
             {
                 WorldPositionOffset = worldSpaceOrigin,
                 OutputVoxelData = outputVoxelDataVolume,
+                OutputVoxelDataDimensions = outputVoxelDataDimensions,
                 ProceduralTerrainSettings = proceduralTerrainSettings
             };
             

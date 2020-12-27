@@ -1,5 +1,6 @@
 ﻿using Eldemarkki.VoxelTerrain.Utilities;
 using Eldemarkki.VoxelTerrain.VoxelData;
+using Eldemarkki.VoxelTerrain.World;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -7,6 +8,8 @@ namespace Eldemarkki.VoxelTerrain.Meshing
 {
     public abstract class VoxelMesher : MonoBehaviour
     {
+        public VoxelWorld VoxelWorld { get; set; }
+
         /// <summary>
         /// Starts a mesh generation job
         /// </summary>

@@ -1,8 +1,8 @@
-﻿using Eldemarkki.VoxelTerrain.VoxelData;
-using Eldemarkki.VoxelTerrain.Meshing.Data;
+﻿using Eldemarkki.VoxelTerrain.Meshing.Data;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
+using Unity.Mathematics;
 
 namespace Eldemarkki.VoxelTerrain.Meshing
 {
@@ -16,10 +16,12 @@ namespace Eldemarkki.VoxelTerrain.Meshing
         /// </summary>
         NativeCounter VertexCountCounter { get; set; }
 
+        int3 VoxelDataDimensions { get; set; }
+
         /// <summary>
         /// The voxel data to generate the mesh from
         /// </summary>
-        VoxelDataVolume VoxelData { get; set; }
+        NativeArray<byte> VoxelData { get; set; }
 
         /// <summary>
         /// The voxel colors used to color the triangles

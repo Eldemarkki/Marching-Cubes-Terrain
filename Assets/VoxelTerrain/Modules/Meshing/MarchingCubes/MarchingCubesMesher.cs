@@ -25,7 +25,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         /// <inheritdoc/>
         public override JobHandleWithData<IMesherJob> CreateMesh(VoxelDataStore voxelDataStore, VoxelColorStore voxelColorStore, int3 chunkCoordinate)
         {
-            if (!voxelDataStore.TryGetVoxelDataChunk(chunkCoordinate, out VoxelDataVolume boundsVoxelData))
+            if (!voxelDataStore.TryGetVoxelDataChunk(chunkCoordinate, out NativeArray<byte> boundsVoxelData))
             {
                 return null;
             }
@@ -37,7 +37,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
 
             NativeCounter vertexCountCounter = new NativeCounter(Allocator.TempJob);
 
-            int voxelCount = (boundsVoxelData.Width - 1) * (boundsVoxelData.Height - 1) * (boundsVoxelData.Depth - 1);
+            int voxelCount = VoxelWorld.WorldSettings.ChunkSize.x * VoxelWorld.WorldSettings.ChunkSize.y * VoxelWorld.WorldSettings.ChunkSize.z;
             int maxLength = 15 * voxelCount;
 
             NativeArray<MeshingVertexData> outputVertices = new NativeArray<MeshingVertexData>(maxLength, Allocator.TempJob);
@@ -49,6 +49,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
                 VoxelColors = boundsVoxelColors,
                 Isolevel = Isolevel,
                 VertexCountCounter = vertexCountCounter,
+                VoxelDataDimensions = VoxelWorld.WorldSettings.ChunkSize + 1,
 
                 OutputVertices = outputVertices,
                 OutputTriangles = outputTriangles

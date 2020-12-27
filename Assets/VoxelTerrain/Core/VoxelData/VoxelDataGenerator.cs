@@ -28,9 +28,9 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <returns>The job handle and the voxel data generation job</returns>
         public JobHandleWithData<IVoxelDataGenerationJob> GenerateVoxelData(BoundsInt bounds, Allocator allocator)
         {
-            VoxelDataVolume voxelDataVolume = new VoxelDataVolume(bounds.size, allocator);
+            NativeArray<byte> voxelDataVolume = new NativeArray<byte>(bounds.CalculateVolume(), allocator);
             int3 worldSpaceOrigin = bounds.min.ToInt3();
-            return GenerateVoxelData(worldSpaceOrigin, voxelDataVolume);
+            return GenerateVoxelData(worldSpaceOrigin, bounds.size.ToInt3(), voxelDataVolume);
         }
 
         /// <summary>
@@ -39,6 +39,6 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <param name="worldSpaceOrigin">The world space origin of <paramref name="outputVoxelDataVolume"/></param>
         /// <param name="outputVoxelDataVolume">The volume where the new voxel data should be generated to</param>
         /// <returns>The job handle and the voxel data generation job</returns>
-        public abstract JobHandleWithData<IVoxelDataGenerationJob> GenerateVoxelData(int3 worldSpaceOrigin, VoxelDataVolume outputVoxelDataVolume);
+        public abstract JobHandleWithData<IVoxelDataGenerationJob> GenerateVoxelData(int3 worldSpaceOrigin, int3 outputVoxelDataDimensions, NativeArray<byte> outputVoxelDataVolume);
     }
 }

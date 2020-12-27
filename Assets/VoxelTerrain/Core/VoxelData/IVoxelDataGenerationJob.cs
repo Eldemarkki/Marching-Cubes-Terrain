@@ -1,4 +1,5 @@
-﻿using Unity.Jobs;
+﻿using Unity.Collections;
+using Unity.Jobs;
 using Unity.Mathematics;
 
 namespace Eldemarkki.VoxelTerrain.VoxelData
@@ -16,6 +17,8 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <summary>
         /// The generated voxel data
         /// </summary>
-        VoxelDataVolume OutputVoxelData { get; set; }
+        NativeArray<byte> OutputVoxelData { get; set; }
+
+        int3 OutputVoxelDataDimensions { get; set; }
     }
 }

@@ -8,24 +8,24 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes.Tests
 {
     public class MarchingCubesFunctionsTests
     {
-        [TestCase(1, 1, 1, 1, 1, 1, 1, 1, 0.5f, 0)]
-        [TestCase(0, 1, 1, 1, 1, 1, 1, 1, 0.5f, 1)]
-        [TestCase(1, 0, 1, 1, 1, 1, 1, 1, 0.5f, 2)]
-        [TestCase(1, 1, 0, 1, 1, 1, 1, 1, 0.5f, 4)]
-        [TestCase(1, 1, 1, 0, 1, 1, 1, 1, 0.5f, 8)]
-        [TestCase(1, 1, 1, 1, 0, 1, 1, 1, 0.5f, 16)]
-        [TestCase(1, 1, 1, 1, 1, 0, 1, 1, 0.5f, 32)]
-        [TestCase(1, 1, 1, 1, 1, 1, 0, 1, 0.5f, 64)]
-        [TestCase(1, 1, 1, 1, 1, 1, 1, 0, 0.5f, 128)]
-        [TestCase(0, 0, 0, 0, 0, 0, 0, 0, 0.5f, 255)]
-        [TestCase(0, 1, 1, 0, 1, 1, 1, 1, 0.5f, 9)]
-        [TestCase(0, 1, 1, 0, 1, 1, 1, 1, 0.9f, 9)]
-        [TestCase(0, 1, 0.5f, 0, 1, 1, 1, 1, 0.6f, 13)]
-        [TestCase(0.7f, 0.7f, 0.7f, 0.7f, 0.8f, 0.8f, 0.5f, 0.75f, 0.77f, 207)]
-        [TestCase(0.3f, 0.45f, 0.9f, 0.4f, 0.5f, 0.55f, 0.75f, 0.625f, 0.55f, 27)]
-        public void CalculateCubeIndex_Test(float c1, float c2, float c3, float c4, float c5, float c6, float c7, float c8, float isolevel, int expectedCubeIndex)
+        [TestCase(255, 255, 255, 255, 255, 255, 255, 255, 127, 0)]
+        [TestCase(0, 255, 255, 255, 255, 255, 255, 255, 127, 1)]
+        [TestCase(255, 0, 255, 255, 255, 255, 255, 255, 127, 2)]
+        [TestCase(255, 255, 0, 255, 255, 255, 255, 255, 127, 4)]
+        [TestCase(255, 255, 255, 0, 255, 255, 255, 255, 127, 8)]
+        [TestCase(255, 255, 255, 255, 0, 255, 255, 255, 127, 16)]
+        [TestCase(255, 255, 255, 255, 255, 0, 255, 255, 127, 32)]
+        [TestCase(255, 255, 255, 255, 255, 255, 0, 255, 127, 64)]
+        [TestCase(255, 255, 255, 255, 255, 255, 255, 0, 127, 128)]
+        [TestCase(0, 0, 0, 0, 0, 0, 0, 0, 127, 255)]
+        [TestCase(0, 255, 255, 0, 255, 255, 255, 255, 127, 9)]
+        [TestCase(0, 255, 255, 0, 255, 255, 255, 255, 229, 9)]
+        [TestCase(0, 255, 127, 0, 255, 255, 255, 255, 153, 13)]
+        [TestCase(178, 178, 178, 178, 204, 204, 127, 191, 196, 207)]
+        [TestCase(76, 114, 229, 102, 127, 140, 191, 159, 140, 27)]
+        public void CalculateCubeIndex_Test(byte c1, byte c2, byte c3, byte c4, byte c5, byte c6, byte c7, byte c8, byte isolevel, byte expectedCubeIndex)
         {
-            VoxelCorners<float> densities = new VoxelCorners<float>
+            VoxelCorners<byte> densities = new VoxelCorners<byte>
             {
                 Corner1 = c1,
                 Corner2 = c2,
@@ -37,7 +37,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes.Tests
                 Corner8 = c8
             };
 
-            int cubeIndex = MarchingCubesFunctions.CalculateCubeIndex(densities, isolevel);
+            byte cubeIndex = MarchingCubesFunctions.CalculateCubeIndex(densities, isolevel);
 
             Assert.AreEqual(expectedCubeIndex, cubeIndex);
         }
@@ -54,20 +54,20 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes.Tests
         public void GenerateVertexList_Test1()
         {
             // Arrange
-            VoxelCorners<float> densities = new VoxelCorners<float>
+            VoxelCorners<byte> densities = new VoxelCorners<byte>
             {
-                Corner1 = 1f,
-                Corner2 = 1f,
-                Corner3 = 1f,
-                Corner4 = 0f,
-                Corner5 = 1f,
-                Corner6 = 1f,
-                Corner7 = 1f,
-                Corner8 = 1f
+                Corner1 = 255,
+                Corner2 = 255,
+                Corner3 = 255,
+                Corner4 = 0,
+                Corner5 = 255,
+                Corner6 = 255,
+                Corner7 = 255,
+                Corner8 = 255
             };
 
             int edgeIndex = 0b1000_0000_1100;
-            float isolevel = 0.5f;
+            byte isolevel = 127;
 
             VertexList expected = new VertexList();
             expected[2] = new float3(0.5f, 0f, 1f);
@@ -78,26 +78,30 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes.Tests
             IEnumerable<float3> actual = MarchingCubesFunctions.GenerateVertexList(densities, new int3(0, 0, 0), edgeIndex, isolevel);
 
             // Assert
-            Assert.AreEqual(expected, actual);
+            for (int i = 0; i < 12; i++)
+            {
+                var actualPosition = actual.ElementAt(i);
+                Assert.AreEqual(0, math.distance(expected[i], actualPosition), 0.011f, $"Expected: {expected[i]}, Actual: {actualPosition}");
+            }
         }
 
         [Test]
         public void GenerateVertexList_Test2()
         {
             // Arrange
-            VoxelCorners<float> densities = new VoxelCorners<float>
+            VoxelCorners<byte> densities = new VoxelCorners<byte>
             {
-                Corner1 = 1f,
-                Corner2 = 0f,
-                Corner3 = 1f,
-                Corner4 = 1f,
-                Corner5 = 1f,
-                Corner6 = 1f,
-                Corner7 = 0f,
-                Corner8 = 0f
+                Corner1 = 255,
+                Corner2 = 0,
+                Corner3 = 255,
+                Corner4 = 255,
+                Corner5 = 255,
+                Corner6 = 255,
+                Corner7 = 0,
+                Corner8 = 0
             };
 
-            float isolevel = 0.75f;
+            byte isolevel = 191;
             int edgeIndex = 0b1110_1010_0011;
 
             VertexList expected = new VertexList();
@@ -113,26 +117,30 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes.Tests
             IEnumerable<float3> actual = MarchingCubesFunctions.GenerateVertexList(densities, new int3(6, -13, 100), edgeIndex, isolevel);
 
             // Assert
-            Assert.That(actual, Is.EquivalentTo(expected));
+            for (int i = 0; i < 12; i++)
+            {
+                var actualPosition = actual.ElementAt(i);
+                Assert.AreEqual(0, math.distance(expected[i], actualPosition), 0.011f, $"Expected: {expected[i]}, Actual: {actualPosition}");
+            }
         }
 
         [Test]
         public void GenerateVertexList_Test3()
         {
             // Arrange
-            VoxelCorners<float> densities = new VoxelCorners<float>
+            VoxelCorners<byte> densities = new VoxelCorners<byte>
             {
-                Corner1 = 0.55f,
-                Corner2 = 0.1f,
-                Corner3 = 0.745f,
-                Corner4 = 0.35f,
-                Corner5 = 0.755f,
-                Corner6 = 0.8f,
-                Corner7 = 1f,
-                Corner8 = 0.9f
+                Corner1 = 140,
+                Corner2 = 25,
+                Corner3 = 189,
+                Corner4 = 89,
+                Corner5 = 192,
+                Corner6 = 204,
+                Corner7 = 255,
+                Corner8 = 229
             };
 
-            float isolevel = 0.75f;
+            byte isolevel = 191;
             int edgeIndex = 0b1111_0000_0000;
 
             VertexList expected = new VertexList();
@@ -148,7 +156,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes.Tests
             for (int i = 0; i < 12; i++)
             {
                 var actualPosition = actual.ElementAt(i);
-                Assert.AreEqual(0, math.distance(expected[i], actualPosition), 0.0001f, $"Expected: {expected[i]}, Actual: {actualPosition}");
+                Assert.AreEqual(0, math.distance(expected[i], actualPosition), 0.011f, $"Expected: {expected[i]}, Actual: {actualPosition}");
             }
         }
 

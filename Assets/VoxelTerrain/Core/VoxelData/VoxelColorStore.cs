@@ -52,7 +52,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <param name="color">The new color of the corner</param>
         public void SetColor(int3 colorWorldPosition, Color32 color)
         {
-            IEnumerable<int3> affectedChunkCoordinates = VoxelDataStore.GetChunkCoordinatesContainingPoint(colorWorldPosition, VoxelWorld.WorldSettings.ChunkSize);
+            IEnumerable<int3> affectedChunkCoordinates = ChunkUtilities.GetChunkCoordinatesContainingPoint(colorWorldPosition, VoxelWorld.WorldSettings.ChunkSize);
 
             foreach (int3 chunkCoordinate in affectedChunkCoordinates)
             {

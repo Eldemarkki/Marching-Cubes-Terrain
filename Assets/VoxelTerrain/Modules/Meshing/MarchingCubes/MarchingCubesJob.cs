@@ -15,7 +15,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
     public struct MarchingCubesJob : IMesherJob
     {
         /// <inheritdoc cref="VoxelData"/>
-        [ReadOnly] private VoxelDataVolume _voxelData;
+        [ReadOnly] private NativeArray<byte> _voxelData;
 
         /// <inheritdoc cref="VoxelColors"/>
         [ReadOnly] private NativeArray<Color32> _voxelColors;
@@ -25,6 +25,8 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         /// and densities above this will be outside the surface (air)
         /// </summary>
         public float Isolevel { get; set; }
+
+        public int3 VoxelDataDimensions { get; set; }
 
         /// <inheritdoc/>
         public NativeCounter VertexCountCounter { get; set; }
@@ -36,7 +38,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         [NativeDisableParallelForRestriction, WriteOnly] private NativeArray<ushort> _triangles;
 
         /// <inheritdoc/>
-        public VoxelDataVolume VoxelData { get => _voxelData; set => _voxelData = value; }
+        public NativeArray<byte> VoxelData { get => _voxelData; set => _voxelData = value; }
 
         /// <inheritdoc/>
         public NativeArray<Color32> VoxelColors { get => _voxelColors; set => _voxelColors = value; }
@@ -52,17 +54,18 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         /// </summary>
         public void Execute()
         {
-            for (int x = 0; x < VoxelData.Width - 1; x++)
+            byte isolevelByte = (byte)math.clamp(Isolevel * 255, 0, 255);
+            for (int x = 0; x < VoxelDataDimensions.x - 1; x++)
             {
-                for (int y = 0; y < VoxelData.Height - 1; y++)
+                for (int y = 0; y < VoxelDataDimensions.y - 1; y++)
                 {
-                    for (int z = 0; z < VoxelData.Depth - 1; z++)
+                    for (int z = 0; z < VoxelDataDimensions.z - 1; z++)
                     {
                         int3 voxelLocalPosition = new int3(x, y, z);
 
-                        VoxelCorners<float> densities = _voxelData.GetVoxelDataUnitCube(voxelLocalPosition);
+                        VoxelCorners<byte> densities = _voxelData.GetVoxelDataUnitCube(VoxelDataDimensions, voxelLocalPosition);
 
-                        byte cubeIndex = MarchingCubesFunctions.CalculateCubeIndex(densities, Isolevel);
+                        byte cubeIndex = MarchingCubesFunctions.CalculateCubeIndex(densities, isolevelByte);
                         if (cubeIndex == 0 || cubeIndex == 255)
                         {
                             continue;
@@ -70,7 +73,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
 
                         int edgeIndex = MarchingCubesLookupTables.EdgeTable[cubeIndex];
 
-                        VertexList vertexList = MarchingCubesFunctions.GenerateVertexList(densities, voxelLocalPosition, edgeIndex, Isolevel);
+                        VertexList vertexList = MarchingCubesFunctions.GenerateVertexList(densities, voxelLocalPosition, edgeIndex, isolevelByte);
 
                         // Index at the beginning of the row
                         int rowIndex = 15 * cubeIndex;
@@ -91,7 +94,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
 
                                 // Take the position of the closest corner of the current voxel
                                 int3 colorSamplePoint = (int3)math.round(triangleMiddlePoint);
-                                int colorSamplePointIndex = IndexUtilities.XyzToIndex(colorSamplePoint, VoxelData.Width, VoxelData.Height);
+                                int colorSamplePointIndex = IndexUtilities.XyzToIndex(colorSamplePoint, VoxelDataDimensions.x, VoxelDataDimensions.y);
                                 Color32 color = _voxelColors[colorSamplePointIndex];
 
                                 _vertices[triangleIndex + 0] = new MeshingVertexData(vertex1, normal, color);
