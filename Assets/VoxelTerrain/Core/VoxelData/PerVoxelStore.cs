@@ -78,7 +78,7 @@ namespace Eldemarkki.VoxelTerrain.World
         /// </summary>
         /// <param name="chunkCoordinate">The coordinate of the chunk</param>
         /// <param name="newData">The colors to set the chunk's colors to</param>
-        public void SetDataChunk(int3 chunkCoordinate, NativeArray<T> newData)
+        public virtual void SetDataChunk(int3 chunkCoordinate, NativeArray<T> newData)
         {
             if (TryGetDataChunk(chunkCoordinate, out NativeArray<T> oldData))
             {
@@ -131,6 +131,102 @@ namespace Eldemarkki.VoxelTerrain.World
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Tries to get the voxel data from <paramref name="worldPosition"/>. If the position is not loaded, false will be returned and <paramref name="voxelData"/> will be set to 0 (Note that 0 doesn't directly mean that the position is not loaded). If it is loaded, true will be returned and <paramref name="voxelData"/> will be set to the value.
+        /// </summary>
+        /// <param name="worldPosition">The world position to get the voxel data from</param>
+        /// <param name="voxelData">The voxel data value at the world position</param>
+        /// <returns>Does a voxel data point exist at that position</returns>
+        public bool TryGetVoxelData(int3 worldPosition, out T voxelData)
+        {
+            int3 chunkCoordinate = VectorUtilities.WorldPositionToCoordinate(worldPosition, VoxelWorld.WorldSettings.ChunkSize);
+            if (TryGetDataChunk(chunkCoordinate, out NativeArray<T> chunk))
+            {
+                int3 voxelDataLocalPosition = worldPosition.Mod(VoxelWorld.WorldSettings.ChunkSize);
+                return chunk.TryGetElement(VoxelWorld.WorldSettings.ChunkSize + 1, voxelDataLocalPosition, out voxelData);
+            }
+            else
+            {
+                voxelData = default;
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Gets the voxel data of a custom volume in the world
+        /// </summary>
+        /// <param name="worldSpaceQuery">The world-space volume to get the voxel data for</param>
+        /// <param name="allocator">How the new voxel data array should be allocated</param>
+        /// <returns>The voxel data array inside the bounds</returns>
+        public NativeArray<T> GetVoxelDataCustom(BoundsInt worldSpaceQuery, Allocator allocator)
+        {
+            NativeArray<T> voxelDataArray = new NativeArray<T>(worldSpaceQuery.CalculateVolume(), allocator);
+
+            ForEachVoxelDataArrayInQuery(worldSpaceQuery, (chunkCoordinate, voxelDataChunk) =>
+            {
+                ForEachVoxelDataInQueryInChunk(worldSpaceQuery, chunkCoordinate, voxelDataChunk, (voxelDataWorldPosition, voxelDataLocalPosition, voxelDataIndex, voxelData) =>
+                {
+                    voxelDataArray.SetElement(voxelData, worldSpaceQuery.size.ToInt3(), voxelDataWorldPosition - worldSpaceQuery.min.ToInt3());
+                });
+            });
+
+            return voxelDataArray;
+        }
+
+        /// <summary>
+        /// Sets the voxel data for a volume in the world
+        /// </summary>
+        /// <param name="voxelDataArray">The new voxel data array</param>
+        /// <param name="originPosition">The world position of the origin where the voxel data should be set</param>
+        public void SetVoxelDataCustom(NativeArray<T> voxelDataArray, int3 voxelDataArrayDimensions, int3 originPosition)
+        {
+            BoundsInt worldSpaceQuery = new BoundsInt(originPosition.ToVectorInt(), (voxelDataArrayDimensions - new int3(1, 1, 1)).ToVectorInt());
+
+            ForEachVoxelDataArrayInQuery(worldSpaceQuery, (chunkCoordinate, voxelDataChunk) =>
+            {
+                ForEachVoxelDataInQueryInChunk(worldSpaceQuery, chunkCoordinate, voxelDataChunk, (voxelDataWorldPosition, voxelDataLocalPosition, voxelDataIndex, voxelData) =>
+                {
+                    voxelDataChunk.SetElement(voxelData, voxelDataArrayDimensions, voxelDataWorldPosition - chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize);
+                });
+
+                if (VoxelWorld.ChunkStore.TryGetDataChunk(chunkCoordinate, out ChunkProperties chunkProperties))
+                {
+                    chunkProperties.HasChanges = true;
+                }
+            });
+        }
+
+        /// <summary>
+        /// Sets the voxel data for a volume in the world
+        /// </summary>
+        /// <param name="worldSpaceQuery">The volume where the voxel datas should be set to</param>
+        /// <param name="setVoxelDataFunction">The function that calculates what the voxel data should be set to at the specific location. The first argument is the world space position of the voxel data, and the second argument is the current voxel data. The return value is what the new voxel data should be set to.</param>
+
+        public void SetVoxelDataCustom(BoundsInt worldSpaceQuery, Func<int3, T, T> setVoxelDataFunction)
+        {
+            ForEachVoxelDataArrayInQuery(worldSpaceQuery, (chunkCoordinate, voxelDataChunk) =>
+            {
+                bool anyChanged = false;
+                ForEachVoxelDataInQueryInChunk(worldSpaceQuery, chunkCoordinate, voxelDataChunk, (voxelDataWorldPosition, voxelDataLocalPosition, voxelDataIndex, voxelData) =>
+                {
+                    T newVoxelData = setVoxelDataFunction(voxelDataWorldPosition, voxelData);
+                    if (!newVoxelData.Equals(voxelData))
+                    {
+                        voxelDataChunk.SetElement(newVoxelData, voxelDataIndex);
+                        anyChanged = true;
+                    }
+                });
+
+                if (anyChanged)
+                {
+                    if (VoxelWorld.ChunkStore.TryGetDataChunk(chunkCoordinate, out ChunkProperties chunkProperties))
+                    {
+                        chunkProperties.HasChanges = true;
+                    }
+                }
+            });
         }
     }
 }
