@@ -84,18 +84,19 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         }
 
         /// <summary>
-        /// Gets a cube-shaped volume of voxel data from <paramref name="voxelDataVolume"/>. The size of the cube is 1 unit. 
+        /// Gets a cube-shaped volume of voxel data from <paramref name="voxelDataArray"/>. The size of the cube is 1 unit. 
         /// </summary>
-        /// <param name="voxelDataVolume">The voxel data volume to get the voxel data from</param>
+        /// <param name="voxelDataArray">The voxel data array to get the voxel data from</param>
+        /// <param name="voxelDataArrayDimensions">The 3-dimensional size of <paramref name="voxelDataArray"/></param>
         /// <param name="localPosition">The origin of the cube</param>
         /// <returns>A cube-shaped volume of voxel data. The size of the cube is 1 unit.</returns>
-        public static VoxelCorners<byte> GetVoxelDataUnitCube(this NativeArray<byte> voxelDataVolume, int3 voxelDataVolumeDimensions, int3 localPosition)
+        public static VoxelCorners<byte> GetVoxelDataUnitCube(this NativeArray<byte> voxelDataArray, int3 voxelDataArrayDimensions, int3 localPosition)
         {
             VoxelCorners<byte> voxelDataCorners = new VoxelCorners<byte>();
             for (int i = 0; i < 8; i++)
             {
                 int3 voxelCorner = localPosition + LookupTables.CubeCorners[i];
-                if (voxelDataVolume.TryGetElement(voxelDataVolumeDimensions, voxelCorner, out byte voxelData))
+                if (voxelDataArray.TryGetElement(voxelDataArrayDimensions, voxelCorner, out byte voxelData))
                 {
                     voxelDataCorners[i] = voxelData;
                 }

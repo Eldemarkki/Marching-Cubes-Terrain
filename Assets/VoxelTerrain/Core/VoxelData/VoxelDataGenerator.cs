@@ -24,21 +24,22 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// Starts generating the voxel data for a specified volume
         /// </summary>
         /// <param name="bounds">The world-space volume to generate the voxel data for</param>
-        /// <param name="allocator">The allocator for the new <see cref="VoxelDataVolume"/></param>
+        /// <param name="allocator">The allocator for the new voxel data array</param>
         /// <returns>The job handle and the voxel data generation job</returns>
         public JobHandleWithData<IVoxelDataGenerationJob> GenerateVoxelData(BoundsInt bounds, Allocator allocator)
         {
-            NativeArray<byte> voxelDataVolume = new NativeArray<byte>(bounds.CalculateVolume(), allocator);
+            NativeArray<byte> voxelDataArray = new NativeArray<byte>(bounds.CalculateVolume(), allocator);
             int3 worldSpaceOrigin = bounds.min.ToInt3();
-            return GenerateVoxelData(worldSpaceOrigin, bounds.size.ToInt3(), voxelDataVolume);
+            return GenerateVoxelData(worldSpaceOrigin, bounds.size.ToInt3(), voxelDataArray);
         }
 
         /// <summary>
         /// Starts generating the voxel data for the given volume, where the origin of the volume is at <paramref name="worldSpaceOrigin"/>
         /// </summary>
-        /// <param name="worldSpaceOrigin">The world space origin of <paramref name="outputVoxelDataVolume"/></param>
-        /// <param name="outputVoxelDataVolume">The volume where the new voxel data should be generated to</param>
+        /// <param name="worldSpaceOrigin">The world space origin of <paramref name="outputVoxelDataArray"/></param>
+        /// <param name="outputVoxelDataDimensions">The 3-dimensional size of <paramref name="outputVoxelDataArray"/></param>
+        /// <param name="outputVoxelDataArray">The volume where the new voxel data should be generated to</param>
         /// <returns>The job handle and the voxel data generation job</returns>
-        public abstract JobHandleWithData<IVoxelDataGenerationJob> GenerateVoxelData(int3 worldSpaceOrigin, int3 outputVoxelDataDimensions, NativeArray<byte> outputVoxelDataVolume);
+        public abstract JobHandleWithData<IVoxelDataGenerationJob> GenerateVoxelData(int3 worldSpaceOrigin, int3 outputVoxelDataDimensions, NativeArray<byte> outputVoxelDataArray);
     }
 }

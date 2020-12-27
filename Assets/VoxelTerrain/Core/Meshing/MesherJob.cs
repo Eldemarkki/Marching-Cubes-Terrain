@@ -16,6 +16,9 @@ namespace Eldemarkki.VoxelTerrain.Meshing
         /// </summary>
         NativeCounter VertexCountCounter { get; set; }
 
+        /// <summary>
+        /// The 3-dimensional size of <see cref="VoxelData"/>
+        /// </summary>
         int3 VoxelDataDimensions { get; set; }
 
         /// <summary>

@@ -1,5 +1,4 @@
 ﻿using Eldemarkki.VoxelTerrain.Meshing.Data;
-using Eldemarkki.VoxelTerrain.VoxelData;
 using Eldemarkki.VoxelTerrain.Utilities;
 using Unity.Burst;
 using Unity.Collections;
@@ -26,6 +25,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         /// </summary>
         public float Isolevel { get; set; }
 
+        /// <inheritdoc/>
         public int3 VoxelDataDimensions { get; set; }
 
         /// <inheritdoc/>

@@ -19,6 +19,9 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// </summary>
         NativeArray<byte> OutputVoxelData { get; set; }
 
+        /// <summary>
+        /// The 3-dimensional size of <see cref="OutputVoxelData"/>
+        /// </summary>
         int3 OutputVoxelDataDimensions { get; set; }
     }
 }

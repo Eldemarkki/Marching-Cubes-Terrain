@@ -167,7 +167,7 @@ namespace Eldemarkki.VoxelTerrain.Player
                 if (distance <= range)
                 {
                     float modificationAmount = deformSpeed / distance * buildModifier;
-                    float oldVoxelData = voxelData * MarchingCubesFunctions.ByteToFloat01;
+                    float oldVoxelData = voxelData / 255f;
                     return (byte)math.clamp((oldVoxelData - modificationAmount) * 255, 0, 255);
                 }
 
@@ -206,7 +206,7 @@ namespace Eldemarkki.VoxelTerrain.Player
 
                 float voxelDataChange = (math.dot(_flatteningNormal, voxelDataWorldPosition) - math.dot(_flatteningNormal, _flatteningOrigin)) / deformRange;
 
-                return (byte)math.clamp(((voxelDataChange * 0.5f + voxelData * MarchingCubesFunctions.ByteToFloat01 - flattenOffset) * 0.8f + flattenOffset) * 255, 0, 255);
+                return (byte)math.clamp(((voxelDataChange * 0.5f + voxelData / 255f - flattenOffset) * 0.8f + flattenOffset) * 255, 0, 255);
             });
         }
 

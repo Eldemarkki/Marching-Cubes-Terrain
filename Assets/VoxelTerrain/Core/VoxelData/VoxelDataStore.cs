@@ -17,7 +17,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
     public class VoxelDataStore : MonoBehaviour
     {
         /// <summary>
-        /// A dictionary containing the chunks. Key is the chunk's coordinate, and the value is the chunk's voxel data volume
+        /// A dictionary containing the chunks. Key is the chunk's coordinate, and the value is the chunk's voxel data array
         /// </summary>
         private Dictionary<int3, NativeArray<byte>> _chunks;
 
@@ -95,24 +95,24 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         }
 
         /// <summary>
-        /// Starts generating the voxel data for the chunk at <paramref name="chunkCoordinate"/>, where the output volume is <paramref name="outputVoxelDataVolume"/>
+        /// Starts generating the voxel data for the chunk at <paramref name="chunkCoordinate"/>, where the output array is <paramref name="outputVoxelDataArray"/>
         /// </summary>
-        /// <param name="chunkCoordinate"></param>
-        /// <param name="outputVoxelDataVolume"></param>
-        private void StartGeneratingVoxelData(int3 chunkCoordinate, NativeArray<byte> outputVoxelDataVolume)
+        /// <param name="chunkCoordinate">The coordinate of the chunk to start generating data for</param>
+        /// <param name="outputVoxelDataArray">The array where the data should be generated to; saves memory by not allocating a new one</param>
+        private void StartGeneratingVoxelData(int3 chunkCoordinate, NativeArray<byte> outputVoxelDataArray)
         {
             if (!_generationJobHandles.ContainsKey(chunkCoordinate))
             {
                 int3 chunkWorldOrigin = chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize;
-                JobHandleWithData<IVoxelDataGenerationJob> jobHandleWithData = VoxelWorld.VoxelDataGenerator.GenerateVoxelData(chunkWorldOrigin, VoxelWorld.WorldSettings.ChunkSize + 1, outputVoxelDataVolume);
+                JobHandleWithData<IVoxelDataGenerationJob> jobHandleWithData = VoxelWorld.VoxelDataGenerator.GenerateVoxelData(chunkWorldOrigin, VoxelWorld.WorldSettings.ChunkSize + 1, outputVoxelDataArray);
                 SetVoxelDataJobHandle(jobHandleWithData, chunkCoordinate);
             }
         }
 
         /// <summary>
-        /// Starts generating the voxel data for the chunk at <paramref name="chunkCoordinate"/> and generates a new <see cref="VoxelDataVolume"/> for the new data with a persistent allocator
+        /// Starts generating the voxel data for the chunk at <paramref name="chunkCoordinate"/> and generates a new voxel data array for the new data with a persistent allocator
         /// </summary>
-        /// <param name="chunkCoordinate"></param>
+        /// <param name="chunkCoordinate">The coordinate of the chunk to start generating data for</param>
         public void StartGeneratingVoxelData(int3 chunkCoordinate)
         {
             if (!_generationJobHandles.ContainsKey(chunkCoordinate))
@@ -175,7 +175,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         }
 
         /// <summary>
-        /// Tries to get the <see cref="VoxelDataVolume"/> for one chunk with a persistent allocator. If a chunk doesn't exist there, false will be returned and <paramref name="chunk"/> will be set to null. If a chunk exists there, true will be returned and <paramref name="chunk"/> will be set to the chunk.
+        /// Tries to get the voxel data array for one chunk with a persistent allocator. If a chunk doesn't exist there, false will be returned and <paramref name="chunk"/> will be set to null. If a chunk exists there, true will be returned and <paramref name="chunk"/> will be set to the chunk.
         /// </summary>
         /// <param name="chunkCoordinate">The coordinate of the chunk whose voxel data should be gotten</param>
         /// <param name="chunk">The voxel data of a chunk at the coordinate</param>
@@ -190,21 +190,21 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// Gets the voxel data of a custom volume in the world
         /// </summary>
         /// <param name="worldSpaceQuery">The world-space volume to get the voxel data for</param>
-        /// <param name="allocator">How the new voxel data volume should be allocated</param>
-        /// <returns>The voxel data volume inside the bounds</returns>
+        /// <param name="allocator">How the new voxel data array should be allocated</param>
+        /// <returns>The voxel data array inside the bounds</returns>
         public NativeArray<byte> GetVoxelDataCustom(BoundsInt worldSpaceQuery, Allocator allocator)
         {
-            NativeArray<byte> voxelDataVolume = new NativeArray<byte>(worldSpaceQuery.CalculateVolume(), allocator);
+            NativeArray<byte> voxelDataArray = new NativeArray<byte>(worldSpaceQuery.CalculateVolume(), allocator);
 
-            ForEachVoxelDataVolumeInQuery(worldSpaceQuery, (chunkCoordinate, voxelDataChunk) =>
+            ForEachVoxelDataArrayInQuery(worldSpaceQuery, (chunkCoordinate, voxelDataChunk) =>
             {
                 ForEachVoxelDataInQueryInChunk(worldSpaceQuery, chunkCoordinate, voxelDataChunk, (voxelDataWorldPosition, voxelDataLocalPosition, voxelDataIndex, voxelData) =>
                 {
-                    voxelDataVolume.SetElement(voxelData, worldSpaceQuery.size.ToInt3(), voxelDataWorldPosition - worldSpaceQuery.min.ToInt3());
+                    voxelDataArray.SetElement(voxelData, worldSpaceQuery.size.ToInt3(), voxelDataWorldPosition - worldSpaceQuery.min.ToInt3());
                 });
             });
 
-            return voxelDataVolume;
+            return voxelDataArray;
         }
 
         /// <summary>
@@ -220,10 +220,10 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
             {
                 if (!_chunks.ContainsKey(chunkCoordinate)) { continue; }
 
-                if (TryGetVoxelDataChunk(chunkCoordinate, out NativeArray<byte> voxelDataVolume))
+                if (TryGetVoxelDataChunk(chunkCoordinate, out NativeArray<byte> voxelDataArray))
                 {
                     int3 localPos = (worldPosition - chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize).Mod(VoxelWorld.WorldSettings.ChunkSize + 1);
-                    voxelDataVolume.SetElement(voxelData, VoxelWorld.WorldSettings.ChunkSize + 1, localPos);
+                    voxelDataArray.SetElement(voxelData, VoxelWorld.WorldSettings.ChunkSize + 1, localPos);
 
                     if (VoxelWorld.ChunkStore.TryGetChunkAtCoordinate(chunkCoordinate, out ChunkProperties chunkProperties))
                     {
@@ -236,18 +236,18 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <summary>
         /// Sets a chunk's voxel data
         /// </summary>
-        /// <param name="chunkVoxelData">The new voxel data</param>
+        /// <param name="newVoxelDataArray">The new voxel data</param>
         /// <param name="chunkCoordinate">The coordinate of the chunk whose voxel data should be set</param>
-        public void SetVoxelDataChunk(NativeArray<byte> chunkVoxelData, int3 chunkCoordinate)
+        public void SetVoxelDataChunk(NativeArray<byte> newVoxelDataArray, int3 chunkCoordinate)
         {
-            if (_chunks.TryGetValue(chunkCoordinate, out NativeArray<byte> voxelDataVolume))
+            if (_chunks.TryGetValue(chunkCoordinate, out NativeArray<byte> oldVoxelDataArray))
             {
-                voxelDataVolume.CopyFrom(chunkVoxelData);
-                chunkVoxelData.Dispose();
+                oldVoxelDataArray.CopyFrom(newVoxelDataArray);
+                newVoxelDataArray.Dispose();
             }
             else
             {
-                _chunks.Add(chunkCoordinate, chunkVoxelData);
+                _chunks.Add(chunkCoordinate, newVoxelDataArray);
             }
 
             if (VoxelWorld.ChunkStore.TryGetChunkAtCoordinate(chunkCoordinate, out ChunkProperties chunkProperties))
@@ -259,17 +259,17 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <summary>
         /// Sets the voxel data for a volume in the world
         /// </summary>
-        /// <param name="voxelDataVolume">The new voxel data volume</param>
+        /// <param name="voxelDataArray">The new voxel data array</param>
         /// <param name="originPosition">The world position of the origin where the voxel data should be set</param>
-        public void SetVoxelDataCustom(NativeArray<byte> voxelDataVolume, int3 voxelDataVolumeDimensions, int3 originPosition)
+        public void SetVoxelDataCustom(NativeArray<byte> voxelDataArray, int3 voxelDataArrayDimensions, int3 originPosition)
         {
-            BoundsInt worldSpaceQuery = new BoundsInt(originPosition.ToVectorInt(), (voxelDataVolumeDimensions - new int3(1, 1, 1)).ToVectorInt());
+            BoundsInt worldSpaceQuery = new BoundsInt(originPosition.ToVectorInt(), (voxelDataArrayDimensions - new int3(1, 1, 1)).ToVectorInt());
 
-            ForEachVoxelDataVolumeInQuery(worldSpaceQuery, (chunkCoordinate, voxelDataChunk) =>
+            ForEachVoxelDataArrayInQuery(worldSpaceQuery, (chunkCoordinate, voxelDataChunk) =>
             {
                 ForEachVoxelDataInQueryInChunk(worldSpaceQuery, chunkCoordinate, voxelDataChunk, (voxelDataWorldPosition, voxelDataLocalPosition, voxelDataIndex, voxelData) =>
                 {
-                    voxelDataChunk.SetElement(voxelData, voxelDataVolumeDimensions, voxelDataWorldPosition - chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize);
+                    voxelDataChunk.SetElement(voxelData, voxelDataArrayDimensions, voxelDataWorldPosition - chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize);
                 });
 
                 if (VoxelWorld.ChunkStore.TryGetChunkAtCoordinate(chunkCoordinate, out ChunkProperties chunkProperties))
@@ -287,7 +287,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
 
         public void SetVoxelDataCustom(BoundsInt worldSpaceQuery, Func<int3, byte, byte> setVoxelDataFunction)
         {
-            ForEachVoxelDataVolumeInQuery(worldSpaceQuery, (chunkCoordinate, voxelDataChunk) =>
+            ForEachVoxelDataArrayInQuery(worldSpaceQuery, (chunkCoordinate, voxelDataChunk) =>
             {
                 bool anyChanged = false;
                 ForEachVoxelDataInQueryInChunk(worldSpaceQuery, chunkCoordinate, voxelDataChunk, (voxelDataWorldPosition, voxelDataLocalPosition, voxelDataIndex, voxelData) =>
@@ -311,11 +311,11 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         }
 
         /// <summary>
-        /// Loops through each voxel data volume that intersects with <paramref name="worldSpaceQuery"/> and performs <paramref name="function"/> on them.
+        /// Loops through each voxel data array that intersects with <paramref name="worldSpaceQuery"/> and performs <paramref name="function"/> on them.
         /// </summary>
         /// <param name="worldSpaceQuery">The query which will be used to determine all the chunks that should be looped through</param>
         /// <param name="function">The function that will be performed on every chunk. The arguments are as follows: 1) The chunk's coordinate, 2) The chunk's voxel data</param>
-        public void ForEachVoxelDataVolumeInQuery(BoundsInt worldSpaceQuery, Action<int3, NativeArray<byte>> function)
+        public void ForEachVoxelDataArrayInQuery(BoundsInt worldSpaceQuery, Action<int3, NativeArray<byte>> function)
         {
             int3 chunkSize = VoxelWorld.WorldSettings.ChunkSize;
 

@@ -8,6 +8,9 @@ namespace Eldemarkki.VoxelTerrain.Meshing
 {
     public abstract class VoxelMesher : MonoBehaviour
     {
+        /// <summary>
+        /// The voxel world the owns this voxel mesher
+        /// </summary>
         public VoxelWorld VoxelWorld { get; set; }
 
         /// <summary>
