@@ -131,9 +131,10 @@ namespace Eldemarkki.VoxelTerrain.World
         private void GenerateTerrainAroundCoordinate(int3 coordinate)
         {
             // Start generating voxel data for chunks with radius 'renderDistance + loadingBufferSize'
-            LoadingCoordinates loadingCoordinates = new LoadingCoordinates(coordinate, renderDistance, loadingBufferSize);
-            foreach (int3 loadingCoordinate in loadingCoordinates.GetCoordinates())
+            int3[] preloadCoordinates = GetPreloadCoordinates(coordinate, renderDistance, loadingBufferSize);
+            for (int i = 0; i < preloadCoordinates.Length; i++)
             {
+                int3 loadingCoordinate = preloadCoordinates[i];
                 voxelWorld.VoxelDataStore.GenerateDataForChunk(loadingCoordinate);
             }
 
@@ -147,6 +148,52 @@ namespace Eldemarkki.VoxelTerrain.World
             }
 
             _lastGenerationCoordinate = coordinate;
+        }
+
+        /// <summary>
+        /// Gets the coordinates of the chunks whose voxel data should be generated. The coordinates are in a cubical shape, with the inside of the cube being empty; generates the coordinates of the outer part of the cube
+        /// </summary>
+        /// <param name="centerCoordinate">The central coordinate</param>
+        /// <param name="innerSize">The size of the inner cube</param>
+        /// <param name="outerSize">The thickness between the outer cube and the inner cube; Think of this as the thickness of the imaginary outline</param>
+        /// <returns>The coordinates for the outer parts of the cube</returns>
+        private static int3[] GetPreloadCoordinates(int3 centerCoordinate, int innerSize, int outerSize)
+        {
+            int3 min = -new int3(innerSize + outerSize);
+            int3 max = new int3(innerSize + outerSize);
+
+            int3 innerMin = -new int3(innerSize);
+            int3 innerMax = new int3(innerSize);
+
+            int3 fullSize = max - min + 1;
+            int fullVolume = fullSize.x * fullSize.y * fullSize.z;
+
+            int3 innerDimensions = innerMax - innerMin + 1;
+            int innerVolume = innerDimensions.x * innerDimensions.y * innerDimensions.z;
+
+            int3[] result = new int3[fullVolume - innerVolume];
+
+            int index = 0;
+            for (int x = min.x; x <= max.x; x++)
+            {
+                for (int y = min.y; y <= max.y; y++)
+                {
+                    for (int z = min.z; z <= max.z; z++)
+                    {
+                        if (innerMin.x <= x && x <= innerMax.x &&
+                            innerMin.y <= y && y <= innerMax.y &&
+                            innerMin.z <= z && z <= innerMax.z)
+                        {
+                            continue;
+                        }
+
+                        result[index] = new int3(x, y, z) + centerCoordinate;
+                        index++;
+                    }
+                }
+            }
+
+            return result;
         }
 
         /// <summary>
