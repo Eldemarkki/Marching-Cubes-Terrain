@@ -34,7 +34,7 @@ namespace Eldemarkki.VoxelTerrain.World
         /// <param name="dataValue">The new data value of the data point</param>
         public void SetData(int3 dataWorldPosition, T dataValue)
         {
-            IEnumerable<int3> affectedChunkCoordinates = ChunkUtilities.GetChunkCoordinatesContainingPoint(dataWorldPosition, VoxelWorld.WorldSettings.ChunkSize);
+            IEnumerable<int3> affectedChunkCoordinates = CoordinateUtilities.GetChunkCoordinatesContainingPoint(dataWorldPosition, VoxelWorld.WorldSettings.ChunkSize);
 
             foreach (int3 chunkCoordinate in affectedChunkCoordinates)
             {
