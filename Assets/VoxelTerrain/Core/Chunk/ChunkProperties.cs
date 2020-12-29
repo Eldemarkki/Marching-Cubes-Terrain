@@ -32,8 +32,10 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         /// <param name="chunkSize">The size of this chunk</param>
         public void Initialize(int3 chunkCoordinate, int3 chunkSize)
         {
-            ChunkGameObject.transform.position = (chunkCoordinate * chunkSize).ToVectorInt();
+#if UNITY_EDITOR
             ChunkGameObject.name = GetName(chunkCoordinate);
+#endif
+            ChunkGameObject.transform.position = (chunkCoordinate * chunkSize).ToVectorInt();
             ChunkCoordinate = chunkCoordinate;
 
             IsMeshGenerated = false;
