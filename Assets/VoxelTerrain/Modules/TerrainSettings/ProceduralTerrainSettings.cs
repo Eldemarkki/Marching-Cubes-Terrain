@@ -9,25 +9,20 @@ namespace Eldemarkki.VoxelTerrain.Settings
     [Serializable]
     public struct ProceduralTerrainSettings
     {
-        /// <summary>
-        /// The frequency of the noise
-        /// </summary>
+        /// <inheritdoc cref="NoiseFrequency"/>
         [SerializeField] private float noiseFrequency;
-        
-        /// <summary>
-        /// How many octaves the noise will have
-        /// </summary>
+
+        /// <inheritdoc cref="NoiseOctaveCount"/>
         [SerializeField] private int noiseOctaveCount;
-        
-        /// <summary>
-        /// The height multiplier
-        /// </summary>
+
+        /// <inheritdoc cref="Amplitude"/>
         [SerializeField] private float amplitude;
-        
-        /// <summary>
-        /// Moves the height up and down
-        /// </summary>
+
+        /// <inheritdoc cref="HeightOffset"/>
         [SerializeField] private float heightOffset;
+
+        /// <inheritdoc cref="NoiseSeed"/>
+        [SerializeField] private int noiseSeed;
 
         /// <summary>
         /// The frequency of the noise
@@ -50,18 +45,25 @@ namespace Eldemarkki.VoxelTerrain.Settings
         public float HeightOffset { get => heightOffset; set => heightOffset = value; }
 
         /// <summary>
+        /// The seed that the noise function will be initialized with
+        /// </summary>
+        public int NoiseSeed { get => noiseSeed; set => noiseSeed = value; }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="noiseFrequency">The frequency of the noise</param>
         /// <param name="noiseOctaveCount">How many octaves the noise will have</param>
         /// <param name="amplitude">The height multiplier</param>
         /// <param name="heightOffset">Moves the height up and down</param>
-        public ProceduralTerrainSettings(float noiseFrequency, int noiseOctaveCount, float amplitude, float heightOffset)
+        /// <param name="noiseSeed">The seed that the noise function will be initialized with</param>
+        public ProceduralTerrainSettings(float noiseFrequency, int noiseOctaveCount, float amplitude, float heightOffset, int noiseSeed)
         {
             this.noiseFrequency = noiseFrequency;
             this.noiseOctaveCount = noiseOctaveCount;
             this.amplitude = amplitude;
             this.heightOffset = heightOffset;
+            this.noiseSeed = noiseSeed;
         }
     }
 }

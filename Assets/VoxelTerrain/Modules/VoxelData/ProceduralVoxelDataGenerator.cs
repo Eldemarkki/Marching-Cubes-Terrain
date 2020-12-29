@@ -15,7 +15,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <summary>
         /// The settings for the procedural generation
         /// </summary>
-        [SerializeField] private ProceduralTerrainSettings proceduralTerrainSettings = new ProceduralTerrainSettings(1, 9, 120, 0);
+        [SerializeField] private ProceduralTerrainSettings proceduralTerrainSettings = new ProceduralTerrainSettings(1, 9, 120, 0, 0);
 
         /// <inheritdoc/>
         public override JobHandleWithData<IVoxelDataGenerationJob> GenerateVoxelData(int3 worldSpaceOrigin, VoxelDataVolume<byte> outputVoxelDataArray)

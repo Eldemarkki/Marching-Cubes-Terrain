@@ -257,6 +257,7 @@ MonoBehaviour:
     noiseOctaveCount: 9
     amplitude: 120
     heightOffset: 0
+    noiseSeed: 0
 --- !u!114 &35699121
 MonoBehaviour:
   m_ObjectHideFlags: 0
