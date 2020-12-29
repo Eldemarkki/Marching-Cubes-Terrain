@@ -1,5 +1,4 @@
 ﻿using Eldemarkki.VoxelTerrain.Utilities.Intersection;
-using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -13,7 +12,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities
         /// <param name="worldPosition">The world position to check</param>
         /// <param name="chunkSize">The size of the chunks</param>
         /// <returns>A collection of chunk coordinates that contain the world position</returns>
-        public static IEnumerable<int3> GetChunkCoordinatesContainingPoint(int3 worldPosition, int3 chunkSize)
+        public static int3[] GetChunkCoordinatesContainingPoint(int3 worldPosition, int3 chunkSize)
         {
             int3 localPosition = VectorUtilities.Mod(worldPosition, chunkSize);
 
@@ -21,29 +20,34 @@ namespace Eldemarkki.VoxelTerrain.Utilities
             int chunkCheckCountY = localPosition.y == 0 ? 1 : 0;
             int chunkCheckCountZ = localPosition.z == 0 ? 1 : 0;
 
+            // Each "1" in chunkCheckCount(x/y/z) will double the chunk count (= move the bit one place to the left), so calculate how many doublings have to be done and then do that many
+            int chunkCount = 1 << (chunkCheckCountX + chunkCheckCountY + chunkCheckCountZ);
+            int3[] chunkCoordinates = new int3[chunkCount];
+
+            // This is world position converted to a chunk coordinate
             int3 origin = VectorUtilities.WorldPositionToCoordinate(worldPosition, chunkSize);
 
-            // The origin (worldPosition as a chunk coordinate) is always included
-            yield return origin;
-
-            // The first corner can be skipped, since it's (0, 0, 0) and would just return origin
-            for (int i = 1; i < 8; i++)
+            int addedIndex = 0;
+            for (int i = 0; i < 8; i++)
             {
                 var cornerOffset = LookupTables.CubeCorners[i];
                 if (cornerOffset.x <= chunkCheckCountX && cornerOffset.y <= chunkCheckCountY && cornerOffset.z <= chunkCheckCountZ)
                 {
-                    yield return origin - cornerOffset;
+                    chunkCoordinates[addedIndex] = origin - cornerOffset;
+                    addedIndex++;
                 }
             }
+
+            return chunkCoordinates;
         }
-        
+
         /// <summary>
-         /// Gets the coordinates of the chunks whose voxel data should be generated. The coordinates are in a cubical shape, with the inside of the cube being empty; generates the coordinates of the outer part of the cube
-         /// </summary>
-         /// <param name="centerCoordinate">The central coordinate</param>
-         /// <param name="innerSize">The size of the inner cube</param>
-         /// <param name="outerSize">The thickness between the outer cube and the inner cube; Think of this as the thickness of the imaginary outline</param>
-         /// <returns>The coordinates for the outer parts of the cube</returns>
+        /// Gets the coordinates of the chunks whose voxel data should be generated. The coordinates are in a cubical shape, with the inside of the cube being empty; generates the coordinates of the outer part of the cube
+        /// </summary>
+        /// <param name="centerCoordinate">The central coordinate</param>
+        /// <param name="innerSize">The size of the inner cube</param>
+        /// <param name="outerSize">The thickness between the outer cube and the inner cube; Think of this as the thickness of the imaginary outline</param>
+        /// <returns>The coordinates for the outer parts of the cube</returns>
         public static int3[] GetPreloadCoordinates(int3 centerCoordinate, int innerSize, int outerSize)
         {
             int3 min = -new int3(innerSize + outerSize);
@@ -125,55 +129,39 @@ namespace Eldemarkki.VoxelTerrain.Utilities
             int newChunksMinZ = newChunks.zMin;
             int newChunksMaxZ = newChunks.zMax;
 
-            int3[] coordinates;
+            int oldChunksMinX = oldChunks.xMin;
+            int oldChunksMaxX = oldChunks.xMax;
+            int oldChunksMinY = oldChunks.yMin;
+            int oldChunksMaxY = oldChunks.yMax;
+            int oldChunksMinZ = oldChunks.zMin;
+            int oldChunksMaxZ = oldChunks.zMax;
+
+            int count = newChunks.CalculateVolume();
 
             BoundsInt intersection = IntersectionUtilities.GetIntersectionVolume(oldChunks, newChunks);
-            if (math.any(intersection.size.ToInt3() < int3.zero))
+            if(math.all(intersection.size.ToInt3() > 0))
             {
-                coordinates = new int3[newChunks.CalculateVolume()];
-                int i = 0;
-                for (int x = newChunksMinX; x < newChunksMaxX; x++)
-                {
-                    for (int y = newChunksMinY; y < newChunksMaxY; y++)
-                    {
-                        for (int z = newChunksMinZ; z < newChunksMaxZ; z++)
-                        {
-                            coordinates[i] = new int3(x, y, z);
-                            i++;
-                        }
-                    }
-                }
+                count -= intersection.CalculateVolume();
             }
-            else
+
+            int3[] coordinates = new int3[count];
+
+            int i = 0;
+            for (int x = newChunksMinX; x < newChunksMaxX; x++)
             {
-                var intersectionMinX = intersection.xMin;
-                var intersectionMinY = intersection.yMin;
-                var intersectionMinZ = intersection.zMin;
-
-                var intersectionMaxX = intersection.xMax;
-                var intersectionMaxY = intersection.yMax;
-                var intersectionMaxZ = intersection.zMax;
-
-                int count = newChunks.CalculateVolume() - intersection.CalculateVolume();
-                coordinates = new int3[count];
-
-                int i = 0;
-                for (int x = newChunksMinX; x < newChunksMaxX; x++)
+                for (int y = newChunksMinY; y < newChunksMaxY; y++)
                 {
-                    for (int y = newChunksMinY; y < newChunksMaxY; y++)
+                    for (int z = newChunksMinZ; z < newChunksMaxZ; z++)
                     {
-                        for (int z = newChunksMinZ; z < newChunksMaxZ; z++)
+                        if (oldChunksMinX <= x && x < oldChunksMaxX &&
+                            oldChunksMinY <= y && y < oldChunksMaxY &&
+                            oldChunksMinZ <= z && z < oldChunksMaxZ)
                         {
-                            if (intersectionMinX <= x && x < intersectionMaxX &&
-                                intersectionMinY <= y && y < intersectionMaxY &&
-                                intersectionMinZ <= z && z < intersectionMaxZ)
-                            {
-                                continue;
-                            }
-
-                            coordinates[i] = new int3(x, y, z);
-                            i++;
+                            continue;
                         }
+
+                        coordinates[i] = new int3(x, y, z);
+                        i++;
                     }
                 }
             }

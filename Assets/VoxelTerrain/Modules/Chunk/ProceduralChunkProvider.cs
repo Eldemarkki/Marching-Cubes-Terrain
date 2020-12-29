@@ -16,13 +16,13 @@ namespace Eldemarkki.VoxelTerrain.Chunks
         [SerializeField] private int chunkGenerationRate = 10;
 
         /// <summary>
-        /// A list that contains all the coordinates where a chunk will eventually have to be generated
+        /// A queue that contains all the coordinates where a chunk will eventually have to be generated
         /// </summary>
-        private List<int3> _generationQueue;
+        private Queue<int3> _generationQueue;
 
         private void Awake()
         {
-            _generationQueue = new List<int3>();
+            _generationQueue = new Queue<int3>();
         }
 
         private void Update()
@@ -30,8 +30,7 @@ namespace Eldemarkki.VoxelTerrain.Chunks
             int chunksGenerated = 0;
             while (_generationQueue.Count > 0 && chunksGenerated < chunkGenerationRate)
             {
-                int3 chunkCoordinate = _generationQueue[0];
-                _generationQueue.RemoveAt(0);
+                int3 chunkCoordinate = _generationQueue.Dequeue();
 
                 if (VoxelWorld.ChunkStore.TryGetDataChunk(chunkCoordinate, out ChunkProperties chunkProperties))
                 {
@@ -63,7 +62,7 @@ namespace Eldemarkki.VoxelTerrain.Chunks
         /// <param name="chunkCoordinate"></param>
         public void AddChunkToGenerationQueue(int3 chunkCoordinate)
         {
-            _generationQueue.Add(chunkCoordinate);
+            _generationQueue.Enqueue(chunkCoordinate);
         }
     }
 }

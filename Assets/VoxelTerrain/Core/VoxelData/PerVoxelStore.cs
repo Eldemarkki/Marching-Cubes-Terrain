@@ -3,7 +3,6 @@ using Eldemarkki.VoxelTerrain.Utilities.Intersection;
 using Eldemarkki.VoxelTerrain.VoxelData;
 using Eldemarkki.VoxelTerrain.World.Chunks;
 using System;
-using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
@@ -34,10 +33,11 @@ namespace Eldemarkki.VoxelTerrain.World
         /// <param name="dataValue">The new data value of the data point</param>
         public void SetData(int3 dataWorldPosition, T dataValue)
         {
-            IEnumerable<int3> affectedChunkCoordinates = CoordinateUtilities.GetChunkCoordinatesContainingPoint(dataWorldPosition, VoxelWorld.WorldSettings.ChunkSize);
+            int3[] affectedChunkCoordinates = CoordinateUtilities.GetChunkCoordinatesContainingPoint(dataWorldPosition, VoxelWorld.WorldSettings.ChunkSize);
 
-            foreach (int3 chunkCoordinate in affectedChunkCoordinates)
+            for (int i = 0; i < affectedChunkCoordinates.Length; i++)
             {
+                int3 chunkCoordinate = affectedChunkCoordinates[i];
                 if (TryGetDataChunk(chunkCoordinate, out VoxelDataVolume<T> chunkData))
                 {
                     int3 localPos = (dataWorldPosition - chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize).Mod(VoxelWorld.WorldSettings.ChunkSize + 1);

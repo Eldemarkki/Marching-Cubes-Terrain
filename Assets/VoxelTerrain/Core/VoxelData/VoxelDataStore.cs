@@ -3,7 +3,6 @@ using System.Linq;
 using Eldemarkki.VoxelTerrain.Utilities;
 using Eldemarkki.VoxelTerrain.World;
 using Eldemarkki.VoxelTerrain.World.Chunks;
-using Unity.Collections;
 using Unity.Mathematics;
 
 namespace Eldemarkki.VoxelTerrain.VoxelData
@@ -75,7 +74,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         }
 
         /// <summary>
-        /// Tries to get the voxel data array for one chunk with a persistent allocator. If a chunk doesn't exist there, false will be returned and <paramref name="chunk"/> will be set to null. If a chunk exists there, true will be returned and <paramref name="chunk"/> will be set to the chunk.
+        /// Tries to get the voxel data array for one chunk with a persistent allocator. If a chunk doesn't exist there, false will be returned and <paramref name="chunk"/> will be set to null. If a chunk exists there, true will be returned and <paramref name="chunk"/> will be set to the chunk. If the data for that chunk is currently being calculated, the job will complete and the new data will be set to <paramref name="chunk"/>
         /// </summary>
         /// <param name="chunkCoordinate">The coordinate of the chunk whose voxel data should be gotten</param>
         /// <param name="chunk">The voxel data of a chunk at the coordinate</param>
@@ -86,19 +85,14 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
             return TryGetDataChunkWithoutApplying(chunkCoordinate, out chunk);
         }
 
+        /// <summary>
+        /// Tries to get the voxel data array for one chunk with a persistent allocator. If a chunk doesn't exist there, false will be returned and <paramref name="chunk"/> will be set to null. If a chunk exists there, true will be returned and <paramref name="chunk"/> will be set to the chunk. If the data for that chunk is currently being calculated, the job will NOT be completed.
+        /// <param name="chunkCoordinate">The coordinate of the chunk whose voxel data should be gotten</param>
+        /// <param name="chunk">The voxel data of a chunk at the coordinate</param>
+        /// <returns>Does a chunk exists at that coordinate</returns>
         private bool TryGetDataChunkWithoutApplying(int3 chunkCoordinate, out VoxelDataVolume<byte> chunk)
         {
             return _chunks.TryGetValue(chunkCoordinate, out chunk);
-        }
-
-        /// <summary>
-        /// Sets the job handle for a chunk coordinate
-        /// </summary>
-        /// <param name="generationJobHandle">The job handle with data</param>
-        /// <param name="chunkCoordinate">The coordinate of the chunk to set the job handle for</param>
-        private void SetVoxelDataJobHandle(JobHandleWithData<IVoxelDataGenerationJob> generationJobHandle, int3 chunkCoordinate)
-        {
-            _generationJobHandles.Add(chunkCoordinate, generationJobHandle);
         }
 
         /// <summary>
@@ -117,14 +111,14 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
 
         public override void SetDataChunk(int3 chunkCoordinate, VoxelDataVolume<byte> newData)
         {
-            if (_chunks.TryGetValue(chunkCoordinate, out VoxelDataVolume<byte> oldData))
+            if (TryGetDataChunkWithoutApplying(chunkCoordinate, out VoxelDataVolume<byte> oldData))
             {
                 oldData.CopyFrom(newData);
                 newData.Dispose();
             }
             else
             {
-                _chunks.Add(chunkCoordinate, newData);
+                AddChunkUnchecked(chunkCoordinate, newData);
             }
 
             if (VoxelWorld.ChunkStore.TryGetDataChunk(chunkCoordinate, out ChunkProperties chunkProperties))
@@ -137,7 +131,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         {
             int3 chunkWorldOrigin = chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize;
             JobHandleWithData<IVoxelDataGenerationJob> jobHandleWithData = VoxelWorld.VoxelDataGenerator.GenerateVoxelData(chunkWorldOrigin, existingData);
-            SetVoxelDataJobHandle(jobHandleWithData, chunkCoordinate);
+            _generationJobHandles.Add(chunkCoordinate, jobHandleWithData);
         }
     }
 }
