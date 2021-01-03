@@ -7,6 +7,15 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
     /// </summary>
     public class ChunkStore : PerChunkStore<ChunkProperties>
     {
+        private void OnApplicationQuit()
+        {
+            foreach(ChunkProperties chunkProperties in _chunks.Values)
+            {
+                chunkProperties.Vertices.Dispose(); 
+                chunkProperties.Triangles.Dispose();
+            }
+        }
+
         /// <summary>
         /// Generates the data for a chunk at coordinate <paramref name="chunkCoordinate"/>, and adds it to the chunks dictionary in <see cref="PerChunkStore{T}"/>
         /// </summary>
