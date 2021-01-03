@@ -83,7 +83,7 @@ namespace Eldemarkki.VoxelTerrain.World
 
             if (VoxelWorld.ChunkStore.TryGetDataChunk(chunkCoordinate, out ChunkProperties chunkProperties))
             {
-                chunkProperties.HasChanges = true;
+                chunkProperties.IsMeshGenerated = false;
             }
         }
 
