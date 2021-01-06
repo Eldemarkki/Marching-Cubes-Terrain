@@ -132,7 +132,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         }
 
         /// <summary>
-        /// Stores the <paramref name="voxelData"/> at <paramref name="localPosition"/>. The <paramref name="voxelData"/> will be clamped to be in range [0, 1]
+        /// Stores the <paramref name="voxelData"/> at <paramref name="localPosition"/>.
         /// </summary>
         /// <param name="voxelData">The new voxel data</param>
         /// <param name="localPosition">The location of that voxel data</param>
@@ -143,7 +143,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         }
 
         /// <summary>
-        /// Stores the <paramref name="voxelData"/> at <paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/>. The <paramref name="voxelData"/> will be clamped to be in range [0, 1]
+        /// Stores the <paramref name="voxelData"/> at <paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/>.
         /// </summary>
         /// <param name="voxelData">The new voxel data</param>
         /// <param name="x">The x value of the voxel data location</param>
@@ -156,7 +156,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         }
 
         /// <summary>
-        /// Stores the <paramref name="voxelData"/> at <paramref name="index"/>. The <paramref name="voxelData"/> will be clamped to be in range [0, 1]
+        /// Stores the <paramref name="voxelData"/> at <paramref name="index"/>.
         /// </summary>
         /// <param name="voxelData">The new voxel data</param>
         /// <param name="index">The index in the native array</param>
@@ -166,10 +166,10 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         }
 
         /// <summary>
-        /// Tries to get the voxel data at <paramref name="localPosition"/>. If the data exists at <paramref name="localPosition"/>, true will be returned and <paramref name="voxelData"/> will be set to the value (range [0, 1]). If it doesn't exist, false will be returned and <paramref name="voxelData"/> will be set to 0.
+        /// Tries to get the voxel data at <paramref name="localPosition"/>. If the data exists at <paramref name="localPosition"/>, true will be returned and <paramref name="voxelData"/> will be set to the value. If it doesn't exist, false will be returned and <paramref name="voxelData"/> will be set to default(T).
         /// </summary>
         /// <param name="localPosition">The local position of the voxel data to get</param>
-        /// <param name="voxelData">A voxel data in the range [0, 1] at <paramref name="localPosition"/></param>
+        /// <param name="voxelData">A voxel data at <paramref name="localPosition"/></param>
         /// <returns>Does a voxel data point exist at <paramref name="localPosition"/></returns>
         public bool TryGetVoxelData(int3 localPosition, out T voxelData)
         {
@@ -177,12 +177,12 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         }
 
         /// <summary>
-        /// Tries to get the voxel data at <paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/>. If the data exists at <paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/>, true will be returned and <paramref name="voxelData"/> will be set to the value (range [0, 1]). If it doesn't exist, false will be returned and <paramref name="voxelData"/> will be set to 0.
+        /// Tries to get the voxel data at <paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/>. If the data exists at <paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/>, true will be returned and <paramref name="voxelData"/> will be set to the value. If it doesn't exist, false will be returned and <paramref name="voxelData"/> will be set to default(T).
         /// </summary>
         /// <param name="x">The x value of the voxel data location</param>
         /// <param name="y">The y value of the voxel data location</param>
         /// <param name="z">The z value of the voxel data location</param>
-        /// <param name="voxelData">A voxel data in the range [0, 1] at <paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/></param>
+        /// <param name="voxelData">A voxel data at <paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/></param>
         /// <returns>Does a voxel data point exist at <paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/></returns>
         public bool TryGetVoxelData(int x, int y, int z, out T voxelData)
         {
@@ -191,10 +191,10 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         }
 
         /// <summary>
-        /// Gets the voxel data at <paramref name="index"/>. If the data exists at <paramref name="index"/>, true will be returned and <paramref name="voxelData"/> will be set to the value (range [0, 1]). If it doesn't exist, false will be returned and <paramref name="voxelData"/> will be set to 0.
+        /// Gets the voxel data at <paramref name="index"/>. If the data exists at <paramref name="index"/>, true will be returned and <paramref name="voxelData"/> will be set to the value. If it doesn't exist, false will be returned and <paramref name="voxelData"/> will be set to default(T).
         /// </summary>
         /// <param name="index">The index in the native array</param>
-        /// <param name="voxelData">A voxel data in the range [0, 1] at <paramref name="index"/></param>
+        /// <param name="voxelData">A voxel data at <paramref name="index"/></param>
         /// <returns>Does a voxel data point exist at <paramref name="index"/></returns>
         public bool TryGetVoxelData(int index, out T voxelData)
         {

@@ -5,7 +5,6 @@ using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
-using Eldemarkki.VoxelTerrain.World.Chunks;
 
 namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
 {
@@ -24,7 +23,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         public float Isolevel => isolevel;
 
         /// <inheritdoc/>
-        public override JobHandleWithData<IMesherJob> CreateMesh(VoxelDataStore voxelDataStore, VoxelColorStore voxelColorStore, ChunkStore chunkStore, int3 chunkCoordinate)
+        public override JobHandleWithData<IMesherJob> CreateMesh(VoxelDataStore voxelDataStore, VoxelColorStore voxelColorStore, int3 chunkCoordinate)
         {
             if (!voxelDataStore.TryGetDataChunk(chunkCoordinate, out VoxelDataVolume<byte> boundsVoxelData))
             {
@@ -41,19 +40,8 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
             int voxelCount = VoxelWorld.WorldSettings.ChunkSize.x * VoxelWorld.WorldSettings.ChunkSize.y * VoxelWorld.WorldSettings.ChunkSize.z;
             int maxLength = 15 * voxelCount;
 
-            NativeArray<MeshingVertexData> outputVertices;
-            NativeArray<ushort> outputTriangles;
-
-            if (chunkStore.TryGetDataChunk(chunkCoordinate, out ChunkProperties chunk))
-            {
-                outputVertices = chunk.Vertices;
-                outputTriangles = chunk.Triangles;
-            }
-            else
-            {
-                outputVertices = new NativeArray<MeshingVertexData>(maxLength, Allocator.TempJob);
-                outputTriangles = new NativeArray<ushort>(maxLength, Allocator.TempJob);
-            }
+            NativeArray<MeshingVertexData> outputVertices = new NativeArray<MeshingVertexData>(maxLength, Allocator.TempJob);
+            NativeArray<ushort> outputTriangles = new NativeArray<ushort>(maxLength, Allocator.TempJob);
 
             MarchingCubesJob marchingCubesJob = new MarchingCubesJob
             {

@@ -39,7 +39,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         /// </summary>
         public void GenerateMeshImmediate(ChunkProperties chunkProperties)
         {
-            JobHandleWithData<IMesherJob> jobHandleWithData = VoxelWorld.VoxelMesher.CreateMesh(VoxelWorld.VoxelDataStore, VoxelWorld.VoxelColorStore, VoxelWorld.ChunkStore, chunkProperties.ChunkCoordinate);
+            JobHandleWithData<IMesherJob> jobHandleWithData = VoxelWorld.VoxelMesher.CreateMesh(VoxelWorld.VoxelDataStore, VoxelWorld.VoxelColorStore, chunkProperties.ChunkCoordinate);
             if (jobHandleWithData == null) { return; }
 
             IMesherJob job = jobHandleWithData.JobData;
@@ -57,6 +57,9 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
 
             mesh.SetVertexBufferData(job.OutputVertices, 0, 0, vertexCount, 0, MeshUpdateFlags.DontValidateIndices);
             mesh.SetIndexBufferData(job.OutputTriangles, 0, 0, vertexCount, MeshUpdateFlags.DontValidateIndices);
+
+            job.OutputVertices.Dispose();
+            job.OutputTriangles.Dispose();
 
             mesh.subMeshCount = 1;
             subMesh.indexCount = vertexCount;

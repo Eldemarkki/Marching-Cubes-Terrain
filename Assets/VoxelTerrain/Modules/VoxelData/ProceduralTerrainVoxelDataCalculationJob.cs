@@ -27,19 +27,22 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// </summary>
         public void Execute()
         {
+            float actualHeightOffset = WorldPositionOffset.y - ProceduralTerrainSettings.HeightOffset;
+
             for (int x = 0; x < OutputVoxelData.Width; x++)
             {
                 for (int z = 0; z < OutputVoxelData.Depth; z++)
                 {
-                    int2 terrainPosition = new int2(x + WorldPositionOffset.x, z + WorldPositionOffset.z);
-                    float terrainNoise = OctaveNoise(terrainPosition.x, terrainPosition.y, ProceduralTerrainSettings.NoiseFrequency * 0.001f, ProceduralTerrainSettings.NoiseOctaveCount, ProceduralTerrainSettings.NoiseSeed) * ProceduralTerrainSettings.Amplitude;
+                    int2 terrainPosition = new int2(x, z) + WorldPositionOffset.xz;
+
+                    float terrainNoise = OctaveNoise(terrainPosition, ProceduralTerrainSettings.NoiseFrequency * 0.001f, ProceduralTerrainSettings.NoiseOctaveCount, ProceduralTerrainSettings.NoiseSeed) * ProceduralTerrainSettings.Amplitude;
+
+                    float offset = actualHeightOffset - terrainNoise;
 
                     for (int y = 0; y < OutputVoxelData.Height; y++)
                     {
-                        int3 worldPosition = new int3(terrainPosition.x, y + WorldPositionOffset.y, terrainPosition.y);
-
-                        float voxelData = (worldPosition.y - ProceduralTerrainSettings.HeightOffset - terrainNoise) * 0.5f;
-                        OutputVoxelData.SetVoxelData((byte)math.clamp(voxelData * 255, 0, 255), new int3(x, y, z));
+                        float voxelData = (y + offset) * 0.5f;
+                        OutputVoxelData.SetVoxelData((byte)(math.saturate(voxelData) * 255), new int3(x, y, z));
                     }
                 }
             }
@@ -48,22 +51,22 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <summary>
         /// Calculates octave noise
         /// </summary>
-        /// <param name="x">Sampling point's x position</param>
-        /// <param name="y">Sampling point's y position</param>
+        /// <param name="position">Sampling point's position</param>
         /// <param name="frequency">The frequency of the noise</param>
         /// <param name="octaveCount">How many layers of noise to combine</param>
         /// <returns>The sampled noise value</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static float OctaveNoise(float x, float y, float frequency, int octaveCount, int seed)
+        private static float OctaveNoise(float2 position, float frequency, int octaveCount, int seed)
         {
             float value = 0;
+            float2 scaledPosition = position * frequency;
 
             for (int i = 0; i < octaveCount; i++)
             {
-                int octaveModifier = (int)math.pow(2, i);
+                int octaveModifier = 2 << i;
 
                 // (x+1)/2 because noise.snoise returns a value from -1 to 1 so it needs to be scaled to go from 0 to 1.
-                float pureNoise = (noise.snoise(new float3(octaveModifier * x * frequency, octaveModifier * y * frequency, seed)) + 1) / 2f;
+                float pureNoise = (noise.snoise(new float3(scaledPosition * octaveModifier, seed)) + 1) / 2f;
                 value += pureNoise / octaveModifier;
             }
 

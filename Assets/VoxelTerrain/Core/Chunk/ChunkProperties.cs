@@ -27,9 +27,6 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         public bool HasChanges { get; set; }
         public bool IsMeshGenerated { get; set; }
 
-        public NativeArray<MeshingVertexData> Vertices;
-        public NativeArray<ushort> Triangles;
-
         /// <summary>
         /// Initializes the chunk's properties.
         /// </summary>
@@ -45,16 +42,6 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
 
             IsMeshGenerated = false;
             HasChanges = false;
-
-            int maxLength = 15 * chunkSize.x * chunkSize.y * chunkSize.z;
-            if (!Vertices.IsCreated)
-            {
-                Vertices = new NativeArray<MeshingVertexData>(maxLength, Allocator.Persistent);
-            }
-            if (!Triangles.IsCreated)
-            {
-                Triangles = new NativeArray<ushort>(maxLength, Allocator.Persistent);
-            }
         }
 
         /// <summary>
