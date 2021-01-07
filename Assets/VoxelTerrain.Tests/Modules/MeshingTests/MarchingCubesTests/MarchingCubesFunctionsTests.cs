@@ -66,16 +66,21 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes.Tests
                 Corner8 = 255
             };
 
-            int edgeIndex = 0b1000_0000_1100;
             byte isolevel = 127;
+            byte cubeIndex = MarchingCubesFunctions.CalculateCubeIndex(densities, isolevel);
 
             VertexList expected = new VertexList();
             expected[2] = new float3(0.5f, 0f, 1f);
             expected[3] = new float3(0f, 0f, 0.5f);
             expected[11] = new float3(0f, 0.5f, 1f);
 
+            // Index at the beginning of the row
+            int rowIndex = MarchingCubesLookupTables.TriangleTableAccessIndices[cubeIndex];
+            int rowLength = MarchingCubesLookupTables.TriangleTableWithLengths[rowIndex]; // First item in the row
+            int rowStartIndex = rowIndex + 1; // Second index in the row;
+
             // Act
-            IEnumerable<float3> actual = MarchingCubesFunctions.GenerateVertexList(densities, new int3(0, 0, 0), edgeIndex, isolevel);
+            IEnumerable<float3> actual = MarchingCubesFunctions.GenerateVertexList(densities, new int3(0, 0, 0), rowStartIndex, rowLength, isolevel);
 
             // Assert
             for (int i = 0; i < 12; i++)
@@ -102,7 +107,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes.Tests
             };
 
             byte isolevel = 191;
-            int edgeIndex = 0b1110_1010_0011;
+            int cubeIndex = MarchingCubesFunctions.CalculateCubeIndex(densities, isolevel);
 
             VertexList expected = new VertexList();
             expected[0] = new float3(6.25f, -13f, 100f);
@@ -113,8 +118,13 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes.Tests
             expected[10] = new float3(7f, -12.75f, 101f);
             expected[11] = new float3(6f, -12.75f, 101f);
 
+            // Index at the beginning of the row
+            int rowIndex = MarchingCubesLookupTables.TriangleTableAccessIndices[cubeIndex];
+            int rowLength = MarchingCubesLookupTables.TriangleTableWithLengths[rowIndex]; // First item in the row
+            int rowStartIndex = rowIndex + 1; // Second index in the row;
+
             // Act
-            IEnumerable<float3> actual = MarchingCubesFunctions.GenerateVertexList(densities, new int3(6, -13, 100), edgeIndex, isolevel);
+            IEnumerable<float3> actual = MarchingCubesFunctions.GenerateVertexList(densities, new int3(6, -13, 100), rowStartIndex, rowLength, isolevel);
 
             // Assert
             for (int i = 0; i < 12; i++)
@@ -141,7 +151,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes.Tests
             };
 
             byte isolevel = 191;
-            int edgeIndex = 0b1111_0000_0000;
+            byte cubeIndex = MarchingCubesFunctions.CalculateCubeIndex(densities, isolevel);
 
             VertexList expected = new VertexList();
             expected[8] = new float3(-56f, -0.02439022f, 9f);
@@ -149,8 +159,13 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes.Tests
             expected[10] = new float3(-55f, -0.9803922f, 10f);
             expected[11] = new float3(-56f, -0.272727272727f, 10f);
 
+            // Index at the beginning of the row
+            int rowIndex = MarchingCubesLookupTables.TriangleTableAccessIndices[cubeIndex];
+            int rowLength = MarchingCubesLookupTables.TriangleTableWithLengths[rowIndex]; // First item in the row
+            int rowStartIndex = rowIndex + 1; // Second index in the row;
+
             // Act
-            IEnumerable<float3> actual = MarchingCubesFunctions.GenerateVertexList(densities, new int3(-56, -1, 9), edgeIndex, isolevel);
+            IEnumerable<float3> actual = MarchingCubesFunctions.GenerateVertexList(densities, new int3(-56, -1, 9), rowStartIndex, rowLength, isolevel);
 
             // Assert
             for (int i = 0; i < 12; i++)

@@ -60,16 +60,16 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         /// <returns>The generated vertex list for the voxel</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static VertexList GenerateVertexList(VoxelCorners<byte> voxelDensities, int3 voxelLocalPosition,
-            int edgeIndex, byte isolevel)
+            int rowStartIndex, int rowLength, byte isolevel)
         {
             VertexList vertexList = new VertexList();
 
-            for (int i = 0; i < 12; i++)
+            for (int i = 0; i < rowLength; i++)
             {
-                if ((edgeIndex & (1 << i)) == 0) { continue; }
+                int edgeIntersectionIndex = MarchingCubesLookupTables.TriangleTableWithLengths[rowStartIndex + i];
 
-                int edgeStartIndex = MarchingCubesLookupTables.EdgeIndexTable[2 * i + 0];
-                int edgeEndIndex = MarchingCubesLookupTables.EdgeIndexTable[2 * i + 1];
+                int edgeStartIndex = MarchingCubesLookupTables.EdgeIndexTable[2 * edgeIntersectionIndex + 0];
+                int edgeEndIndex = MarchingCubesLookupTables.EdgeIndexTable[2 * edgeIntersectionIndex + 1];
 
                 int3 corner1 = voxelLocalPosition + LookupTables.CubeCorners[edgeStartIndex];
                 int3 corner2 = voxelLocalPosition + LookupTables.CubeCorners[edgeEndIndex];
@@ -77,7 +77,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
                 float density1 = voxelDensities[edgeStartIndex] / 255f;
                 float density2 = voxelDensities[edgeEndIndex] / 255f;
 
-                vertexList[i] = VertexInterpolate(corner1, corner2, density1, density2, isolevel / 255f);
+                vertexList[edgeIntersectionIndex] = VertexInterpolate(corner1, corner2, density1, density2, isolevel / 255f);
             }
 
             return vertexList;
@@ -89,7 +89,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         /// <param name="voxelDataArray">The voxel data array to get the voxel data from</param>
         /// <param name="localPosition">The origin of the cube</param>
         /// <returns>A cube-shaped volume of voxel data. The size of the cube is 1 unit.</returns>
-        public static VoxelCorners<T> GetVoxelDataUnitCube<T>(this VoxelDataVolume<T> voxelDataArray, int3 localPosition) where T : struct
+        public static VoxelCorners<T> GetVoxelDataUnitCube<T>(this VoxelDataVolume<T> voxelDataArray, int3 localPosition) where T : unmanaged
         {
             VoxelCorners<T> voxelDataCorners = new VoxelCorners<T>();
             for (int i = 0; i < 8; i++)

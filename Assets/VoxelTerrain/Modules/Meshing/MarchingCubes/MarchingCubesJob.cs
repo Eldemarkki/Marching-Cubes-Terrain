@@ -67,19 +67,20 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
                         {
                             continue;
                         }
-
-                        int edgeIndex = MarchingCubesLookupTables.EdgeTable[cubeIndex];
-
-                        VertexList vertexList = MarchingCubesFunctions.GenerateVertexList(densities, voxelLocalPosition, edgeIndex, isolevelByte);
-
+                        
                         // Index at the beginning of the row
-                        int rowIndex = 15 * cubeIndex;
+                        int rowIndex = MarchingCubesLookupTables.TriangleTableAccessIndices[cubeIndex];
+                        
+                        int rowLength = MarchingCubesLookupTables.TriangleTableWithLengths[rowIndex]; // First item in the row
+                        int rowStartIndex = rowIndex + 1; // Second index in the row;
 
-                        for (int i = 0; MarchingCubesLookupTables.TriangleTable[rowIndex + i] != -1 && i < 15; i += 3)
+                        VertexList vertexList = MarchingCubesFunctions.GenerateVertexList(densities, voxelLocalPosition, rowStartIndex, rowLength, isolevelByte);
+
+                        for (int i = 0; i < rowLength; i += 3)
                         {
-                            float3 vertex1 = vertexList[MarchingCubesLookupTables.TriangleTable[rowIndex + i + 0]];
-                            float3 vertex2 = vertexList[MarchingCubesLookupTables.TriangleTable[rowIndex + i + 1]];
-                            float3 vertex3 = vertexList[MarchingCubesLookupTables.TriangleTable[rowIndex + i + 2]];
+                            float3 vertex1 = vertexList[MarchingCubesLookupTables.TriangleTableWithLengths[rowStartIndex + i + 0]];
+                            float3 vertex2 = vertexList[MarchingCubesLookupTables.TriangleTableWithLengths[rowStartIndex + i + 1]];
+                            float3 vertex3 = vertexList[MarchingCubesLookupTables.TriangleTableWithLengths[rowStartIndex + i + 2]];
 
                             if (!vertex1.Equals(vertex2) && !vertex1.Equals(vertex3) && !vertex2.Equals(vertex3))
                             {
