@@ -50,6 +50,16 @@ namespace Eldemarkki.VoxelTerrain.Meshing
         }
 
         /// <summary>
+        /// Increments the count by <paramref name="increase"/>
+        /// </summary>
+        /// <param name="increase">How much the count should be increased by</param>
+        /// <returns>The original count</returns>
+        public int Add(int increase)
+        {
+            return Interlocked.Add(ref *_counter, increase) - increase;
+        }
+
+        /// <summary>
         /// Disposes the counter
         /// </summary>
         public void Dispose()

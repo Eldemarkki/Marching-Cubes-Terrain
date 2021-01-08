@@ -54,7 +54,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
                 OutputTriangles = outputTriangles
             };
 
-            JobHandle jobHandle = marchingCubesJob.Schedule();
+            JobHandle jobHandle = marchingCubesJob.Schedule(voxelCount, 256);
 
             JobHandleWithData<IMesherJob> jobHandleWithData = new JobHandleWithData<IMesherJob>
             {

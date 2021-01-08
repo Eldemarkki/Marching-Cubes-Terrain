@@ -1,7 +1,5 @@
-﻿using Eldemarkki.VoxelTerrain.Meshing.Data;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using System.Collections.Generic;
-using System.Linq;
 using Unity.Mathematics;
 
 namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes.Tests
@@ -23,21 +21,21 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes.Tests
         [TestCase(0, 255, 127, 0, 255, 255, 255, 255, 153, 13)]
         [TestCase(178, 178, 178, 178, 204, 204, 127, 191, 196, 207)]
         [TestCase(76, 114, 229, 102, 127, 140, 191, 159, 140, 27)]
-        public void CalculateCubeIndex_Test(byte c1, byte c2, byte c3, byte c4, byte c5, byte c6, byte c7, byte c8, byte isolevel, byte expectedCubeIndex)
+        public unsafe void CalculateCubeIndex_Test(byte c1, byte c2, byte c3, byte c4, byte c5, byte c6, byte c7, byte c8, byte isolevel, byte expectedCubeIndex)
         {
-            VoxelCorners<byte> densities = new VoxelCorners<byte>
+            float* densities = stackalloc float[8]
             {
-                Corner1 = c1,
-                Corner2 = c2,
-                Corner3 = c3,
-                Corner4 = c4,
-                Corner5 = c5,
-                Corner6 = c6,
-                Corner7 = c7,
-                Corner8 = c8
+                c1 / 255f,
+                c2 / 255f,
+                c3 / 255f,
+                c4 / 255f,
+                c5 / 255f,
+                c6 / 255f,
+                c7 / 255f,
+                c8 / 255f
             };
 
-            byte cubeIndex = MarchingCubesFunctions.CalculateCubeIndex(densities, isolevel);
+            byte cubeIndex = MarchingCubesFunctions.CalculateCubeIndex(densities, isolevel / 255f);
 
             Assert.AreEqual(expectedCubeIndex, cubeIndex);
         }
@@ -48,131 +46,6 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes.Tests
             float3 actualPoint = MarchingCubesFunctions.VertexInterpolate(a, b, densityA, densityB, isolevel);
 
             Assert.AreEqual(0, math.distance(expectedPoint, actualPoint), 0.00001f, $"Expected: {expectedPoint}, but was: {actualPoint}");
-        }
-
-        [Test]
-        public void GenerateVertexList_Test1()
-        {
-            // Arrange
-            VoxelCorners<byte> densities = new VoxelCorners<byte>
-            {
-                Corner1 = 255,
-                Corner2 = 255,
-                Corner3 = 255,
-                Corner4 = 0,
-                Corner5 = 255,
-                Corner6 = 255,
-                Corner7 = 255,
-                Corner8 = 255
-            };
-
-            byte isolevel = 127;
-            byte cubeIndex = MarchingCubesFunctions.CalculateCubeIndex(densities, isolevel);
-
-            VertexList expected = new VertexList();
-            expected[2] = new float3(0.5f, 0f, 1f);
-            expected[3] = new float3(0f, 0f, 0.5f);
-            expected[11] = new float3(0f, 0.5f, 1f);
-
-            // Index at the beginning of the row
-            int rowIndex = MarchingCubesLookupTables.TriangleTableAccessIndices[cubeIndex];
-            int rowLength = MarchingCubesLookupTables.TriangleTableWithLengths[rowIndex]; // First item in the row
-            int rowStartIndex = rowIndex + 1; // Second index in the row;
-
-            // Act
-            IEnumerable<float3> actual = MarchingCubesFunctions.GenerateVertexList(densities, new int3(0, 0, 0), rowStartIndex, rowLength, isolevel);
-
-            // Assert
-            for (int i = 0; i < 12; i++)
-            {
-                var actualPosition = actual.ElementAt(i);
-                Assert.AreEqual(0, math.distance(expected[i], actualPosition), 0.011f, $"Expected: {expected[i]}, Actual: {actualPosition}");
-            }
-        }
-
-        [Test]
-        public void GenerateVertexList_Test2()
-        {
-            // Arrange
-            VoxelCorners<byte> densities = new VoxelCorners<byte>
-            {
-                Corner1 = 255,
-                Corner2 = 0,
-                Corner3 = 255,
-                Corner4 = 255,
-                Corner5 = 255,
-                Corner6 = 255,
-                Corner7 = 0,
-                Corner8 = 0
-            };
-
-            byte isolevel = 191;
-            int cubeIndex = MarchingCubesFunctions.CalculateCubeIndex(densities, isolevel);
-
-            VertexList expected = new VertexList();
-            expected[0] = new float3(6.25f, -13f, 100f);
-            expected[1] = new float3(7f, -13f, 100.75f);
-            expected[5] = new float3(7f, -12f, 100.25f);
-            expected[7] = new float3(6f, -12f, 100.25f);
-            expected[9] = new float3(7f, -12.25f, 100f);
-            expected[10] = new float3(7f, -12.75f, 101f);
-            expected[11] = new float3(6f, -12.75f, 101f);
-
-            // Index at the beginning of the row
-            int rowIndex = MarchingCubesLookupTables.TriangleTableAccessIndices[cubeIndex];
-            int rowLength = MarchingCubesLookupTables.TriangleTableWithLengths[rowIndex]; // First item in the row
-            int rowStartIndex = rowIndex + 1; // Second index in the row;
-
-            // Act
-            IEnumerable<float3> actual = MarchingCubesFunctions.GenerateVertexList(densities, new int3(6, -13, 100), rowStartIndex, rowLength, isolevel);
-
-            // Assert
-            for (int i = 0; i < 12; i++)
-            {
-                var actualPosition = actual.ElementAt(i);
-                Assert.AreEqual(0, math.distance(expected[i], actualPosition), 0.011f, $"Expected: {expected[i]}, Actual: {actualPosition}");
-            }
-        }
-
-        [Test]
-        public void GenerateVertexList_Test3()
-        {
-            // Arrange
-            VoxelCorners<byte> densities = new VoxelCorners<byte>
-            {
-                Corner1 = 140,
-                Corner2 = 25,
-                Corner3 = 189,
-                Corner4 = 89,
-                Corner5 = 192,
-                Corner6 = 204,
-                Corner7 = 255,
-                Corner8 = 229
-            };
-
-            byte isolevel = 191;
-            byte cubeIndex = MarchingCubesFunctions.CalculateCubeIndex(densities, isolevel);
-
-            VertexList expected = new VertexList();
-            expected[8] = new float3(-56f, -0.02439022f, 9f);
-            expected[9] = new float3(-55f, -0.07142866f, 9f);
-            expected[10] = new float3(-55f, -0.9803922f, 10f);
-            expected[11] = new float3(-56f, -0.272727272727f, 10f);
-
-            // Index at the beginning of the row
-            int rowIndex = MarchingCubesLookupTables.TriangleTableAccessIndices[cubeIndex];
-            int rowLength = MarchingCubesLookupTables.TriangleTableWithLengths[rowIndex]; // First item in the row
-            int rowStartIndex = rowIndex + 1; // Second index in the row;
-
-            // Act
-            IEnumerable<float3> actual = MarchingCubesFunctions.GenerateVertexList(densities, new int3(-56, -1, 9), rowStartIndex, rowLength, isolevel);
-
-            // Assert
-            for (int i = 0; i < 12; i++)
-            {
-                var actualPosition = actual.ElementAt(i);
-                Assert.AreEqual(0, math.distance(expected[i], actualPosition), 0.011f, $"Expected: {expected[i]}, Actual: {actualPosition}");
-            }
         }
 
         private static IEnumerable<TestCaseData> VertexInterpolateTestCases

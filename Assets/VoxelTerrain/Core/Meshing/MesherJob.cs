@@ -9,7 +9,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing
     /// <summary>
     /// An interface for all the jobs that can extract a surface from voxel data
     /// </summary>
-    public interface IMesherJob : IJob
+    public interface IMesherJob : IJobParallelFor
     {
         /// <summary>
         /// A counter that keeps track of how many vertices there are

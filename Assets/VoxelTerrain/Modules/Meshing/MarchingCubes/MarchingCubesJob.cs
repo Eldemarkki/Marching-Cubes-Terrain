@@ -1,4 +1,5 @@
 ﻿using Eldemarkki.VoxelTerrain.Meshing.Data;
+using Eldemarkki.VoxelTerrain.Utilities;
 using Eldemarkki.VoxelTerrain.VoxelData;
 using Unity.Burst;
 using Unity.Collections;
@@ -49,62 +50,59 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         /// <summary>
         /// The execute method required by the Unity Job System's IJob
         /// </summary>
-        public void Execute()
+        public unsafe void Execute(int index)
         {
-            byte isolevelByte = (byte)math.clamp(Isolevel * 255, 0, 255);
-            for (int x = 0; x < VoxelData.Width - 1; x++)
+            int3 voxelLocalPosition = IndexUtilities.IndexToXyz(index, _voxelData.Width - 1, _voxelData.Height - 1);
+
+            float* densities = stackalloc float[8];
+            for (int i = 0; i < 8; i++)
             {
-                for (int y = 0; y < VoxelData.Height - 1; y++)
+                int3 voxelCorner = voxelLocalPosition + LookupTables.CubeCorners[i];
+                densities[i] = _voxelData.GetVoxelData(voxelCorner) * MarchingCubesFunctions.ByteToFloat;
+            }
+
+            byte cubeIndex = MarchingCubesFunctions.CalculateCubeIndex(densities, Isolevel);
+            if (cubeIndex == 0 || cubeIndex == 255)
+            {
+                return;
+            }
+
+            // Index at the beginning of the row
+            int rowIndex = MarchingCubesLookupTables.TriangleTableAccessIndices[cubeIndex];
+
+            int rowLength = MarchingCubesLookupTables.TriangleTableWithLengths[rowIndex]; // First item in the row
+            int rowStartIndex = rowIndex + 1; // Second index in the row;
+
+            // Increment it before the for loop to reduce the 'lock' operations which slow down the execution.
+            // This in a way "reserves" the next 'rowLength' vertices for this thread.
+            int triangleIndex = VertexCountCounter.Add(rowLength / 3) * 3;
+
+            for (int i = 0; i < rowLength; i += 3)
+            {
+                float3 vertex1 = MarchingCubesFunctions.GetVertex(rowStartIndex + i + 0, voxelLocalPosition, Isolevel, densities);
+                float3 vertex2 = MarchingCubesFunctions.GetVertex(rowStartIndex + i + 1, voxelLocalPosition, Isolevel, densities);
+                float3 vertex3 = MarchingCubesFunctions.GetVertex(rowStartIndex + i + 2, voxelLocalPosition, Isolevel, densities);
+
+                if (!vertex1.Equals(vertex2) && !vertex1.Equals(vertex3) && !vertex2.Equals(vertex3))
                 {
-                    for (int z = 0; z < VoxelData.Depth - 1; z++)
-                    {
-                        int3 voxelLocalPosition = new int3(x, y, z);
+                    float3 normal = math.normalize(math.cross(vertex2 - vertex1, vertex3 - vertex1));
 
-                        VoxelCorners<byte> densities = _voxelData.GetVoxelDataUnitCube(voxelLocalPosition);
+                    float3 triangleMiddlePoint = (vertex1 + vertex2 + vertex3) / 3f;
 
-                        byte cubeIndex = MarchingCubesFunctions.CalculateCubeIndex(densities, isolevelByte);
-                        if (cubeIndex == 0 || cubeIndex == 255)
-                        {
-                            continue;
-                        }
-                        
-                        // Index at the beginning of the row
-                        int rowIndex = MarchingCubesLookupTables.TriangleTableAccessIndices[cubeIndex];
-                        
-                        int rowLength = MarchingCubesLookupTables.TriangleTableWithLengths[rowIndex]; // First item in the row
-                        int rowStartIndex = rowIndex + 1; // Second index in the row;
+                    // Take the position of the closest corner of the current voxel
+                    int3 colorSamplePoint = (int3)math.round(triangleMiddlePoint);
+                    Color32 color = _voxelColors.GetVoxelData(colorSamplePoint);
 
-                        VertexList vertexList = MarchingCubesFunctions.GenerateVertexList(densities, voxelLocalPosition, rowStartIndex, rowLength, isolevelByte);
+                    _vertices[triangleIndex + 0] = new MeshingVertexData(vertex1, normal, color);
+                    _triangles[triangleIndex + 0] = (ushort)(triangleIndex + 0);
 
-                        for (int i = 0; i < rowLength; i += 3)
-                        {
-                            float3 vertex1 = vertexList[MarchingCubesLookupTables.TriangleTableWithLengths[rowStartIndex + i + 0]];
-                            float3 vertex2 = vertexList[MarchingCubesLookupTables.TriangleTableWithLengths[rowStartIndex + i + 1]];
-                            float3 vertex3 = vertexList[MarchingCubesLookupTables.TriangleTableWithLengths[rowStartIndex + i + 2]];
+                    _vertices[triangleIndex + 1] = new MeshingVertexData(vertex2, normal, color);
+                    _triangles[triangleIndex + 1] = (ushort)(triangleIndex + 1);
 
-                            if (!vertex1.Equals(vertex2) && !vertex1.Equals(vertex3) && !vertex2.Equals(vertex3))
-                            {
-                                float3 normal = math.normalize(math.cross(vertex2 - vertex1, vertex3 - vertex1));
+                    _vertices[triangleIndex + 2] = new MeshingVertexData(vertex3, normal, color);
+                    _triangles[triangleIndex + 2] = (ushort)(triangleIndex + 2);
 
-                                int triangleIndex = VertexCountCounter.Increment() * 3;
-
-                                float3 triangleMiddlePoint = (vertex1 + vertex2 + vertex3) / 3f;
-
-                                // Take the position of the closest corner of the current voxel
-                                int3 colorSamplePoint = (int3)math.round(triangleMiddlePoint);
-                                Color32 color = VoxelColors.GetVoxelData(colorSamplePoint);
-
-                                _vertices[triangleIndex + 0] = new MeshingVertexData(vertex1, normal, color);
-                                _triangles[triangleIndex + 0] = (ushort)(triangleIndex + 0);
-
-                                _vertices[triangleIndex + 1] = new MeshingVertexData(vertex2, normal, color);
-                                _triangles[triangleIndex + 1] = (ushort)(triangleIndex + 1);
-
-                                _vertices[triangleIndex + 2] = new MeshingVertexData(vertex3, normal, color);
-                                _triangles[triangleIndex + 2] = (ushort)(triangleIndex + 2);
-                            }
-                        }
-                    }
+                    triangleIndex += 3;
                 }
             }
         }
