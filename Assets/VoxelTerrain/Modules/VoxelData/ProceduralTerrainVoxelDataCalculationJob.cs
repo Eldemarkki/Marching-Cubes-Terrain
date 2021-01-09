@@ -63,7 +63,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
 
             for (int i = 0; i < octaveCount; i++)
             {
-                int octaveModifier = 2 << i;
+                int octaveModifier = 1 << i;
 
                 // (x+1)/2 because noise.snoise returns a value from -1 to 1 so it needs to be scaled to go from 0 to 1.
                 float pureNoise = (noise.snoise(new float3(scaledPosition * octaveModifier, seed)) + 1) / 2f;

@@ -1,5 +1,4 @@
-﻿using Eldemarkki.VoxelTerrain.Utilities;
-using System.Runtime.CompilerServices;
+﻿using System.Runtime.CompilerServices;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -53,26 +52,22 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// </summary>
         public void Execute()
         {
-            int index = 0;
             for (int z = 0; z < OutputVoxelData.Depth; z++)
             {
                 for (int y = 0; y < OutputVoxelData.Height; y++)
                 {
                     for (int x = 0; x < OutputVoxelData.Width; x++)
                     {
-                        int3 worldPosition = new int3(x, y, z) + WorldPositionOffset;
-                        int worldPositionX = worldPosition.x;
-                        int worldPositionY = worldPosition.y;
-                        int worldPositionZ = worldPosition.z;
+                        int worldPositionX = x + WorldPositionOffset.x;
+                        int worldPositionY = y + WorldPositionOffset.y;
+                        int worldPositionZ = z + WorldPositionOffset.z;
 
-                        float voxelData = 1; // 1, because the default voxel data should be air
-                        if (worldPositionX < HeightmapWidth && worldPositionZ < HeightmapHeight)
-                        {
-                            voxelData = CalculateVoxelData(worldPositionX, worldPositionY, worldPositionZ);
-                        }
+                        bool isInsideOfMap = worldPositionX < HeightmapWidth && worldPositionZ < HeightmapHeight;
 
-                        OutputVoxelData.SetVoxelData((byte)math.clamp(voxelData * 255, 0, 255), index);
-                        index++;
+                        // Default is 1, because the default voxel data should be air
+                        float voxelData = math.select(1, CalculateVoxelData(worldPositionX, worldPositionY, worldPositionZ), isInsideOfMap);
+
+                        OutputVoxelData.SetVoxelData((byte)(math.saturate(voxelData) * 255), x, y, z);
                     }
                 }
             }
