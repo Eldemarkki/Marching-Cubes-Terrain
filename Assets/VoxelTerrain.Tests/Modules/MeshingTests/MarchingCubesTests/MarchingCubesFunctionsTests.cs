@@ -41,21 +41,23 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes.Tests
         }
 
         [TestCaseSource(nameof(VertexInterpolateTestCases))]
-        public void VertexInterpolate_Test(float3 a, float3 b, float densityA, float densityB, float isolevel, float3 expectedPoint)
+        public void VertexInterpolate_Test(int3 a, int3 b, float densityA, float densityB, float isolevel, float3 expectedPoint)
         {
-            float3 actualPoint = MarchingCubesFunctions.VertexInterpolate(a, b, densityA, densityB, isolevel);
+            float3x3 actualPoint = MarchingCubesFunctions.VertexInterpolateTriangle(new int3x3(a, a, a), new int3x3(b, b, b), densityA, densityB, isolevel);
 
-            Assert.AreEqual(0, math.distance(expectedPoint, actualPoint), 0.00001f, $"Expected: {expectedPoint}, but was: {actualPoint}");
+            Assert.AreEqual(0, math.distance(expectedPoint, actualPoint.c0), 0.00001f, $"Expected: {expectedPoint}, but was: {actualPoint}");
+            Assert.AreEqual(0, math.distance(expectedPoint, actualPoint.c1), 0.00001f, $"Expected: {expectedPoint}, but was: {actualPoint}");
+            Assert.AreEqual(0, math.distance(expectedPoint, actualPoint.c2), 0.00001f, $"Expected: {expectedPoint}, but was: {actualPoint}");
         }
 
         private static IEnumerable<TestCaseData> VertexInterpolateTestCases
         {
             get
             {
-                yield return new TestCaseData(new float3(-1, -1, -1), new float3(1, 1, 1), 0, 1, 0.5f, new float3(0, 0, 0));
-                yield return new TestCaseData(new float3(-2, -2, -2), new float3(1, 1, 1), 0, 1, 1f / 3, new float3(-1, -1, -1));
-                yield return new TestCaseData(new float3(-10, -10, -10), new float3(-5, -5, -5), 0, 1, 0.5f, new float3(-7.5f, -7.5f, -7.5f));
-                yield return new TestCaseData(new float3(-5, 0, 7), new float3(3, 2, -5), 0.25f, 0.6f, 0.3f, new float3(-3.857142857142f, 0.2857142857142857f, 5.2857142857142f));
+                yield return new TestCaseData(new int3(-1, -1, -1), new int3(1, 1, 1), 0, 1, 0.5f, new float3(0, 0, 0));
+                yield return new TestCaseData(new int3(-2, -2, -2), new int3(1, 1, 1), 0, 1, 1f / 3, new float3(-1, -1, -1));
+                yield return new TestCaseData(new int3(-10, -10, -10), new int3(-5, -5, -5), 0, 1, 0.5f, new float3(-7.5f, -7.5f, -7.5f));
+                yield return new TestCaseData(new int3(-5, 0, 7), new int3(3, 2, -5), 0.25f, 0.6f, 0.3f, new float3(-3.857142857142f, 0.2857142857142857f, 5.2857142857142f));
             }
         }
     }

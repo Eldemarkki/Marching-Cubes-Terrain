@@ -70,39 +70,34 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
             // Index at the beginning of the row
             int rowIndex = MarchingCubesLookupTables.TriangleTableAccessIndices[cubeIndex];
 
-            int rowLength = MarchingCubesLookupTables.TriangleTableWithLengths[rowIndex]; // First item in the row
+            int voxelTriangleCount = MarchingCubesLookupTables.TriangleTableWithLengths[rowIndex]; ; // First item in the row
             int rowStartIndex = rowIndex + 1; // Second index in the row;
 
             // Increment it before the for loop to reduce the 'lock' operations which slow down the execution.
-            // This in a way "reserves" the next 'rowLength' vertices for this thread.
-            int triangleIndex = VertexCountCounter.Add(rowLength / 3) * 3;
+            // This in a way "reserves" the next 'rowLength*3' vertices for this thread.
+            int triangleIndex = VertexCountCounter.Add(voxelTriangleCount) * 3;
 
-            for (int i = 0; i < rowLength; i += 3)
+            for (int i = 0; i < voxelTriangleCount; i++)
             {
-                float3 vertex1 = MarchingCubesFunctions.GetVertex(rowStartIndex + i + 0, voxelLocalPosition, Isolevel, densities);
-                float3 vertex2 = MarchingCubesFunctions.GetVertex(rowStartIndex + i + 1, voxelLocalPosition, Isolevel, densities);
-                float3 vertex3 = MarchingCubesFunctions.GetVertex(rowStartIndex + i + 2, voxelLocalPosition, Isolevel, densities);
+                float3x3 triangle = MarchingCubesFunctions.GetTriangle(rowStartIndex + i * 3, voxelLocalPosition, Isolevel, densities);
 
-                if (!vertex1.Equals(vertex2) && !vertex1.Equals(vertex3) && !vertex2.Equals(vertex3))
+                if (!triangle.c0.Equals(triangle.c1) && !triangle.c0.Equals(triangle.c2) && !triangle.c1.Equals(triangle.c2))
                 {
-                    float3 normal = math.normalize(math.cross(vertex2 - vertex1, vertex3 - vertex1));
-
-                    float3 triangleMiddlePoint = (vertex1 + vertex2 + vertex3) / 3f;
+                    float3 normal = math.normalize(math.cross(triangle.c1 - triangle.c0, triangle.c2 - triangle.c0));
+                    float3 triangleMiddlePoint = (triangle.c0 + triangle.c1 + triangle.c2) / 3f;
 
                     // Take the position of the closest corner of the current voxel
                     int3 colorSamplePoint = (int3)math.round(triangleMiddlePoint);
                     Color32 color = _voxelColors.GetVoxelData(colorSamplePoint);
 
-                    _vertices[triangleIndex + 0] = new MeshingVertexData(vertex1, normal, color);
-                    _triangles[triangleIndex + 0] = (ushort)(triangleIndex + 0);
+                    _vertices[triangleIndex + i * 3 + 0] = new MeshingVertexData(triangle.c0, normal, color);
+                    _triangles[triangleIndex + i * 3 + 0] = (ushort)(triangleIndex + i * 3 + 0);
 
-                    _vertices[triangleIndex + 1] = new MeshingVertexData(vertex2, normal, color);
-                    _triangles[triangleIndex + 1] = (ushort)(triangleIndex + 1);
+                    _vertices[triangleIndex + i * 3 + 1] = new MeshingVertexData(triangle.c1, normal, color);
+                    _triangles[triangleIndex + i * 3 + 1] = (ushort)(triangleIndex + i * 3 + 1);
 
-                    _vertices[triangleIndex + 2] = new MeshingVertexData(vertex3, normal, color);
-                    _triangles[triangleIndex + 2] = (ushort)(triangleIndex + 2);
-
-                    triangleIndex += 3;
+                    _vertices[triangleIndex + i * 3 + 2] = new MeshingVertexData(triangle.c2, normal, color);
+                    _triangles[triangleIndex + i * 3 + 2] = (ushort)(triangleIndex + i * 3 + 2);
                 }
             }
         }

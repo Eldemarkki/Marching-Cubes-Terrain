@@ -15,22 +15,6 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         public const float ByteToFloat = 1f / 255f;
 
         /// <summary>
-        /// Interpolates the vertex's position 
-        /// </summary>
-        /// <param name="p1">The first corner's position</param>
-        /// <param name="p2">The second corner's position</param>
-        /// <param name="v1">The first corner's density</param>
-        /// <param name="v2">The second corner's density</param>
-        /// <param name="isolevel">The density level where a surface will be created. Densities below this will be inside the surface (solid),
-        /// and densities above this will be outside the surface (air)</param>
-        /// <returns>The interpolated vertex's position</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static float3 VertexInterpolate(float3 p1, float3 p2, float v1, float v2, float isolevel)
-        {
-            return p1 + (isolevel - v1) * (p2 - p1) / (v2 - v1);
-        }
-
-        /// <summary>
         /// Calculates the cube index of a single voxel
         /// </summary>
         /// <param name="voxelDensities">The densities of the voxel</param>
@@ -40,42 +24,86 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe byte CalculateCubeIndex(float* voxelDensities, float isolevel)
         {
-            byte cubeIndex = (byte)math.select(0, 1, voxelDensities[0] < isolevel);
-            cubeIndex |= (byte)math.select(0, 2, voxelDensities[1] < isolevel);
-            cubeIndex |= (byte)math.select(0, 4, voxelDensities[2] < isolevel);
-            cubeIndex |= (byte)math.select(0, 8, voxelDensities[3] < isolevel);
-            cubeIndex |= (byte)math.select(0, 16, voxelDensities[4] < isolevel);
-            cubeIndex |= (byte)math.select(0, 32, voxelDensities[5] < isolevel);
-            cubeIndex |= (byte)math.select(0, 64, voxelDensities[6] < isolevel);
-            cubeIndex |= (byte)math.select(0, 128, voxelDensities[7] < isolevel);
+            float4 voxelDensitiesPart1 = new float4(voxelDensities[0], voxelDensities[1], voxelDensities[2], voxelDensities[3]);
+            float4 voxelDensitiesPart2 = new float4(voxelDensities[4], voxelDensities[5], voxelDensities[6], voxelDensities[7]);
 
-            return cubeIndex;
+            int4 p1 = math.select(0, new int4(1, 2, 4, 8), voxelDensitiesPart1 < isolevel);
+            int4 p2 = math.select(0, new int4(16, 32, 64, 128), voxelDensitiesPart2 < isolevel);
+
+            return (byte)(p1.x | p1.y | p1.z | p1.w | p2.x | p2.y | p2.z | p2.w);
         }
 
         /// <summary>
-        /// Gets a vertex that is located on edge <paramref name="indexInTriangleTable"/>. If none exists, returns float3(0,0,0)
+        /// Gets a single interpolated triangle in a voxel
         /// </summary>
-        /// <param name="indexInTriangleTable">The index of the edge in <see cref="MarchingCubesLookupTables.TriangleTableWithLengths"></see></param>
-        /// <param name="voxelLocalPosition">The local voxel position of the voxel whose vertex should be genererated</param>
+        /// <param name="indexInTriangleTable">The index of the triangle in <see cref="MarchingCubesLookupTables.TriangleTableWithLengths"/></param>
+        /// <param name="voxelLocalPosition">The position of the voxel</param>
+        /// <param name="isolevel">The density level where a surface will be created. Densities below this will be inside the surface (solid), and densities above this will be outside the surface (air)</param>
+        /// <param name="densities">The densities of the voxel</param>
+        /// <returns>The points of the triangle</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe float3x3 GetTriangle(int indexInTriangleTable, int3 voxelLocalPosition, float isolevel, float* densities)
+        {
+            int3 edgeIntersectionIndices = new int3(
+                MarchingCubesLookupTables.TriangleTableWithLengths[indexInTriangleTable + 0],
+                MarchingCubesLookupTables.TriangleTableWithLengths[indexInTriangleTable + 1],
+                MarchingCubesLookupTables.TriangleTableWithLengths[indexInTriangleTable + 2]
+            );
+
+            int3 edgeStartIndices = new int3(
+                MarchingCubesLookupTables.EdgeIndexTable[2 * edgeIntersectionIndices.x],
+                MarchingCubesLookupTables.EdgeIndexTable[2 * edgeIntersectionIndices.y],
+                MarchingCubesLookupTables.EdgeIndexTable[2 * edgeIntersectionIndices.z]
+            );
+
+            int3 edgeEndIndices = new int3(
+                MarchingCubesLookupTables.EdgeIndexTable[2 * edgeIntersectionIndices.x + 1],
+                MarchingCubesLookupTables.EdgeIndexTable[2 * edgeIntersectionIndices.y + 1],
+                MarchingCubesLookupTables.EdgeIndexTable[2 * edgeIntersectionIndices.z + 1]
+            );
+
+            int3x3 startCorners = new int3x3(
+                voxelLocalPosition + LookupTables.CubeCorners[edgeStartIndices.x],
+                voxelLocalPosition + LookupTables.CubeCorners[edgeStartIndices.y],
+                voxelLocalPosition + LookupTables.CubeCorners[edgeStartIndices.z]
+            );
+
+            int3x3 endCorners = new int3x3(
+                voxelLocalPosition + LookupTables.CubeCorners[edgeEndIndices.x],
+                voxelLocalPosition + LookupTables.CubeCorners[edgeEndIndices.y],
+                voxelLocalPosition + LookupTables.CubeCorners[edgeEndIndices.z]
+            );
+
+            float3 startDensities = new float3(
+                densities[edgeStartIndices.x],
+                densities[edgeStartIndices.y],
+                densities[edgeStartIndices.z]
+            );
+
+            float3 endDensities = new float3(
+                densities[edgeEndIndices.x],
+                densities[edgeEndIndices.y],
+                densities[edgeEndIndices.z]
+            );
+
+            return VertexInterpolateTriangle(startCorners, endCorners, startDensities, endDensities, isolevel);
+        }
+
+        /// <summary>
+        /// Interpolates the vertex's position on 3 different edges to form a triangle
+        /// </summary>
+        /// <param name="p1">The start corners of the 3 edges</param>
+        /// <param name="p2">The end corners of the 3 edges</param>
+        /// <param name="v1">The densities on the start corners</param>
+        /// <param name="v2">The densities on the end corners</param>
         /// <param name="isolevel">The density level where a surface will be created. Densities below this will be inside the surface (solid),
         /// and densities above this will be outside the surface (air)</param>
-        /// <param name="voxelDensities">The densities of the voxel</param>
-        /// <returns>The position of the vertex on the edge</returns>
+        /// <returns>The interpolated points of the new triangle</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static unsafe float3 GetVertex(int indexInTriangleTable, int3 voxelLocalPosition, float isolevel, float* voxelDensities)
+        public static float3x3 VertexInterpolateTriangle(int3x3 p1, int3x3 p2, float3 v1, float3 v2, float isolevel)
         {
-            int edgeIntersectionIndex = MarchingCubesLookupTables.TriangleTableWithLengths[indexInTriangleTable];
-
-            int edgeStartIndex = MarchingCubesLookupTables.EdgeIndexTable[2 * edgeIntersectionIndex + 0];
-            int edgeEndIndex = MarchingCubesLookupTables.EdgeIndexTable[2 * edgeIntersectionIndex + 1];
-
-            int3 corner1 = voxelLocalPosition + LookupTables.CubeCorners[edgeStartIndex];
-            int3 corner2 = voxelLocalPosition + LookupTables.CubeCorners[edgeEndIndex];
-
-            float density1 = voxelDensities[edgeStartIndex];
-            float density2 = voxelDensities[edgeEndIndex];
-
-            return VertexInterpolate(corner1, corner2, density1, density2, isolevel);
+            float3 k = (isolevel - v1) / (v2 - v1);
+            return p1 + (p2 - p1) * new float3x3(k.x, k.y, k.z);
         }
     }
 }
