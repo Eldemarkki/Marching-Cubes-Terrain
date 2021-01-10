@@ -30,7 +30,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
             int4 p1 = math.select(0, new int4(1, 2, 4, 8), voxelDensitiesPart1 < isolevel);
             int4 p2 = math.select(0, new int4(16, 32, 64, 128), voxelDensitiesPart2 < isolevel);
 
-            return (byte)(p1.x | p1.y | p1.z | p1.w | p2.x | p2.y | p2.z | p2.w);
+            return (byte)(math.csum(p1) | math.csum(p2));
         }
 
         /// <summary>

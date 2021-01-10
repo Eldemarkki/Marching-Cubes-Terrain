@@ -256,7 +256,7 @@ MonoBehaviour:
     noiseFrequency: 1
     noiseOctaveCount: 9
     amplitude: 120
-    heightOffset: 50
+    heightOffset: 0
     noiseSeed: 0
 --- !u!114 &35699121
 MonoBehaviour:
