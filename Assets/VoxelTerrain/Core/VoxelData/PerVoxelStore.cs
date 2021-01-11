@@ -46,7 +46,8 @@ namespace Eldemarkki.VoxelTerrain.World
 
                     if (VoxelWorld.ChunkStore.TryGetDataChunk(chunkCoordinate, out ChunkProperties chunkProperties))
                     {
-                        chunkProperties.HasChanges = true;
+                        VoxelWorld.ChunkUpdater.SetChunkDirty(chunkProperties);
+                        //chunkProperties.HasChanges = true;
                     }
                 }
             }
@@ -83,7 +84,8 @@ namespace Eldemarkki.VoxelTerrain.World
 
             if (VoxelWorld.ChunkStore.TryGetDataChunk(chunkCoordinate, out ChunkProperties chunkProperties))
             {
-                chunkProperties.HasChanges = true;
+                VoxelWorld.ChunkUpdater.SetChunkDirty(chunkProperties);
+                //chunkProperties.HasChanges = true;
             }
         }
 
@@ -191,7 +193,8 @@ namespace Eldemarkki.VoxelTerrain.World
 
                 if (VoxelWorld.ChunkStore.TryGetDataChunk(chunkCoordinate, out ChunkProperties chunkProperties))
                 {
-                    chunkProperties.HasChanges = true;
+                    VoxelWorld.ChunkUpdater.SetChunkDirty(chunkProperties);
+                    //chunkProperties.HasChanges = true;
                 }
             });
         }
@@ -220,7 +223,8 @@ namespace Eldemarkki.VoxelTerrain.World
                 {
                     if (VoxelWorld.ChunkStore.TryGetDataChunk(chunkCoordinate, out ChunkProperties chunkProperties))
                     {
-                        chunkProperties.HasChanges = true;
+                        VoxelWorld.ChunkUpdater.SetChunkDirty(chunkProperties);
+                        //chunkProperties.HasChanges = true;
                     }
                 }
             });

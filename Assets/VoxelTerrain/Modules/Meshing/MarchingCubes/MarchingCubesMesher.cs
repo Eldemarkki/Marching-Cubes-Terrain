@@ -1,6 +1,7 @@
 ﻿using Eldemarkki.VoxelTerrain.Meshing.Data;
 using Eldemarkki.VoxelTerrain.VoxelData;
 using Eldemarkki.VoxelTerrain.Utilities;
+using Eldemarkki.VoxelTerrain.World.Chunks;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -23,7 +24,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         public float Isolevel => isolevel;
 
         /// <inheritdoc/>
-        public override JobHandleWithData<IMesherJob> CreateMesh(VoxelDataStore voxelDataStore, VoxelColorStore voxelColorStore, int3 chunkCoordinate)
+        public override JobHandleWithDataAndChunkProperties<IMesherJob> CreateMesh(VoxelDataStore voxelDataStore, VoxelColorStore voxelColorStore, int3 chunkCoordinate, ChunkProperties properties)
         {
             if (!voxelDataStore.TryGetDataChunk(chunkCoordinate, out VoxelDataVolume<byte> boundsVoxelData))
             {
@@ -56,10 +57,11 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
 
             JobHandle jobHandle = marchingCubesJob.Schedule();
 
-            JobHandleWithData<IMesherJob> jobHandleWithData = new JobHandleWithData<IMesherJob>
+            JobHandleWithDataAndChunkProperties<IMesherJob> jobHandleWithData = new JobHandleWithDataAndChunkProperties<IMesherJob>
             {
                 JobHandle = jobHandle,
-                JobData = marchingCubesJob
+                JobData = marchingCubesJob,
+                ChunkProperties = properties
             };
 
             return jobHandleWithData;
