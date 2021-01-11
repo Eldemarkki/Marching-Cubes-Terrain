@@ -1,5 +1,9 @@
 ﻿using Eldemarkki.VoxelTerrain.World.Chunks;
 using System.Collections.Generic;
+using System.Linq;
+using Eldemarkki.VoxelTerrain.Meshing;
+using Eldemarkki.VoxelTerrain.Utilities;
+using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -27,19 +31,34 @@ namespace Eldemarkki.VoxelTerrain.Chunks
 
         private void Update()
         {
-            int chunksGenerated = 0;
+            if (!_generationQueue.Any()) return;
+
+            var jobs = new List<JobHandleWithDataAndChunkProperties<IMesherJob>>();
+            var chunksGenerated = 0;
             while (_generationQueue.Count > 0 && chunksGenerated < chunkGenerationRate)
             {
-                int3 chunkCoordinate = _generationQueue.Dequeue();
+                var chunkCoordinate = _generationQueue.Dequeue();
 
                 if (VoxelWorld.ChunkStore.TryGetDataChunk(chunkCoordinate, out ChunkProperties chunkProperties))
                 {
                     if (!chunkProperties.IsMeshGenerated)
                     {
-                        VoxelWorld.ChunkUpdater.GenerateVoxelDataAndMeshImmediate(chunkProperties);
+                        var job = VoxelWorld.ChunkUpdater.GenerateVoxelDataAndMeshDelay(chunkProperties);
+                        jobs.Add(job);
+
+                        ///VoxelWorld.ChunkUpdater.GenerateVoxelDataAndMeshImmediate(chunkProperties);
                         chunksGenerated++;
                     }
                 }
+            }
+
+            JobHandle.ScheduleBatchedJobs();
+            while (jobs.Any())
+            {
+                var finishedJob = jobs.FirstOrDefault(f => f.JobHandle.IsCompleted);
+                if (finishedJob == null) continue;
+                jobs.Remove(finishedJob);
+                VoxelWorld.ChunkUpdater.FinalizeChunkJob(finishedJob);
             }
         }
 

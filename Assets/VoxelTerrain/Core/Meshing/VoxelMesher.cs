@@ -1,6 +1,7 @@
 ﻿using Eldemarkki.VoxelTerrain.Utilities;
 using Eldemarkki.VoxelTerrain.VoxelData;
 using Eldemarkki.VoxelTerrain.World;
+using Eldemarkki.VoxelTerrain.World.Chunks;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -20,6 +21,6 @@ namespace Eldemarkki.VoxelTerrain.Meshing
         /// <param name="voxelColorStore">The store where to retrieve the voxels' color data from</param>
         /// <param name="chunkCoordinate">The coordinate of the chunk that will be generated</param>
         /// <returns>The job handle and the actual mesh generation job</returns>
-        public abstract JobHandleWithData<IMesherJob> CreateMesh(VoxelDataStore voxelDataStore, VoxelColorStore voxelColorStore, int3 chunkCoordinate);
+        public abstract JobHandleWithDataAndChunkProperties<IMesherJob> CreateMesh(VoxelDataStore voxelDataStore, VoxelColorStore voxelColorStore, int3 chunkCoordinate, ChunkProperties properties);
     }
 }
