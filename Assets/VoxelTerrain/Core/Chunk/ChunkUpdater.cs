@@ -24,37 +24,34 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
                 return;
             }
 
-            var jobs = new List<JobHandleWithDataAndChunkProperties<IMesherJob>>(chunksNeedingUpdate.Count);
+            var jobs = new JobHandleWithDataAndChunkProperties<IMesherJob>[chunksNeedingUpdate.Count];
+            int jobIndex = 0;
             foreach (ChunkProperties chunk in chunksNeedingUpdate)
             {
-                jobs.Add(StartGeneratingMesh(chunk));
+                jobs[jobIndex] = StartGeneratingMesh(chunk);
+                jobIndex++;
             }
+
+            JobHandle.ScheduleBatchedJobs();
 
             chunksNeedingUpdate.Clear();
 
-            JobHandle.ScheduleBatchedJobs();
-            while (jobs.Count > 0)
+            while (true)
             {
-                JobHandleWithDataAndChunkProperties<IMesherJob> finishedJob = null;
-                int jobIndex;
-                for (jobIndex = 0; jobIndex < jobs.Count; jobIndex++)
+                bool atleastOneJobRunning = false;
+                for (int i = 0; i < jobs.Length; i++)
                 {
-                    JobHandleWithDataAndChunkProperties<IMesherJob> job = jobs[jobIndex];
-                    if (job.JobHandle.IsCompleted)
-                    {
-                        finishedJob = job;
-                        break;
-                    }
+                    bool currentJobRunning = !jobs[i].JobHandle.IsCompleted;
+                    atleastOneJobRunning |= currentJobRunning;
                 }
 
-                if (finishedJob == null)
+                if (!atleastOneJobRunning)
                 {
-                    continue;
+                    break;
                 }
-
-                jobs.RemoveAt(jobIndex); // remove 'finishedJob'
-                FinalizeChunkJob(finishedJob);
             }
+
+            FinalizeMultipleChunkJobs(jobs);
         }
 
         public void SetChunkDirty(ChunkProperties chunk)
@@ -126,6 +123,52 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
             chunkProperties.MeshRenderer.enabled = true;
 
             chunkProperties.IsMeshGenerated = true;
+        }
+
+        public void FinalizeMultipleChunkJobs(JobHandleWithDataAndChunkProperties<IMesherJob>[] jobs)
+        {
+            FinalizeMultipleChunkJobs(jobs, jobs.Length);
+        }
+
+        public void FinalizeMultipleChunkJobs(JobHandleWithDataAndChunkProperties<IMesherJob>[] jobs, int count)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                var chunkJob = jobs[i];
+                IMesherJob job = chunkJob.JobData;
+                ChunkProperties chunkProperties = chunkJob.ChunkProperties;
+
+                Mesh mesh = chunkProperties.ChunkMesh;
+                SubMeshDescriptor subMesh = new SubMeshDescriptor(0, 0);
+
+                chunkJob.JobHandle.Complete();
+
+                int vertexCount = job.VertexCountCounter.Count * 3;
+                job.VertexCountCounter.Dispose();
+
+                mesh.SetVertexBufferParams(vertexCount, MeshingVertexData.VertexBufferMemoryLayout);
+                mesh.SetIndexBufferParams(vertexCount, IndexFormat.UInt16);
+
+                mesh.SetVertexBufferData(job.OutputVertices, 0, 0, vertexCount, 0, MeshUpdateFlags.DontValidateIndices);
+                mesh.SetIndexBufferData(job.OutputTriangles, 0, 0, vertexCount, MeshUpdateFlags.DontValidateIndices);
+
+                job.OutputVertices.Dispose();
+                job.OutputTriangles.Dispose();
+
+                mesh.subMeshCount = 1;
+                subMesh.indexCount = vertexCount;
+                mesh.SetSubMesh(0, subMesh);
+
+                mesh.RecalculateBounds();
+
+                chunkProperties.MeshFilter.sharedMesh = mesh;
+                chunkProperties.MeshRenderer.enabled = true;
+
+                chunkProperties.MeshCollider.sharedMesh = mesh;
+                chunkProperties.MeshCollider.enabled = true;
+
+                chunkProperties.IsMeshGenerated = true;
+            }
         }
     }
 }

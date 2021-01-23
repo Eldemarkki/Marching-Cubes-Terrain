@@ -1,6 +1,5 @@
 ﻿using Eldemarkki.VoxelTerrain.World.Chunks;
 using System.Collections.Generic;
-using System.Linq;
 using Eldemarkki.VoxelTerrain.Meshing;
 using Eldemarkki.VoxelTerrain.Utilities;
 using Unity.Jobs;
@@ -31,9 +30,13 @@ namespace Eldemarkki.VoxelTerrain.Chunks
 
         private void Update()
         {
-            if (_generationQueue.Count == 0) return;
+            if (_generationQueue.Count == 0)
+            {
+                return;
+            }
 
-            var jobs = new List<JobHandleWithDataAndChunkProperties<IMesherJob>>(chunkGenerationRate);
+            var jobs = new JobHandleWithDataAndChunkProperties<IMesherJob>[math.min(_generationQueue.Count, chunkGenerationRate)];
+
             var chunksGenerated = 0;
             while (_generationQueue.Count > 0 && chunksGenerated < chunkGenerationRate)
             {
@@ -44,7 +47,7 @@ namespace Eldemarkki.VoxelTerrain.Chunks
                     if (!chunkProperties.IsMeshGenerated)
                     {
                         var job = VoxelWorld.ChunkUpdater.StartGeneratingChunk(chunkProperties);
-                        jobs.Add(job);
+                        jobs[chunksGenerated] = job;
 
                         chunksGenerated++;
                     }
@@ -52,28 +55,22 @@ namespace Eldemarkki.VoxelTerrain.Chunks
             }
 
             JobHandle.ScheduleBatchedJobs();
-            while (jobs.Count > 0)
+            while (true)
             {
-                JobHandleWithDataAndChunkProperties<IMesherJob> finishedJob = null;
-                int jobIndex;
-                for (jobIndex = 0; jobIndex < jobs.Count; jobIndex++)
+                bool atleastOneJobRunning = false;
+                for (int i = 0; i < chunksGenerated; i++)
                 {
-                    JobHandleWithDataAndChunkProperties<IMesherJob> job = jobs[jobIndex];
-                    if (job.JobHandle.IsCompleted)
-                    {
-                        finishedJob = job;
-                        break;
-                    }
+                    bool currentJobRunning = !jobs[i].JobHandle.IsCompleted;
+                    atleastOneJobRunning |= currentJobRunning;
                 }
 
-                if (finishedJob == null)
+                if (!atleastOneJobRunning)
                 {
-                    continue;
+                    break;
                 }
-
-                jobs.RemoveAt(jobIndex); // remove 'finishedJob'
-                VoxelWorld.ChunkUpdater.FinalizeChunkJob(finishedJob);
             }
+
+            VoxelWorld.ChunkUpdater.FinalizeMultipleChunkJobs(jobs, chunksGenerated);
         }
 
         /// <summary>
