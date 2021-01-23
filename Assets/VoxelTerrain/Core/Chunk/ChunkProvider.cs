@@ -29,7 +29,8 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
                 ChunkGameObject = chunkGameObject,
                 MeshCollider = chunkGameObject.GetComponent<MeshCollider>(),
                 MeshFilter = chunkGameObject.GetComponent<MeshFilter>(),
-                MeshRenderer = chunkGameObject.GetComponent<MeshRenderer>()
+                MeshRenderer = chunkGameObject.GetComponent<MeshRenderer>(),
+                ChunkMesh = new Mesh()
             };
 
             chunkProperties.Initialize(chunkCoordinate, VoxelWorld.WorldSettings.ChunkSize);
@@ -47,7 +48,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         public ChunkProperties CreateLoadedChunkToCoordinateImmediate(int3 chunkCoordinate)
         {
             ChunkProperties chunkProperties = CreateUnloadedChunkToCoordinate(chunkCoordinate);
-            VoxelWorld.ChunkUpdater.GenerateVoxelDataAndMeshImmediate(chunkProperties);
+            VoxelWorld.ChunkUpdater.GenerateChunkImmediate(chunkProperties);
             return chunkProperties;
         }
     }

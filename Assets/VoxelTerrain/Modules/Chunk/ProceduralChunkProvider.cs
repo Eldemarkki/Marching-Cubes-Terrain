@@ -31,9 +31,9 @@ namespace Eldemarkki.VoxelTerrain.Chunks
 
         private void Update()
         {
-            if (!_generationQueue.Any()) return;
+            if (_generationQueue.Count == 0) return;
 
-            var jobs = new List<JobHandleWithDataAndChunkProperties<IMesherJob>>();
+            var jobs = new List<JobHandleWithDataAndChunkProperties<IMesherJob>>(chunkGenerationRate);
             var chunksGenerated = 0;
             while (_generationQueue.Count > 0 && chunksGenerated < chunkGenerationRate)
             {
@@ -43,21 +43,35 @@ namespace Eldemarkki.VoxelTerrain.Chunks
                 {
                     if (!chunkProperties.IsMeshGenerated)
                     {
-                        var job = VoxelWorld.ChunkUpdater.GenerateVoxelDataAndMeshDelay(chunkProperties);
+                        var job = VoxelWorld.ChunkUpdater.StartGeneratingChunk(chunkProperties);
                         jobs.Add(job);
 
-                        ///VoxelWorld.ChunkUpdater.GenerateVoxelDataAndMeshImmediate(chunkProperties);
                         chunksGenerated++;
                     }
                 }
             }
 
             JobHandle.ScheduleBatchedJobs();
-            while (jobs.Any())
+            while (jobs.Count > 0)
             {
-                var finishedJob = jobs.FirstOrDefault(f => f.JobHandle.IsCompleted);
-                if (finishedJob == null) continue;
-                jobs.Remove(finishedJob);
+                JobHandleWithDataAndChunkProperties<IMesherJob> finishedJob = null;
+                int jobIndex;
+                for (jobIndex = 0; jobIndex < jobs.Count; jobIndex++)
+                {
+                    JobHandleWithDataAndChunkProperties<IMesherJob> job = jobs[jobIndex];
+                    if (job.JobHandle.IsCompleted)
+                    {
+                        finishedJob = job;
+                        break;
+                    }
+                }
+
+                if (finishedJob == null)
+                {
+                    continue;
+                }
+
+                jobs.RemoveAt(jobIndex); // remove 'finishedJob'
                 VoxelWorld.ChunkUpdater.FinalizeChunkJob(finishedJob);
             }
         }

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Eldemarkki.VoxelTerrain.Meshing;
 using Eldemarkki.VoxelTerrain.Meshing.Data;
 using Eldemarkki.VoxelTerrain.Utilities;
@@ -20,81 +19,87 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
 
         private void Update()
         {
-            if (!chunksNeedingUpdate.Any()) return;
-
-            var lst = new List<JobHandleWithDataAndChunkProperties<IMesherJob>>();
-            foreach (var itm in chunksNeedingUpdate)
+            if (chunksNeedingUpdate.Count == 0)
             {
-                lst.Add(GenerateMeshDelay(itm));
+                return;
+            }
+
+            var jobs = new List<JobHandleWithDataAndChunkProperties<IMesherJob>>(chunksNeedingUpdate.Count);
+            foreach (ChunkProperties chunk in chunksNeedingUpdate)
+            {
+                jobs.Add(StartGeneratingMesh(chunk));
             }
 
             chunksNeedingUpdate.Clear();
 
             JobHandle.ScheduleBatchedJobs();
-            while (lst.Any())
+            while (jobs.Count > 0)
             {
-                var finishedJob = lst.FirstOrDefault(f => f.JobHandle.IsCompleted);
-                if (finishedJob == null) continue;
+                JobHandleWithDataAndChunkProperties<IMesherJob> finishedJob = null;
+                int jobIndex;
+                for (jobIndex = 0; jobIndex < jobs.Count; jobIndex++)
+                {
+                    JobHandleWithDataAndChunkProperties<IMesherJob> job = jobs[jobIndex];
+                    if (job.JobHandle.IsCompleted)
+                    {
+                        finishedJob = job;
+                        break;
+                    }
+                }
 
-                lst.Remove(finishedJob);
-                this.FinalizeChunkJob(finishedJob);
+                if (finishedJob == null)
+                {
+                    continue;
+                }
+
+                jobs.RemoveAt(jobIndex); // remove 'finishedJob'
+                FinalizeChunkJob(finishedJob);
             }
-
-            //foreach (ChunkProperties chunkProperties in VoxelWorld.ChunkStore.Chunks)
-            //{
-            //    if (chunkProperties.HasChanges)
-            //    {
-            //        GenerateMeshImmediate(chunkProperties);
-            //    }
-            //}
         }
 
-        public void SetChunkDirty(ChunkProperties properties)
+        public void SetChunkDirty(ChunkProperties chunk)
         {
-            chunksNeedingUpdate.Add(properties);
+            chunksNeedingUpdate.Add(chunk);
         }
 
-        public void GenerateMeshImmediate(ChunkProperties chunkProperties)
+        public void GenerateMeshImmediate(ChunkProperties chunk)
         {
-            var handle = this.GenerateVoxelDataAndMeshDelay(chunkProperties);
-            this.FinalizeChunkJob(handle);
+            var handle = StartGeneratingChunk(chunk);
+            FinalizeChunkJob(handle);
         }
 
-        public JobHandleWithDataAndChunkProperties<IMesherJob> GenerateMeshDelay(ChunkProperties chunkProperties)
+        public JobHandleWithDataAndChunkProperties<IMesherJob> StartGeneratingMesh(ChunkProperties chunk)
         {
-            var jobHandleWithData = VoxelWorld.VoxelMesher.CreateMesh(VoxelWorld.VoxelDataStore, VoxelWorld.VoxelColorStore, chunkProperties.ChunkCoordinate, chunkProperties);
-            return jobHandleWithData;
+            return VoxelWorld.VoxelMesher.CreateMesh(VoxelWorld.VoxelDataStore, VoxelWorld.VoxelColorStore, chunk.ChunkCoordinate, chunk);
         }
 
         /// <summary>
         /// Generates the voxel data and colors for this chunk and generates the mesh
         /// </summary>
-        public void GenerateVoxelDataAndMeshImmediate(ChunkProperties chunkProperties)
+        public void GenerateChunkImmediate(ChunkProperties chunk)
         {
-            VoxelWorld.VoxelDataStore.GenerateDataForChunk(chunkProperties.ChunkCoordinate);
-            VoxelWorld.VoxelColorStore.GenerateDataForChunk(chunkProperties.ChunkCoordinate);
+            VoxelWorld.VoxelDataStore.GenerateDataForChunk(chunk.ChunkCoordinate);
+            VoxelWorld.VoxelColorStore.GenerateDataForChunk(chunk.ChunkCoordinate);
 
-            var handle = this.GenerateVoxelDataAndMeshDelay(chunkProperties);
-            this.FinalizeChunkJob(handle);
+            GenerateMeshImmediate(chunk);
         }
 
-        public JobHandleWithDataAndChunkProperties<IMesherJob> GenerateVoxelDataAndMeshDelay(ChunkProperties chunkProperties)
+        public JobHandleWithDataAndChunkProperties<IMesherJob> StartGeneratingChunk(ChunkProperties chunk)
         {
-            VoxelWorld.VoxelDataStore.GenerateDataForChunk(chunkProperties.ChunkCoordinate);
-            VoxelWorld.VoxelColorStore.GenerateDataForChunk(chunkProperties.ChunkCoordinate);
-            var jobHandleWithData = VoxelWorld.VoxelMesher.CreateMesh(VoxelWorld.VoxelDataStore, VoxelWorld.VoxelColorStore, chunkProperties.ChunkCoordinate, chunkProperties);
-            return jobHandleWithData;
+            VoxelWorld.VoxelDataStore.GenerateDataForChunk(chunk.ChunkCoordinate);
+            VoxelWorld.VoxelColorStore.GenerateDataForChunk(chunk.ChunkCoordinate);
+            return VoxelWorld.VoxelMesher.CreateMesh(VoxelWorld.VoxelDataStore, VoxelWorld.VoxelColorStore, chunk.ChunkCoordinate, chunk);
         }
 
-        public void FinalizeChunkJob(JobHandleWithDataAndChunkProperties<IMesherJob> jobHandleWithData)
+        public void FinalizeChunkJob(JobHandleWithDataAndChunkProperties<IMesherJob> chunkJob)
         {
-            IMesherJob job = jobHandleWithData.JobData;
-            var chunkProperties = jobHandleWithData.ChunkProperties;
+            IMesherJob job = chunkJob.JobData;
+            ChunkProperties chunkProperties = chunkJob.ChunkProperties;
 
-            Mesh mesh = new Mesh();
+            Mesh mesh = chunkProperties.ChunkMesh;
             SubMeshDescriptor subMesh = new SubMeshDescriptor(0, 0);
 
-            jobHandleWithData.JobHandle.Complete();
+            chunkJob.JobHandle.Complete();
 
             int vertexCount = job.VertexCountCounter.Count * 3;
             job.VertexCountCounter.Dispose();
@@ -119,8 +124,6 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
 
             chunkProperties.MeshCollider.enabled = true;
             chunkProperties.MeshRenderer.enabled = true;
-
-            //chunkProperties.HasChanges = false;
 
             chunkProperties.IsMeshGenerated = true;
         }

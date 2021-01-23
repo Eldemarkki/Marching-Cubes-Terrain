@@ -153,8 +153,10 @@ namespace Eldemarkki.VoxelTerrain.World
         /// <returns>A collection of chunk coordinates outside of <paramref name="range"/> from <paramref name="coordinate"/></returns>
         public virtual IEnumerable<int3> GetChunkCoordinatesOutsideOfRange(int3 coordinate, int range)
         {
-            foreach (int3 chunkCoordinate in _chunks.Keys.ToList())
+            int3[] chunkCoordinates = _chunks.Keys.ToArray();
+            for (int i = 0; i < chunkCoordinates.Length; i++)
             {
+                int3 chunkCoordinate = chunkCoordinates[i];
                 if(DistanceUtilities.ChebyshevDistanceGreaterThan(coordinate, chunkCoordinate, range))
                 {
                     yield return chunkCoordinate;

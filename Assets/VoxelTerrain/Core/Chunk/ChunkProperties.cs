@@ -19,11 +19,9 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
 
         public int3 ChunkCoordinate { get; set; }
 
-        /// <summary>
-        /// Has the voxel data of this chunk been changed during the last frame
-        /// </summary>
-        //public bool HasChanges { get; set; }
         public bool IsMeshGenerated { get; set; }
+
+        public Mesh ChunkMesh { get; set; }
 
         /// <summary>
         /// Initializes the chunk's properties.
@@ -36,7 +34,6 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
             ChunkCoordinate = chunkCoordinate;
 
             IsMeshGenerated = false;
-            //HasChanges = false;
         }
     }
 }
