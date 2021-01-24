@@ -163,15 +163,17 @@ namespace Eldemarkki.VoxelTerrain.Player
 
             voxelWorld.VoxelDataStore.SetVoxelDataCustom(queryBounds, (voxelDataWorldPosition, voxelData) =>
             {
-                float distance = math.distance(voxelDataWorldPosition, point);
-                if (distance <= range)
+                float distanceSq = math.distancesq(voxelDataWorldPosition, point);
+                if (distanceSq > range * range)
                 {
-                    float modificationAmount = deformSpeed / distance * buildModifier;
-                    float oldVoxelData = voxelData / 255f;
-                    return (byte)math.clamp((oldVoxelData - modificationAmount) * 255, 0, 255);
+                    return voxelData;
                 }
 
-                return voxelData;
+                float distanceReciprocal = math.rsqrt(distanceSq);
+                float modificationAmount = deformSpeed * distanceReciprocal * buildModifier;
+                float oldVoxelData = voxelData / 255f;
+
+                return (byte)(math.saturate(oldVoxelData - modificationAmount) * 255);
             });
         }
 
@@ -198,15 +200,14 @@ namespace Eldemarkki.VoxelTerrain.Player
 
             voxelWorld.VoxelDataStore.SetVoxelDataCustom(worldSpaceQuery, (voxelDataWorldPosition, voxelData) =>
             {
-                float distance = math.distance(voxelDataWorldPosition, intersectionPoint);
-                if (distance > deformRange)
+                float distanceSq = math.distancesq(voxelDataWorldPosition, intersectionPoint);
+                if (distanceSq > deformRange * deformRange)
                 {
                     return voxelData;
                 }
 
                 float voxelDataChange = (math.dot(_flatteningNormal, voxelDataWorldPosition) - math.dot(_flatteningNormal, _flatteningOrigin)) / deformRange;
-
-                return (byte)math.clamp(((voxelDataChange * 0.5f + voxelData / 255f - flattenOffset) * 0.8f + flattenOffset) * 255, 0, 255);
+                return (byte)(math.saturate((voxelDataChange * 0.5f + voxelData / 255f - flattenOffset) * 0.8f + flattenOffset) * 255);
             });
         }
 
@@ -230,14 +231,9 @@ namespace Eldemarkki.VoxelTerrain.Player
 
             voxelWorld.VoxelColorStore.SetVoxelDataCustom(queryBounds, (voxelDataWorldPosition, voxelData) =>
             {
-                float distance = math.distance(voxelDataWorldPosition, point);
-
-                if (distance <= deformRange)
-                {
-                    return paintColor;
-                }
-
-                return voxelData;
+                float distanceSq = math.distancesq(voxelDataWorldPosition, point);
+                bool shouldBePainted = distanceSq <= deformRange * deformRange;
+                return shouldBePainted ? paintColor : voxelData;
             });
         }
     }
