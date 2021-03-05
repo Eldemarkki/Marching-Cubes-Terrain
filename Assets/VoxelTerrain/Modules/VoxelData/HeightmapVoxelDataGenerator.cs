@@ -1,6 +1,5 @@
 ﻿using Eldemarkki.VoxelTerrain.Utilities;
 using Eldemarkki.VoxelTerrain.World;
-using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
@@ -32,7 +31,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
             };
 
             JobHandle jobHandle = job.Schedule();
-            
+
             JobHandleWithData<IVoxelDataGenerationJob> jobHandleWithData = new JobHandleWithData<IVoxelDataGenerationJob>
             {
                 JobHandle = jobHandle,

@@ -48,7 +48,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         public NativeArray<float> HeightmapData { get => _heightmapData; set => _heightmapData = value; }
 
         /// <summary>
-        /// The execute method required for Unity's IJobParallelFor job type
+        /// The execute method required for Unity's IJob job type
         /// </summary>
         public void Execute()
         {

@@ -23,15 +23,9 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         public override unsafe void GenerateDataForChunkUnchecked(int3 chunkCoordinate, VoxelDataVolume<Color32> outputColors)
         {
             // Fill the array with the default terrain color
-            Color32* defaultColorArray = stackalloc Color32[1]
-            {
-                defaultTerrainColor
-            };
+            Color32* defaultColorArray = stackalloc Color32[1] { defaultTerrainColor };
 
-            unsafe
-            {
-                UnsafeUtility.MemCpyReplicate(outputColors.GetUnsafePtr(), defaultColorArray, sizeof(Color32), outputColors.Length);
-            }
+            UnsafeUtility.MemCpyReplicate(outputColors.GetUnsafePtr(), defaultColorArray, sizeof(Color32), outputColors.Length);
 
             SetDataChunkUnchecked(chunkCoordinate, outputColors, false);
         }

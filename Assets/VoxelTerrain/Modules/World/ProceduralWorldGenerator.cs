@@ -1,7 +1,5 @@
-﻿using System.Linq;
-using Eldemarkki.VoxelTerrain.Chunks;
+﻿using Eldemarkki.VoxelTerrain.Chunks;
 using Eldemarkki.VoxelTerrain.Utilities;
-using Eldemarkki.VoxelTerrain.Utilities.Intersection;
 using Unity.Mathematics;
 using UnityEngine;
 
