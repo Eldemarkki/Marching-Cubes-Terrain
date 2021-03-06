@@ -171,23 +171,13 @@ namespace Eldemarkki.VoxelTerrain.World
         /// <param name="function">The function that will be performed on every chunk. The arguments are as follows: 1) The chunk's coordinate, 2) The data associated with the chunk</param>
         public void ForEachVoxelDataArrayInQuery(BoundsInt worldSpaceQuery, Action<int3, T> function)
         {
-            int3 chunkSize = VoxelWorld.WorldSettings.ChunkSize;
-
-            int3 minChunkCoordinate = VectorUtilities.WorldPositionToCoordinate(worldSpaceQuery.min - Vector3Int.one, chunkSize);
-            int3 maxChunkCoordinate = VectorUtilities.WorldPositionToCoordinate(worldSpaceQuery.max, chunkSize);
-
-            for (int chunkCoordinateX = minChunkCoordinate.x; chunkCoordinateX <= maxChunkCoordinate.x; chunkCoordinateX++)
+            int3[] chunkCoordinates = CoordinateUtilities.GetChunkCoordinatesInsideWorldSpaceBounds(worldSpaceQuery, VoxelWorld.WorldSettings.ChunkSize);
+            for (int i = 0; i < chunkCoordinates.Length; i++)
             {
-                for (int chunkCoordinateY = minChunkCoordinate.y; chunkCoordinateY <= maxChunkCoordinate.y; chunkCoordinateY++)
+                int3 chunkCoordinate = chunkCoordinates[i];
+                if (TryGetDataChunk(chunkCoordinate, out T voxelDataChunk))
                 {
-                    for (int chunkCoordinateZ = minChunkCoordinate.z; chunkCoordinateZ <= maxChunkCoordinate.z; chunkCoordinateZ++)
-                    {
-                        int3 chunkCoordinate = new int3(chunkCoordinateX, chunkCoordinateY, chunkCoordinateZ);
-                        if (TryGetDataChunk(chunkCoordinate, out T voxelDataChunk))
-                        {
-                            function(chunkCoordinate, voxelDataChunk);
-                        }
-                    }
+                    function(chunkCoordinate, voxelDataChunk);
                 }
             }
         }

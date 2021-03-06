@@ -168,5 +168,35 @@ namespace Eldemarkki.VoxelTerrain.Utilities
 
             return coordinates;
         }
+
+        public static int3[] GetChunkCoordinatesInsideWorldSpaceBounds(BoundsInt worldSpaceBounds, int3 chunkSize)
+        {
+            int3 minCoordinate = VectorUtilities.WorldPositionToCoordinate(worldSpaceBounds.min - Vector3Int.one, chunkSize);
+            int3 maxCoordinate = VectorUtilities.WorldPositionToCoordinate(worldSpaceBounds.max, chunkSize);
+
+            int chunkCount = ChunkCountInsideCoordinates(minCoordinate, maxCoordinate);
+            int3[] chunkCoordinates = new int3[chunkCount];
+
+            int i = 0;
+            for (int x = minCoordinate.x; x <= maxCoordinate.x; x++)
+            {
+                for (int y = minCoordinate.y; y <= maxCoordinate.y; y++)
+                {
+                    for (int z = minCoordinate.z; z <= maxCoordinate.z; z++)
+                    {
+                        int3 chunkCoordinate = new int3(x, y, z);
+                        chunkCoordinates[i++] = chunkCoordinate;
+                    }
+                }
+            }
+
+            return chunkCoordinates;
+        }
+
+        public static int ChunkCountInsideCoordinates(int3 a, int3 b)
+        {
+            int3 diff = b - a + 1;
+            return diff.x * diff.y * diff.z;
+        }
     }
 }
