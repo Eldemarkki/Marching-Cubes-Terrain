@@ -24,8 +24,9 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         public float Isolevel => isolevel;
 
         /// <inheritdoc/>
-        public override JobHandleWithDataAndChunkProperties<IMesherJob> CreateMesh(VoxelDataStore voxelDataStore, VoxelColorStore voxelColorStore, int3 chunkCoordinate, ChunkProperties properties)
+        public override JobHandleWithDataAndChunkProperties<IMesherJob> CreateMesh(VoxelDataStore voxelDataStore, VoxelColorStore voxelColorStore, ChunkProperties chunkProperties)
         {
+            int3 chunkCoordinate = chunkProperties.ChunkCoordinate;
             if (!voxelDataStore.TryGetDataChunk(chunkCoordinate, out VoxelDataVolume<byte> boundsVoxelData))
             {
                 return null;
@@ -61,7 +62,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
             {
                 JobHandle = jobHandle,
                 JobData = marchingCubesJob,
-                ChunkProperties = properties
+                ChunkProperties = chunkProperties
             };
 
             return jobHandleWithData;

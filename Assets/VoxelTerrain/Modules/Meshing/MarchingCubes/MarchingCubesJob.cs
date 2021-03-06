@@ -75,7 +75,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
 
             // Increment it before the for loop to reduce the 'lock' operations which slow down the execution.
             // This in a way "reserves" the next 'rowLength*3' vertices for this thread.
-            int triangleIndex = VertexCountCounter.Add(voxelTriangleCount) * 3;
+            int triangleIndex = VertexCountCounter.Add(voxelTriangleCount * 3);
 
             for (int i = 0; i < voxelTriangleCount; i++)
             {
