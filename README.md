@@ -3,6 +3,8 @@ This is my implementation of the Marching Cubes algorithm using Unity.
 
 Demo video: https://www.youtube.com/watch?v=7GrKaSCoyvs
 
+Discord Server: https://discord.gg/tKhNq7sCYu
+
 ## Features
   - Unity Job System with the Burst Compiler
   - Realtime terrain editing
