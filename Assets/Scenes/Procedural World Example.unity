@@ -297,9 +297,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e66f3dd9a72a0f2449b26a410bde7d38, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  defaultTerrainColor:
-    serializedVersion: 2
-    rgba: 4280376075
 --- !u!1 &170076733
 GameObject:
   m_ObjectHideFlags: 0
@@ -405,6 +402,7 @@ GameObject:
   - component: {fileID: 534669904}
   - component: {fileID: 534669906}
   - component: {fileID: 534669907}
+  - component: {fileID: 534669903}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -412,6 +410,38 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &534669903
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 534669902}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a79441f348de89743a2939f4d699eac1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_RenderShadows: 1
+  m_RequiresDepthTextureOption: 2
+  m_RequiresOpaqueTextureOption: 2
+  m_CameraType: 0
+  m_Cameras: []
+  m_RendererIndex: -1
+  m_VolumeLayerMask:
+    serializedVersion: 2
+    m_Bits: 1
+  m_VolumeTrigger: {fileID: 0}
+  m_RenderPostProcessing: 0
+  m_Antialiasing: 0
+  m_AntialiasingQuality: 2
+  m_StopNaN: 0
+  m_Dithering: 0
+  m_ClearDepth: 1
+  m_AllowXRRendering: 1
+  m_RequiresDepthTexture: 0
+  m_RequiresColorTexture: 0
+  m_Version: 2
 --- !u!20 &534669904
 Camera:
   m_ObjectHideFlags: 0
@@ -489,7 +519,7 @@ MonoBehaviour:
   flatteningKey: 306
   paintColor:
     serializedVersion: 2
-    rgba: 4294954496
+    rgba: 4280035383
   playerCamera: {fileID: 534669905}
 --- !u!114 &534669907
 MonoBehaviour:
