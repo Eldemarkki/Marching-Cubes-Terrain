@@ -8,7 +8,8 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Triplanar Shading
-  m_Shader: {fileID: 4800000, guid: db8c18db5cb480d4c8523e1b745f5af5, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: a14177a6971a5ae479265a1041eaf8cb,
+    type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -55,13 +56,33 @@ Material:
         m_Texture: {fileID: 2800000, guid: 2fdf9aa38a68a274cbfa7b62d7a8841b, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - unity_Lightmaps:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_LightmapsInd:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_ShadowMasks:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Floats:
+    - BlendStepCount: 2
+    - NegativeYCutoff: -0.35
+    - Sensitivity: 0.6
+    - SensitivityBlend: 0.1
+    - Vector1_9549fe7ad75f4d61966d16c203e980f9: 0
+    - Vector1_be5b0d3c5d0c40d29f0225d2013c415f: 0
     - YColorAmount: 1
     - _Glossiness: 0
     - _Metallic: 0
     m_Colors:
-    - NegativeYColor: {r: 0.3490566, g: 0.22091156, b: 0.09055714, a: 1}
+    - NegativeYColor: {r: 0.4245283, g: 0.37146226, b: 0.3183962, a: 1}
+    - SideColor: {r: 0.41999996, g: 0.41999996, b: 0.41999996, a: 1}
     - XColor: {r: 0.5849056, g: 0.35697895, b: 0.124154516, a: 1}
-    - YColor: {r: 0.21813813, g: 0.8113208, b: 0.3686471, a: 1}
+    - YColor: {r: 0.4392869, g: 0.7169812, b: 0.39569244, a: 1}
     - ZColor: {r: 0.5849056, g: 0.35697892, b: 0.124154486, a: 1}
     - _TintColor: {r: 1, g: 1, b: 1, a: 1}
+  m_BuildTextureStacks: []
