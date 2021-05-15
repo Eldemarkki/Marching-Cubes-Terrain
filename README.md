@@ -12,7 +12,7 @@ Demo video: https://www.youtube.com/watch?v=yzmw12dbkYY
     - Import from black-and-white heightmap texture
 
 ## System Requirements
-  - Unity3D (I'm developing this project with version **2019.3.0f6**, but any newer version should also work)
+  - Unity3D (I'm developing this project with version **2020.3.8f1**, but any newer version should also work)
 
 ## Setup
   1. Clone the repository with `git clone https://github.com/Eldemarkki/Marching-Cubes-Terrain.git`
