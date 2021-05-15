@@ -3,6 +3,7 @@ using System.Linq;
 using Eldemarkki.VoxelTerrain.Utilities;
 using Eldemarkki.VoxelTerrain.World;
 using Eldemarkki.VoxelTerrain.World.Chunks;
+using Unity.Jobs;
 using Unity.Mathematics;
 
 namespace Eldemarkki.VoxelTerrain.VoxelData
@@ -57,7 +58,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <returns></returns>
         public override IEnumerable<int3> GetChunkCoordinatesOutsideOfRange(int3 coordinate, int range)
         {
-            foreach(var baseCoordinate in base.GetChunkCoordinatesOutsideOfRange(coordinate, range))
+            foreach (var baseCoordinate in base.GetChunkCoordinatesOutsideOfRange(coordinate, range))
             {
                 yield return baseCoordinate;
             }
@@ -82,7 +83,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         public override bool TryGetDataChunk(int3 chunkCoordinate, out VoxelDataVolume<byte> chunk)
         {
             ApplyChunkChanges(chunkCoordinate);
-            return TryGetDataChunkWithoutApplying(chunkCoordinate, out chunk);
+            return TryGetDataChunkWithoutApplyingChanges(chunkCoordinate, out chunk);
         }
 
         /// <summary>
@@ -90,9 +91,28 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <param name="chunkCoordinate">The coordinate of the chunk whose voxel data should be gotten</param>
         /// <param name="chunk">The voxel data of a chunk at the coordinate</param>
         /// <returns>Does a chunk exists at that coordinate</returns>
-        private bool TryGetDataChunkWithoutApplying(int3 chunkCoordinate, out VoxelDataVolume<byte> chunk)
+        public bool TryGetDataChunkWithoutApplyingChanges(int3 chunkCoordinate, out VoxelDataVolume<byte> chunk)
         {
             return _chunks.TryGetValue(chunkCoordinate, out chunk);
+        }
+
+        /// <summary>
+        /// Tries to get the voxel data array for one chunk with a persistent allocator. If a chunk doesn't exist there, false will be returned and <paramref name="chunk"/> will be set to null. If a chunk exists there, true will be returned and <paramref name="chunk"/> will be set to the chunk. This also checks the chunk generation queue, so a chunk that is currently being generated may also be returned.
+        /// <param name="chunkCoordinate">The coordinate of the chunk whose voxel data should be gotten</param>
+        /// <param name="chunk">The voxel data of a chunk at the coordinate</param>
+        /// <returns>Does a chunk exists at that coordinate</returns>
+        public bool TryGetDataChunkWithoutApplyingChangesIncludeQueue(int3 chunkCoordinate, out VoxelDataVolume<byte> chunk)
+        {
+            if (!_chunks.TryGetValue(chunkCoordinate, out chunk))
+            {
+                if (_generationJobHandles.TryGetValue(chunkCoordinate, out var job))
+                {
+                    chunk = job.JobData.OutputVoxelData;
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -111,7 +131,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
 
         public override void SetDataChunk(int3 chunkCoordinate, VoxelDataVolume<byte> newData)
         {
-            if (TryGetDataChunkWithoutApplying(chunkCoordinate, out VoxelDataVolume<byte> oldData))
+            if (TryGetDataChunkWithoutApplyingChanges(chunkCoordinate, out VoxelDataVolume<byte> oldData))
             {
                 oldData.CopyFrom(newData);
                 newData.Dispose();
@@ -127,11 +147,13 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
             }
         }
 
-        public override void GenerateDataForChunkUnchecked(int3 chunkCoordinate, VoxelDataVolume<byte> existingData)
+        public override JobHandle GenerateDataForChunkUnchecked(int3 chunkCoordinate, VoxelDataVolume<byte> existingData)
         {
             int3 chunkWorldOrigin = chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize;
             JobHandleWithData<IVoxelDataGenerationJob> jobHandleWithData = VoxelWorld.VoxelDataGenerator.GenerateVoxelData(chunkWorldOrigin, existingData);
             _generationJobHandles.Add(chunkCoordinate, jobHandleWithData);
+
+            return jobHandleWithData.JobHandle;
         }
     }
 }

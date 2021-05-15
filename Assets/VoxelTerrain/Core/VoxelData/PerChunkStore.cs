@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -88,12 +89,14 @@ namespace Eldemarkki.VoxelTerrain.World
         /// If data does not already exist at <paramref name="chunkCoordinate"/>, it generates the data for a chunk at coordinate <paramref name="chunkCoordinate"/>
         /// </summary>
         /// <param name="chunkCoordinate">The coordinate to generate the data for</param>
-        public void GenerateDataForChunk(int3 chunkCoordinate)
+        public JobHandle GenerateDataForChunk(int3 chunkCoordinate)
         {
             if (!DoesChunkExistAtCoordinate(chunkCoordinate))
             {
-                GenerateDataForChunkUnchecked(chunkCoordinate);
+                return GenerateDataForChunkUnchecked(chunkCoordinate);
             }
+
+            return default;
         }
 
         /// <summary>
@@ -113,14 +116,14 @@ namespace Eldemarkki.VoxelTerrain.World
         /// Generates the data for a chunk at <paramref name="chunkCoordinate"/>
         /// </summary>
         /// <param name="chunkCoordinate">The coordinate of the chunk which to generate the data for</param>
-        public abstract void GenerateDataForChunkUnchecked(int3 chunkCoordinate);
+        public abstract JobHandle GenerateDataForChunkUnchecked(int3 chunkCoordinate);
 
         /// <summary>
         /// Generates the data for a chunk at <paramref name="chunkCoordinate"/> by reusing <paramref name="existingData"/> in order to save memory
         /// </summary>
         /// <param name="chunkCoordinate">The coordinate of the chunk which to generate the data for</param>
         /// <param name="existingData">The already existing data that should be reused to generate the new data</param>
-        public abstract void GenerateDataForChunkUnchecked(int3 chunkCoordinate, T existingData);
+        public abstract JobHandle GenerateDataForChunkUnchecked(int3 chunkCoordinate, T existingData);
 
         /// <summary>
         /// Adds a chunk to the chunk store, if one does not already exist
@@ -157,7 +160,7 @@ namespace Eldemarkki.VoxelTerrain.World
             for (int i = 0; i < chunkCoordinates.Length; i++)
             {
                 int3 chunkCoordinate = chunkCoordinates[i];
-                if(DistanceUtilities.ChebyshevDistanceGreaterThan(coordinate, chunkCoordinate, range))
+                if (DistanceUtilities.ChebyshevDistanceGreaterThan(coordinate, chunkCoordinate, range))
                 {
                     yield return chunkCoordinate;
                 }

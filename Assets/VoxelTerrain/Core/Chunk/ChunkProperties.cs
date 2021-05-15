@@ -1,4 +1,5 @@
 ﻿using Eldemarkki.VoxelTerrain.Utilities;
+using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -20,6 +21,8 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         public int3 ChunkCoordinate { get; set; }
 
         public bool IsMeshGenerated { get; set; }
+
+        public JobHandle DataGenerationJobHandle { get; set; }
 
         /// <summary>
         /// Initializes the chunk's properties.

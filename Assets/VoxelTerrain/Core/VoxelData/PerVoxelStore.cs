@@ -4,6 +4,7 @@ using Eldemarkki.VoxelTerrain.VoxelData;
 using Eldemarkki.VoxelTerrain.World.Chunks;
 using System;
 using Unity.Collections;
+using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -88,10 +89,10 @@ namespace Eldemarkki.VoxelTerrain.World
         }
 
         /// <inheritdoc/>
-        public override void GenerateDataForChunkUnchecked(int3 chunkCoordinate)
+        public override JobHandle GenerateDataForChunkUnchecked(int3 chunkCoordinate)
         {
             VoxelDataVolume<T> data = new VoxelDataVolume<T>(VoxelWorld.WorldSettings.ChunkSize + 1, Allocator.Persistent);
-            GenerateDataForChunkUnchecked(chunkCoordinate, data);
+            return GenerateDataForChunkUnchecked(chunkCoordinate, data);
         }
 
         /// <summary>

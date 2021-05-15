@@ -1,5 +1,6 @@
 ﻿using Eldemarkki.VoxelTerrain.World;
 using Unity.Collections.LowLevel.Unsafe;
+using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -20,7 +21,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// </summary>
         /// <param name="chunkCoordinate">The coordinate of the chunk which to generate the colors for</param>
         /// <param name="outputColors">The array that should be filled with the new colors</param>
-        public override unsafe void GenerateDataForChunkUnchecked(int3 chunkCoordinate, VoxelDataVolume<Color32> outputColors)
+        public override unsafe JobHandle GenerateDataForChunkUnchecked(int3 chunkCoordinate, VoxelDataVolume<Color32> outputColors)
         {
             // Fill the array with the default terrain color
             Color32* defaultColorArray = stackalloc Color32[1] { defaultTerrainColor };
@@ -28,6 +29,8 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
             UnsafeUtility.MemCpyReplicate(outputColors.GetUnsafePtr(), defaultColorArray, sizeof(Color32), outputColors.Length);
 
             SetDataChunkUnchecked(chunkCoordinate, outputColors, false);
+
+            return default;
         }
     }
 }

@@ -59,7 +59,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
             chunksNeedingUpdate.Add(chunk);
         }
 
-        public void GenerateMeshImmediate(ChunkProperties chunk)
+        public void GenerateChunkImmediate(ChunkProperties chunk)
         {
             var handle = StartGeneratingChunk(chunk);
             FinalizeChunkJob(handle);
@@ -67,22 +67,16 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
 
         public JobHandleWithDataAndChunkProperties<IMesherJob> StartGeneratingMesh(ChunkProperties chunk)
         {
-            return VoxelWorld.VoxelMesher.CreateMesh(VoxelWorld.VoxelDataStore, VoxelWorld.VoxelColorStore, chunk);
+            return VoxelWorld.VoxelMesher.CreateMesh(VoxelWorld.VoxelDataStore, VoxelWorld.VoxelColorStore, chunk, chunk.DataGenerationJobHandle);
         }
 
         private void StartGeneratingData(ChunkProperties chunk)
         {
-            VoxelWorld.VoxelDataStore.GenerateDataForChunk(chunk.ChunkCoordinate);
-            VoxelWorld.VoxelColorStore.GenerateDataForChunk(chunk.ChunkCoordinate);
-        }
+            JobHandle voxelDataHandle = VoxelWorld.VoxelDataStore.GenerateDataForChunk(chunk.ChunkCoordinate);
+            JobHandle voxelColorHandle = VoxelWorld.VoxelColorStore.GenerateDataForChunk(chunk.ChunkCoordinate);
 
-        /// <summary>
-        /// Generates the voxel data and colors for this chunk and generates the mesh
-        /// </summary>
-        public void GenerateChunkImmediate(ChunkProperties chunk)
-        {
-            StartGeneratingData(chunk);
-            GenerateMeshImmediate(chunk);
+            JobHandle dataHandleDependency = JobHandle.CombineDependencies(voxelDataHandle, voxelColorHandle);
+            chunk.DataGenerationJobHandle = dataHandleDependency;
         }
 
         public JobHandleWithDataAndChunkProperties<IMesherJob> StartGeneratingChunk(ChunkProperties chunk)
