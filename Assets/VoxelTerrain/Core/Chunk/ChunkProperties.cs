@@ -21,8 +21,6 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
 
         public bool IsMeshGenerated { get; set; }
 
-        public Mesh ChunkMesh { get; set; }
-
         /// <summary>
         /// Initializes the chunk's properties.
         /// </summary>

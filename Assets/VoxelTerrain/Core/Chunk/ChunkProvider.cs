@@ -29,8 +29,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
                 ChunkGameObject = chunkGameObject,
                 MeshCollider = chunkGameObject.GetComponent<MeshCollider>(),
                 MeshFilter = chunkGameObject.GetComponent<MeshFilter>(),
-                MeshRenderer = chunkGameObject.GetComponent<MeshRenderer>(),
-                ChunkMesh = new Mesh()
+                MeshRenderer = chunkGameObject.GetComponent<MeshRenderer>()
             };
 
             chunkProperties.Initialize(chunkCoordinate, VoxelWorld.WorldSettings.ChunkSize);

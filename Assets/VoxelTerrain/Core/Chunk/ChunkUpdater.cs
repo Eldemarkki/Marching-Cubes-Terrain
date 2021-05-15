@@ -96,7 +96,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
             IMesherJob job = chunkJob.JobData;
             ChunkProperties chunkProperties = chunkJob.ChunkProperties;
 
-            Mesh mesh = chunkProperties.ChunkMesh;
+            Mesh mesh = new Mesh();
             SubMeshDescriptor subMesh = new SubMeshDescriptor(0, 0);
 
             chunkJob.JobHandle.Complete();
