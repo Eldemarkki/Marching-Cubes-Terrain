@@ -120,6 +120,8 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
             chunkProperties.MeshRenderer.enabled = true;
 
             chunkProperties.IsMeshGenerated = true;
+
+            VoxelWorld.VoxelDataStore.ApplyChunkChanges(chunkProperties.ChunkCoordinate);
         }
 
         public void FinalizeMultipleChunkJobs(JobHandleWithDataAndChunkProperties<IMesherJob>[] jobs)

@@ -103,13 +103,15 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <returns>Does a chunk exists at that coordinate</returns>
         public bool TryGetDataChunkWithoutApplyingChangesIncludeQueue(int3 chunkCoordinate, out VoxelDataVolume<byte> chunk)
         {
-            if (!_chunks.TryGetValue(chunkCoordinate, out chunk))
+            if (_chunks.TryGetValue(chunkCoordinate, out chunk))
             {
-                if (_generationJobHandles.TryGetValue(chunkCoordinate, out var job))
-                {
-                    chunk = job.JobData.OutputVoxelData;
-                    return true;
-                }
+                return true;
+            }
+
+            if (_generationJobHandles.TryGetValue(chunkCoordinate, out var job))
+            {
+                chunk = job.JobData.OutputVoxelData;
+                return true;
             }
 
             return false;
@@ -119,7 +121,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// If the chunk coordinate has an ongoing voxel data generation job, it will get completed and it's result will be applied to the chunk
         /// </summary>
         /// <param name="chunkCoordinate">The coordinate of the chunk to apply changes for</param>
-        private void ApplyChunkChanges(int3 chunkCoordinate)
+        public void ApplyChunkChanges(int3 chunkCoordinate)
         {
             if (_generationJobHandles.TryGetValue(chunkCoordinate, out JobHandleWithData<IVoxelDataGenerationJob> jobHandle))
             {
@@ -152,7 +154,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
             int3 chunkWorldOrigin = chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize;
             JobHandleWithData<IVoxelDataGenerationJob> jobHandleWithData = VoxelWorld.VoxelDataGenerator.GenerateVoxelData(chunkWorldOrigin, existingData);
             _generationJobHandles.Add(chunkCoordinate, jobHandleWithData);
-
+         
             return jobHandleWithData.JobHandle;
         }
     }
