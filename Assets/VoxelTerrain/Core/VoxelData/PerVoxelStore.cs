@@ -79,7 +79,7 @@ namespace Eldemarkki.VoxelTerrain.World
             }
             else
             {
-                _chunks.Add(chunkCoordinate, newData);
+                AddChunkUnchecked(chunkCoordinate, newData);
             }
 
             if (VoxelWorld.ChunkStore.TryGetDataChunk(chunkCoordinate, out ChunkProperties chunkProperties))

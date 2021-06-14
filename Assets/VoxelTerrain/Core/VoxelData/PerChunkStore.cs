@@ -76,6 +76,30 @@ namespace Eldemarkki.VoxelTerrain.World
             }
         }
 
+        public void MoveChunks(int3 from, int3 to, int range, Action<int3> afterChunkMoved)
+        {
+            int3 renderSize = new int3(range * 2 + 1);
+
+            int3 oldPos = from - new int3(range);
+            BoundsInt oldCoords = new BoundsInt(oldPos.ToVectorInt(), renderSize.ToVectorInt());
+
+            int3 newPos = to - new int3(range);
+            BoundsInt newCoords = new BoundsInt(newPos.ToVectorInt(), renderSize.ToVectorInt());
+
+            var newlyFreedCoordinates = VoxelWorld.ChunkStore.GetChunkCoordinatesOutsideOfRange(to, range);
+
+            int3[] coordinatesThatNeedChunks = CoordinateUtilities.GetCoordinatesThatNeedChunks(oldCoords, newCoords);
+
+            int i = 0;
+            foreach (int3 source in newlyFreedCoordinates)
+            {
+                int3 target = coordinatesThatNeedChunks[i];
+                MoveChunk(source, target);
+                afterChunkMoved.Invoke(target);
+                i++;
+            }
+        }
+
         /// <summary>
         /// Removes a chunk from <paramref name="chunkCoordinate"/> without checking if a chunk exists there
         /// </summary>
