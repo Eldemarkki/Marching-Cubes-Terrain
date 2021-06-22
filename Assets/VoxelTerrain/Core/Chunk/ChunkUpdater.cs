@@ -2,7 +2,9 @@
 using Eldemarkki.VoxelTerrain.Meshing;
 using Eldemarkki.VoxelTerrain.Meshing.Data;
 using Eldemarkki.VoxelTerrain.Utilities;
+using Unity.Collections;
 using Unity.Jobs;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Rendering;
 
@@ -90,28 +92,32 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
             IMesherJob job = chunkJob.JobData;
             ChunkProperties chunkProperties = chunkJob.ChunkProperties;
 
-            Mesh mesh = new Mesh();
-            SubMeshDescriptor subMesh = new SubMeshDescriptor(0, 0);
+            Mesh.MeshDataArray meshDataArray = Mesh.AllocateWritableMeshData(1);
+            Mesh.MeshData meshData = meshDataArray[0];
 
             chunkJob.JobHandle.Complete();
 
-            int vertexCount = job.VertexCountCounter.Count;
-            job.VertexCountCounter.Dispose();
+            meshData.SetVertexBufferParams(job.OutputVertices.Length, MeshingVertexData.VertexBufferMemoryLayout);
+            meshData.SetIndexBufferParams(job.OutputTriangles.Length, IndexFormat.UInt16);
 
-            mesh.SetVertexBufferParams(vertexCount, MeshingVertexData.VertexBufferMemoryLayout);
-            mesh.SetIndexBufferParams(vertexCount, IndexFormat.UInt16);
+            var meshDataVertices = meshData.GetVertexData<MeshingVertexData>();
+            var meshDataTriangles = meshData.GetIndexData<ushort>();
 
-            mesh.SetVertexBufferData(job.OutputVertices, 0, 0, vertexCount, 0, MeshUpdateFlags.DontValidateIndices);
-            mesh.SetIndexBufferData(job.OutputTriangles, 0, 0, vertexCount, MeshUpdateFlags.DontValidateIndices);
+            NativeArray<MeshingVertexData>.Copy(job.OutputVertices, meshDataVertices);
+            NativeArray<ushort>.Copy(job.OutputTriangles, meshDataTriangles);
 
-            job.OutputVertices.Dispose();
-            job.OutputTriangles.Dispose();
+            MeshUpdateFlags flags = MeshUpdateFlags.DontRecalculateBounds | MeshUpdateFlags.DontValidateIndices;
 
-            mesh.subMeshCount = 1;
-            subMesh.indexCount = vertexCount;
-            mesh.SetSubMesh(0, subMesh);
+            Mesh mesh = new Mesh();
+            meshData.subMeshCount = 1;
+            meshData.SetSubMesh(0, new SubMeshDescriptor(0, job.OutputVertices.Length), flags);
+            Mesh.ApplyAndDisposeWritableMeshData(meshDataArray, mesh, flags);
 
-            mesh.RecalculateBounds();
+            int3 chunkSize = VoxelWorld.WorldSettings.ChunkSize;
+            mesh.bounds = new Bounds(((Vector3)chunkSize.ToVectorInt()) * 0.5f, chunkSize.ToVectorInt());
+
+            job.OutputVertices.Clear();
+            job.OutputTriangles.Clear();
 
             chunkProperties.MeshFilter.sharedMesh = mesh;
             chunkProperties.MeshCollider.sharedMesh = mesh;

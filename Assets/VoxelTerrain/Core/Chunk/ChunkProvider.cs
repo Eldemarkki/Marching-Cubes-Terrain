@@ -24,15 +24,12 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
             int3 worldPosition = chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize;
             GameObject chunkGameObject = Instantiate(VoxelWorld.WorldSettings.ChunkPrefab, worldPosition.ToVectorInt(), Quaternion.identity);
 
-            ChunkProperties chunkProperties = new ChunkProperties
+            ChunkProperties chunkProperties = new ChunkProperties(VoxelWorld.WorldSettings.ChunkSize)
             {
-                ChunkGameObject = chunkGameObject,
-                MeshCollider = chunkGameObject.GetComponent<MeshCollider>(),
-                MeshFilter = chunkGameObject.GetComponent<MeshFilter>(),
-                MeshRenderer = chunkGameObject.GetComponent<MeshRenderer>()
+                ChunkGameObject = chunkGameObject
             };
 
-            chunkProperties.Initialize(chunkCoordinate, VoxelWorld.WorldSettings.ChunkSize);
+            chunkProperties.Move(chunkCoordinate);
 
             VoxelWorld.ChunkStore.AddChunk(chunkCoordinate, chunkProperties);
 

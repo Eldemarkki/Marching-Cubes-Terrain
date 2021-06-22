@@ -8,14 +8,22 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
     /// </summary>
     public class ChunkStore : PerChunkStore<ChunkProperties>
     {
+        private void OnApplicationQuit()
+        {
+            foreach(var chunk in Chunks)
+            {
+                chunk.Dispose();
+            }
+        }
+
         /// <summary>
         /// Generates the data for a chunk at coordinate <paramref name="chunkCoordinate"/>, and adds it to the chunks dictionary in <see cref="PerChunkStore{T}"/>
         /// </summary>
         /// <param name="chunkCoordinate">The coordinate to generate the data for</param>
         public override JobHandle GenerateDataForChunkUnchecked(int3 chunkCoordinate)
         {
-            ChunkProperties chunkProperties = new ChunkProperties();
-            chunkProperties.Initialize(chunkCoordinate, VoxelWorld.WorldSettings.ChunkSize);
+            ChunkProperties chunkProperties = new ChunkProperties(VoxelWorld.WorldSettings.ChunkSize);
+            chunkProperties.Move(chunkCoordinate);
             AddChunk(chunkCoordinate, chunkProperties);
 
             return default;
@@ -30,7 +38,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         {
             existingData.MeshCollider.enabled = false;
             existingData.MeshRenderer.enabled = false;
-            existingData.Initialize(chunkCoordinate, VoxelWorld.WorldSettings.ChunkSize);
+            existingData.Move(chunkCoordinate);
             AddChunk(chunkCoordinate, existingData);
 
             return default;

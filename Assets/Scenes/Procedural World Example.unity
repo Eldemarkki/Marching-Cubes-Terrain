@@ -227,7 +227,6 @@ MonoBehaviour:
   voxelWorld: {fileID: 35699114}
   chunkProvider: {fileID: 35699119}
   renderDistance: 5
-  loadingBufferSize: 2
   player: {fileID: 534669905}
 --- !u!114 &35699119
 MonoBehaviour:

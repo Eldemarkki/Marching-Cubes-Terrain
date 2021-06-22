@@ -1,8 +1,6 @@
-﻿using Eldemarkki.VoxelTerrain.Meshing.Data;
-using Eldemarkki.VoxelTerrain.VoxelData;
+﻿using Eldemarkki.VoxelTerrain.VoxelData;
 using Eldemarkki.VoxelTerrain.Utilities;
 using Eldemarkki.VoxelTerrain.World.Chunks;
-using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
@@ -34,26 +32,17 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
                 return null;
             }
 
-            NativeCounter vertexCountCounter = new NativeCounter(Allocator.TempJob);
-
-            int voxelCount = VoxelWorld.WorldSettings.ChunkSize.x * VoxelWorld.WorldSettings.ChunkSize.y * VoxelWorld.WorldSettings.ChunkSize.z;
-            int maxLength = 15 * voxelCount;
-
-            NativeArray<MeshingVertexData> outputVertices = new NativeArray<MeshingVertexData>(maxLength, Allocator.TempJob);
-            NativeArray<ushort> outputTriangles = new NativeArray<ushort>(maxLength, Allocator.TempJob);
-
             MarchingCubesJob marchingCubesJob = new MarchingCubesJob
             {
                 VoxelData = boundsVoxelData,
                 VoxelColors = boundsVoxelColors,
                 Isolevel = Isolevel,
-                VertexCountCounter = vertexCountCounter,
 
-                OutputVertices = outputVertices,
-                OutputTriangles = outputTriangles
+                OutputVertices = chunkProperties.OutputVertices,
+                OutputTriangles = chunkProperties.OutputTriangles
             };
 
-            JobHandle jobHandle = marchingCubesJob.Schedule(voxelCount, 256, dependency);
+            JobHandle jobHandle = marchingCubesJob.Schedule(dependency);
 
             JobHandleWithDataAndChunkProperties<IMesherJob> jobHandleWithData = new JobHandleWithDataAndChunkProperties<IMesherJob>
             {
