@@ -1,5 +1,7 @@
 ﻿using Eldemarkki.VoxelTerrain.Utilities;
 using Eldemarkki.VoxelTerrain.World;
+using Unity.Burst;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
@@ -38,6 +40,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
             return jobHandle;
         }
 
+        [BurstCompile]
         private struct FillColorJob : IVoxelDataGenerationJob<Color32>
         {
             private Color32 _fillColor;
@@ -48,12 +51,13 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
 
             public int3 WorldPositionOffset { get; set; }
 
-            public void Execute()
+            public unsafe void Execute()
             {
-                for (int i = 0; i < _outputVoxelData.Length; i++)
-                {
-                    _outputVoxelData.SetVoxelData(_fillColor, i);
-                }
+                var fillColorPtr = stackalloc Color32[1];
+                fillColorPtr[0] = _fillColor;
+
+                UnsafeUtility.MemCpyReplicate(_outputVoxelData.GetUnsafePtr(), fillColorPtr, sizeof(Color32), _outputVoxelData.Length);
+                _outputVoxelData.GetUnsafePtr();
             }
         }
     }
