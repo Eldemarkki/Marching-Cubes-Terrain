@@ -1,4 +1,7 @@
-﻿using Eldemarkki.VoxelTerrain.Utilities;
+﻿#if DEBUG
+using Eldemarkki.VoxelTerrain.Debugging;
+#endif
+using Eldemarkki.VoxelTerrain.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,6 +35,9 @@ namespace Eldemarkki.VoxelTerrain.World
         protected virtual void Awake()
         {
             _chunks = new Dictionary<int3, T>();
+#if DEBUG
+            DebugView.AddDebugProperty($"{GetType().Name} count", () => _chunks.Count);
+#endif
         }
 
         /// <summary>

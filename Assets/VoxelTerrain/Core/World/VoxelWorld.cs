@@ -14,6 +14,9 @@ namespace Eldemarkki.VoxelTerrain.World
         [SerializeField] private WorldSettings worldSettings;
         public WorldSettings WorldSettings => worldSettings;
 
+        [SerializeField] private Transform player;
+        public Transform Player => player;
+
         [SerializeField] private VoxelMesher voxelMesher;
         public VoxelMesher VoxelMesher => voxelMesher;
 

@@ -1,4 +1,7 @@
 ﻿using Eldemarkki.VoxelTerrain.Chunks;
+#if DEBUG
+using Eldemarkki.VoxelTerrain.Debugging;
+#endif
 using Eldemarkki.VoxelTerrain.Utilities;
 using Unity.Mathematics;
 using UnityEngine;
@@ -26,17 +29,16 @@ namespace Eldemarkki.VoxelTerrain.World
         [SerializeField] private int renderDistance = 5;
 
         /// <summary>
-        /// The viewer which the terrain is generated around
-        /// </summary>
-        [SerializeField] private Transform player;
-
-        /// <summary>
         /// The coordinate of the chunk where terrain was last generated around
         /// </summary>
         private int3 _lastGenerationCoordinate;
 
         private void Start()
         {
+#if DEBUG
+            DebugView.AddDebugProperty("Render distance", () => renderDistance);
+#endif
+
             int3 playerCoordinate = GetPlayerCoordinate();
             GenerateTerrainAroundCoordinate(playerCoordinate);
         }
@@ -61,7 +63,7 @@ namespace Eldemarkki.VoxelTerrain.World
         /// <returns>The coordinate of <see cref="player"/></returns>
         private int3 GetPlayerCoordinate()
         {
-            return VectorUtilities.WorldPositionToCoordinate(player.position, voxelWorld.WorldSettings.ChunkSize);
+            return VectorUtilities.WorldPositionToCoordinate(voxelWorld.Player.position, voxelWorld.WorldSettings.ChunkSize);
         }
 
         /// <summary>

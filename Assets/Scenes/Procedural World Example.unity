@@ -167,6 +167,7 @@ MonoBehaviour:
       z: 16
     chunkPrefab: {fileID: 1042568357287805991, guid: d3008c1365ac1cb49b849d43fffdc19e,
       type: 3}
+  player: {fileID: 534669905}
   voxelMesher: {fileID: 35699122}
   voxelDataStore: {fileID: 35699121}
   voxelColorStore: {fileID: 35699123}
@@ -227,7 +228,6 @@ MonoBehaviour:
   voxelWorld: {fileID: 35699114}
   chunkProvider: {fileID: 35699119}
   renderDistance: 5
-  player: {fileID: 534669905}
 --- !u!114 &35699119
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -896,7 +896,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 334.6385, y: 261.6143}
+  m_SizeDelta: {x: 240, y: 130}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &2085301871
 MonoBehaviour:
