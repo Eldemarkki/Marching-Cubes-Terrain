@@ -26,11 +26,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         {
             int3 chunkCoordinate = chunkProperties.ChunkCoordinate;
             voxelDataStore.TryGetDataChunkWithoutApplyingChangesIncludeQueue(chunkCoordinate, out VoxelDataVolume<byte> boundsVoxelData);
-
-            if (!voxelColorStore.TryGetDataChunk(chunkCoordinate, out VoxelDataVolume<Color32> boundsVoxelColors))
-            {
-                return null;
-            }
+            voxelColorStore.TryGetDataChunkWithoutApplyingChangesIncludeQueue(chunkCoordinate, out VoxelDataVolume<Color32> boundsVoxelColors);
 
             MarchingCubesJob marchingCubesJob = new MarchingCubesJob
             {

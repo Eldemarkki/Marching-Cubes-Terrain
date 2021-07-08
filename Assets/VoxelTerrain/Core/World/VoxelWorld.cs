@@ -44,5 +44,13 @@ namespace Eldemarkki.VoxelTerrain.World
             chunkStore.VoxelWorld = this;
             voxelMesher.VoxelWorld = this;
         }
+
+        // The stores have to be disposed here manually in order to guarantee correct order
+        private void OnApplicationQuit()
+        {
+            chunkStore.Dispose();
+            voxelDataStore.Dispose();
+            voxelColorStore.Dispose();
+        }
     }
 }

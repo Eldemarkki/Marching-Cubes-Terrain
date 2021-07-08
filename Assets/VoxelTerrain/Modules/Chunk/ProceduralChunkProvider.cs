@@ -1,7 +1,5 @@
 ﻿using Eldemarkki.VoxelTerrain.World.Chunks;
 using System.Collections.Generic;
-using Eldemarkki.VoxelTerrain.Meshing;
-using Eldemarkki.VoxelTerrain.Utilities;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
@@ -23,20 +21,16 @@ namespace Eldemarkki.VoxelTerrain.Chunks
         /// </summary>
         private Queue<int3> _generationQueue;
 
+        private List<ChunkProperties> currentlyRunningJobs;
+
         private void Awake()
         {
             _generationQueue = new Queue<int3>();
+            currentlyRunningJobs = new List<ChunkProperties>();
         }
 
         private void Update()
         {
-            if (_generationQueue.Count == 0)
-            {
-                return;
-            }
-
-            var jobs = new JobHandleWithDataAndChunkProperties<IMesherJob>[math.min(_generationQueue.Count, chunkGenerationRate)];
-
             var chunksGenerated = 0;
             while (_generationQueue.Count > 0 && chunksGenerated < chunkGenerationRate)
             {
@@ -46,31 +40,37 @@ namespace Eldemarkki.VoxelTerrain.Chunks
                 {
                     if (!chunkProperties.IsMeshGenerated)
                     {
-                        var job = VoxelWorld.ChunkUpdater.StartGeneratingChunk(chunkProperties);
-                        jobs[chunksGenerated] = job;
+                        VoxelWorld.ChunkUpdater.StartGeneratingChunk(chunkProperties);
+                        currentlyRunningJobs.Add(chunkProperties);
 
                         chunksGenerated++;
                     }
                 }
             }
 
-            JobHandle.ScheduleBatchedJobs();
-            while (true)
+            if (chunksGenerated > 0)
             {
-                bool atleastOneJobRunning = false;
-                for (int i = 0; i < chunksGenerated; i++)
-                {
-                    bool currentJobRunning = !jobs[i].JobHandle.IsCompleted;
-                    atleastOneJobRunning |= currentJobRunning;
-                }
-
-                if (!atleastOneJobRunning)
-                {
-                    break;
-                }
+                JobHandle.ScheduleBatchedJobs();
             }
 
-            VoxelWorld.ChunkUpdater.FinalizeMultipleChunkJobs(jobs, chunksGenerated);
+            for (int i = currentlyRunningJobs.Count - 1; i >= 0; i--)
+            {
+                if(currentlyRunningJobs[i] == null)
+                {
+                    currentlyRunningJobs.RemoveAt(i);
+                    continue;
+                }
+
+                var job = currentlyRunningJobs[i].MeshingJobHandle;
+                if (job != null)
+                {
+                    if (job.JobHandle.IsCompleted)
+                    {
+                        VoxelWorld.ChunkUpdater.FinalizeChunkJob(currentlyRunningJobs[i]);
+                        currentlyRunningJobs.RemoveAt(i);
+                    }
+                }
+            }
         }
 
         /// <summary>

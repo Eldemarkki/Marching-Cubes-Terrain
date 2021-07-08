@@ -6,7 +6,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
     /// <summary>
     /// An interface for voxel data generation jobs
     /// </summary>
-    public interface IVoxelDataGenerationJob : IJob
+    public interface IVoxelDataGenerationJob<T> : IJob where T : unmanaged
     {
         /// <summary>
         /// The sampling point's world position offset
@@ -16,6 +16,6 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <summary>
         /// The generated voxel data
         /// </summary>
-        VoxelDataVolume<byte> OutputVoxelData { get; set; }
+        VoxelDataVolume<T> OutputVoxelData { get; set; }
     }
 }

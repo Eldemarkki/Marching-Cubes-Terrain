@@ -3,6 +3,8 @@ using Eldemarkki.VoxelTerrain.Utilities.Intersection;
 using Eldemarkki.VoxelTerrain.VoxelData;
 using Eldemarkki.VoxelTerrain.World.Chunks;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -14,17 +16,17 @@ namespace Eldemarkki.VoxelTerrain.World
     /// A store that contains a single variable of type <typeparamref name="T"/> for each voxel data point in a chunk
     /// </summary>
     /// <typeparam name="T">The type of variable to associate with each voxel data point</typeparam>
-    public abstract class PerVoxelStore<T> : PerChunkStore<VoxelDataVolume<T>> where T : struct
+    public abstract class PerVoxelStore<T> : PerChunkStore<VoxelDataVolume<T>>, IDisposable where T : unmanaged
     {
-        protected virtual void OnApplicationQuit()
+        /// <summary>
+        /// A dictionary of all the ongoing voxel data generation jobs. Key is the chunk's coordinate, and the value is the ongoing job for that chunk
+        /// </summary>
+        public Dictionary<int3, JobHandleWithData<IVoxelDataGenerationJob<T>>> _generationJobHandles;
+
+        protected override void Awake()
         {
-            foreach (VoxelDataVolume<T> dataArray in _chunks.Values)
-            {
-                if (dataArray.IsCreated)
-                {
-                    dataArray.Dispose();
-                }
-            }
+            base.Awake();
+            _generationJobHandles = new Dictionary<int3, JobHandleWithData<IVoxelDataGenerationJob<T>>>();
         }
 
         /// <summary>
@@ -54,14 +56,127 @@ namespace Eldemarkki.VoxelTerrain.World
         }
 
         /// <summary>
-        /// Sets the chunk data of the chunk at <paramref name="chunkCoordinate"/>
+        /// Tries to get the voxel data array for one chunk with a persistent allocator. If a chunk doesn't exist there, false will be returned and <paramref name="chunk"/> will be set to null. If a chunk exists there, true will be returned and <paramref name="chunk"/> will be set to the chunk. If the data for that chunk is currently being calculated, the job will complete and the new data will be set to <paramref name="chunk"/>
         /// </summary>
-        /// <param name="chunkCoordinate">The coordinate of the chunk</param>
-        /// <param name="newData">The data to set the chunk's data to</param>
-        public virtual void SetDataChunk(int3 chunkCoordinate, VoxelDataVolume<T> newData)
+        /// <param name="chunkCoordinate">The coordinate of the chunk whose voxel data should be gotten</param>
+        /// <param name="chunk">The voxel data of a chunk at the coordinate</param>
+        /// <returns>Does a chunk exists at that coordinate</returns>
+        public override bool TryGetDataChunk(int3 chunkCoordinate, out VoxelDataVolume<T> chunk)
         {
-            bool dataExistsAtCoordinate = DoesChunkExistAtCoordinate(chunkCoordinate);
-            SetDataChunkUnchecked(chunkCoordinate, newData, dataExistsAtCoordinate);
+            ApplyChunkChanges(chunkCoordinate);
+            return TryGetDataChunkWithoutApplyingChanges(chunkCoordinate, out chunk);
+        }
+
+        /// <summary>
+        /// If the chunk coordinate has an ongoing voxel data generation job, it will get completed and it's result will be applied to the chunk
+        /// </summary>
+        /// <param name="chunkCoordinate">The coordinate of the chunk to apply changes for</param>
+        public void ApplyChunkChanges(int3 chunkCoordinate)
+        {
+            if (_generationJobHandles.TryGetValue(chunkCoordinate, out JobHandleWithData<IVoxelDataGenerationJob<T>> jobHandle))
+            {
+                jobHandle.JobHandle.Complete();
+                SetDataChunk(chunkCoordinate, jobHandle.JobData.OutputVoxelData);
+                _generationJobHandles.Remove(chunkCoordinate);
+            }
+        }
+
+        /// <summary>
+        /// Tries to get the voxel data array for one chunk with a persistent allocator. If a chunk doesn't exist there, false will be returned and <paramref name="chunk"/> will be set to null. If a chunk exists there, true will be returned and <paramref name="chunk"/> will be set to the chunk. If the data for that chunk is currently being calculated, the job will NOT be completed.
+        /// <param name="chunkCoordinate">The coordinate of the chunk whose voxel data should be gotten</param>
+        /// <param name="chunk">The voxel data of a chunk at the coordinate</param>
+        /// <returns>Does a chunk exists at that coordinate</returns>
+        public bool TryGetDataChunkWithoutApplyingChanges(int3 chunkCoordinate, out VoxelDataVolume<T> chunk)
+        {
+            return _chunks.TryGetValue(chunkCoordinate, out chunk);
+        }
+
+        /// <summary>
+        /// Tries to get the voxel data array for one chunk with a persistent allocator. If a chunk doesn't exist there, false will be returned and <paramref name="chunk"/> will be set to null. If a chunk exists there, true will be returned and <paramref name="chunk"/> will be set to the chunk. This also checks the chunk generation queue, so a chunk that is currently being generated may also be returned.
+        /// <param name="chunkCoordinate">The coordinate of the chunk whose voxel data should be gotten</param>
+        /// <param name="chunk">The voxel data of a chunk at the coordinate</param>
+        /// <returns>Does a chunk exists at that coordinate</returns>
+        public bool TryGetDataChunkWithoutApplyingChangesIncludeQueue(int3 chunkCoordinate, out VoxelDataVolume<T> chunk)
+        {
+            if (_chunks.TryGetValue(chunkCoordinate, out chunk))
+            {
+                return true;
+            }
+
+            if (_generationJobHandles.TryGetValue(chunkCoordinate, out var job))
+            {
+                chunk = job.JobData.OutputVoxelData;
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Gets all the coordinates of the chunks that already exist or are currently being generated, where the Chebyshev distance from <paramref name="coordinate"/> to the chunk's coordinate is more than <paramref name="range"/>
+        /// </summary>
+        /// <param name="coordinate">The central coordinate where the distances should be measured from</param>
+        /// <param name="range">The maximum allowed manhattan distance</param>
+        /// <returns></returns>
+        public override IEnumerable<int3> GetChunkCoordinatesOutsideOfRange(int3 coordinate, int range)
+        {
+            foreach (var baseCoordinate in base.GetChunkCoordinatesOutsideOfRange(coordinate, range))
+            {
+                yield return baseCoordinate;
+            }
+
+            int3[] generationJobHandleArray = _generationJobHandles.Keys.ToArray();
+            for (int i = 0; i < generationJobHandleArray.Length; i++)
+            {
+                int3 generationCoordinate = generationJobHandleArray[i];
+                if (DistanceUtilities.ChebyshevDistanceGreaterThan(coordinate, generationCoordinate, range))
+                {
+                    yield return generationCoordinate;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Checks if a chunk exists or is currently being generated at the coordinate <paramref name="chunkCoordinate"/>
+        /// </summary>
+        /// <param name="chunkCoordinate">The coordinate to check for</param>
+        /// <returns>Returns true if a chunk exists or is currently being generated at <paramref name="chunkCoordinate"/>, otherwise returns false</returns>
+        public override bool DoesChunkExistAtCoordinate(int3 chunkCoordinate)
+        {
+            return base.DoesChunkExistAtCoordinate(chunkCoordinate) || _generationJobHandles.ContainsKey(chunkCoordinate);
+        }
+
+        protected override bool TryGetDefaultOrJobHandle(int3 chunkCoordinate, out JobHandle jobHandle)
+        {
+            if (base.DoesChunkExistAtCoordinate(chunkCoordinate))
+            {
+                jobHandle = default;
+                return true;
+            }
+            else
+            {
+                bool exists = _generationJobHandles.TryGetValue(chunkCoordinate, out var job);
+                jobHandle = exists ? job.JobHandle : default;
+                return exists;
+            }
+        }
+
+        public void SetDataChunk(int3 chunkCoordinate, VoxelDataVolume<T> newData)
+        {
+            if (TryGetDataChunkWithoutApplyingChanges(chunkCoordinate, out VoxelDataVolume<T> oldData))
+            {
+                oldData.CopyFrom(newData);
+                newData.Dispose();
+            }
+            else
+            {
+                AddChunkUnchecked(chunkCoordinate, newData);
+            }
+
+            if (VoxelWorld.ChunkStore.TryGetDataChunk(chunkCoordinate, out ChunkProperties chunkProperties))
+            {
+                chunkProperties.IsMeshGenerated = false;
+            }
         }
 
         /// <summary>
@@ -129,6 +244,32 @@ namespace Eldemarkki.VoxelTerrain.World
                         }
                     }
                 }
+            }
+        }
+
+        public override void MoveChunk(int3 from, int3 to)
+        {
+            // Check that 'from' and 'to' are not equal
+            if (from.Equals(to)) { return; }
+
+            // Check that a chunk does NOT already exist at 'to'
+            if (DoesChunkExistAtCoordinate(to)) { return; }
+
+            // Check that a chunk exists at 'from'
+            if (TryGetDataChunk(from, out var existingData))
+            {
+
+                JobHandle meshingJobHandle = default;
+                if (VoxelWorld.ChunkStore.TryGetDataChunk(from, out var chunk))
+                {
+                    if (chunk.MeshingJobHandle != null)
+                    {
+                        meshingJobHandle = chunk.MeshingJobHandle.JobHandle;
+                    }
+                }
+                RemoveChunkUnchecked(from);
+
+                GenerateDataForChunkUnchecked(to, existingData, meshingJobHandle);
             }
         }
 
@@ -225,6 +366,28 @@ namespace Eldemarkki.VoxelTerrain.World
                     }
                 }
             });
+        }
+
+        public void Dispose()
+        {
+            foreach (VoxelDataVolume<T> dataArray in Chunks)
+            {
+                if (dataArray.IsCreated)
+                {
+                    dataArray.Dispose();
+                }
+            }
+
+            if (_generationJobHandles != null)
+            {
+                foreach (var jobHandle in _generationJobHandles.Values)
+                {
+                    jobHandle.JobHandle.Complete();
+                    jobHandle.JobData.OutputVoxelData.Dispose();
+                }
+
+                _generationJobHandles.Clear();
+            }
         }
     }
 }

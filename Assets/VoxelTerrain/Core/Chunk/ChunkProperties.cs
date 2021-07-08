@@ -1,8 +1,8 @@
-﻿using Eldemarkki.VoxelTerrain.Meshing.Data;
+﻿using Eldemarkki.VoxelTerrain.Meshing;
+using Eldemarkki.VoxelTerrain.Meshing.Data;
 using Eldemarkki.VoxelTerrain.Utilities;
 using System;
 using Unity.Collections;
-using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
 
@@ -40,10 +40,9 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
 
         private int3 _chunkSize;
 
-        public JobHandle DataGenerationJobHandle { get; set; }
-
         public NativeList<MeshingVertexData> OutputVertices { get; private set; }
         public NativeList<ushort> OutputTriangles { get; private set; }
+        public JobHandleWithDataAndChunkProperties<IMesherJob> MeshingJobHandle { get; set; }
 
         public ChunkProperties(int3 chunkSize)
         {
@@ -67,8 +66,17 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
 
         public void Dispose()
         {
-            OutputVertices.Dispose();
-            OutputTriangles.Dispose();
+            if (MeshingJobHandle != null)
+            {
+                MeshingJobHandle.JobHandle.Complete();
+                MeshingJobHandle.JobData.OutputTriangles.Dispose();
+                MeshingJobHandle.JobData.OutputVertices.Dispose();
+            }
+            else
+            {
+                OutputVertices.Dispose();
+                OutputTriangles.Dispose();
+            }
         }
     }
 }

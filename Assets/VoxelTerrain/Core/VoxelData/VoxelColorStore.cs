@@ -1,5 +1,5 @@
-﻿using Eldemarkki.VoxelTerrain.World;
-using Unity.Collections.LowLevel.Unsafe;
+﻿using Eldemarkki.VoxelTerrain.Utilities;
+using Eldemarkki.VoxelTerrain.World;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
@@ -16,13 +16,45 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// </summary>
         /// <param name="chunkCoordinate">The coordinate of the chunk which to generate the colors for</param>
         /// <param name="outputColors">The array that should be filled with the new colors</param>
-        public override unsafe JobHandle GenerateDataForChunkUnchecked(int3 chunkCoordinate, VoxelDataVolume<Color32> outputColors)
+        public override unsafe JobHandle GenerateDataForChunkUnchecked(int3 chunkCoordinate, VoxelDataVolume<Color32> outputColors, JobHandle dependency)
         {
             // Fill the array with the any color, with alpha=0 by default
-            Color32* defaultColorArray = stackalloc Color32[1] { new Color32(0, 0, 0, 0) };
-            UnsafeUtility.MemCpyReplicate(outputColors.GetUnsafePtr(), defaultColorArray, sizeof(Color32), outputColors.Length);
-            SetDataChunkUnchecked(chunkCoordinate, outputColors, false);
-            return default;
+            Color32 fillColor = new Color32(0, 0, 0, 0);
+
+            FillColorJob job = new FillColorJob
+            {
+                FillColor = fillColor,
+                OutputVoxelData = outputColors
+            };
+
+            JobHandle jobHandle = job.Schedule(dependency);
+            JobHandleWithData<IVoxelDataGenerationJob<Color32>> jobHandleWithData = new JobHandleWithData<IVoxelDataGenerationJob<Color32>>
+            {
+                JobData = job,
+                JobHandle = jobHandle,
+            };
+
+            _generationJobHandles.Add(chunkCoordinate, jobHandleWithData);
+            return jobHandle;
+        }
+
+        private struct FillColorJob : IVoxelDataGenerationJob<Color32>
+        {
+            private Color32 _fillColor;
+            public Color32 FillColor { get => _fillColor; set => _fillColor = value; }
+
+            private VoxelDataVolume<Color32> _outputVoxelData;
+            public VoxelDataVolume<Color32> OutputVoxelData { get => _outputVoxelData; set => _outputVoxelData = value; }
+
+            public int3 WorldPositionOffset { get; set; }
+
+            public void Execute()
+            {
+                for (int i = 0; i < _outputVoxelData.Length; i++)
+                {
+                    _outputVoxelData.SetVoxelData(_fillColor, i);
+                }
+            }
         }
     }
 }

@@ -47,9 +47,9 @@ namespace Eldemarkki.VoxelTerrain.World
             if (!newPlayerCoordinate.Equals(_lastGenerationCoordinate))
             {
                 void addChunkToGenerationQueue(int3 coordinate) => chunkProvider.AddChunkToGenerationQueue(coordinate);
-                voxelWorld.ChunkStore.MoveChunks(_lastGenerationCoordinate, newPlayerCoordinate, renderDistance, addChunkToGenerationQueue);
                 voxelWorld.VoxelDataStore.MoveChunks(_lastGenerationCoordinate, newPlayerCoordinate, renderDistance, addChunkToGenerationQueue);
                 voxelWorld.VoxelColorStore.MoveChunks(_lastGenerationCoordinate, newPlayerCoordinate, renderDistance, addChunkToGenerationQueue);
+                voxelWorld.ChunkStore.MoveChunks(_lastGenerationCoordinate, newPlayerCoordinate, renderDistance, addChunkToGenerationQueue);
                 _lastGenerationCoordinate = newPlayerCoordinate;
             }
         }

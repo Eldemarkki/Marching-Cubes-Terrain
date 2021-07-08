@@ -86,7 +86,7 @@ namespace Eldemarkki.VoxelTerrain.World
             int3 newPos = to - new int3(range);
             BoundsInt newCoords = new BoundsInt(newPos.ToVectorInt(), renderSize.ToVectorInt());
 
-            var newlyFreedCoordinates = VoxelWorld.ChunkStore.GetChunkCoordinatesOutsideOfRange(to, range);
+            var newlyFreedCoordinates = GetChunkCoordinatesOutsideOfRange(to, range);
 
             int3[] coordinatesThatNeedChunks = CoordinateUtilities.GetCoordinatesThatNeedChunks(oldCoords, newCoords);
 
@@ -115,12 +115,18 @@ namespace Eldemarkki.VoxelTerrain.World
         /// <param name="chunkCoordinate">The coordinate to generate the data for</param>
         public JobHandle GenerateDataForChunk(int3 chunkCoordinate)
         {
-            if (!DoesChunkExistAtCoordinate(chunkCoordinate))
+            if(TryGetDefaultOrJobHandle(chunkCoordinate, out var jobHandle))
             {
-                return GenerateDataForChunkUnchecked(chunkCoordinate);
+                return jobHandle;
             }
 
-            return default;
+            return GenerateDataForChunkUnchecked(chunkCoordinate);
+        }
+
+        protected virtual bool TryGetDefaultOrJobHandle(int3 chunkCoordinate, out JobHandle jobHandle)
+        {
+            jobHandle = default;
+            return DoesChunkExistAtCoordinate(chunkCoordinate);
         }
 
         /// <summary>
@@ -147,7 +153,7 @@ namespace Eldemarkki.VoxelTerrain.World
         /// </summary>
         /// <param name="chunkCoordinate">The coordinate of the chunk which to generate the data for</param>
         /// <param name="existingData">The already existing data that should be reused to generate the new data</param>
-        public abstract JobHandle GenerateDataForChunkUnchecked(int3 chunkCoordinate, T existingData);
+        public abstract JobHandle GenerateDataForChunkUnchecked(int3 chunkCoordinate, T existingData, JobHandle dependency = default);
 
         /// <summary>
         /// Adds a chunk to the chunk store, if one does not already exist
