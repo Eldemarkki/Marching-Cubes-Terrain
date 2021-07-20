@@ -1,4 +1,5 @@
-﻿using Eldemarkki.VoxelTerrain.World.Chunks;
+﻿using Eldemarkki.VoxelTerrain.Utilities;
+using Eldemarkki.VoxelTerrain.World.Chunks;
 using System.Collections.Generic;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -19,13 +20,13 @@ namespace Eldemarkki.VoxelTerrain.Chunks
         /// <summary>
         /// A queue that contains all the coordinates where a chunk will eventually have to be generated
         /// </summary>
-        private Queue<int3> _generationQueue;
+        private UniqueQueue<int3> _generationQueue;
 
         private List<ChunkProperties> currentlyRunningJobs;
 
         private void Awake()
         {
-            _generationQueue = new Queue<int3>();
+            _generationQueue = new UniqueQueue<int3>();
             currentlyRunningJobs = new List<ChunkProperties>();
         }
 

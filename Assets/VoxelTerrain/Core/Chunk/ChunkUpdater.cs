@@ -94,6 +94,9 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
 
         private JobHandle StartGeneratingData(ChunkProperties chunk)
         {
+            chunk.MeshCollider.enabled = false;
+            chunk.MeshRenderer.enabled = false;
+
             JobHandle voxelDataHandle = VoxelWorld.VoxelDataStore.GenerateDataForChunk(chunk.ChunkCoordinate);
             JobHandle voxelColorHandle = VoxelWorld.VoxelColorStore.GenerateDataForChunk(chunk.ChunkCoordinate);
 
