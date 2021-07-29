@@ -38,6 +38,8 @@ namespace Eldemarkki.VoxelTerrain.Player
         /// </summary>
         [SerializeField] private float maxReachDistance = Mathf.Infinity;
 
+        [SerializeField] private Transform hitIndicator;
+
         /// <summary>
         /// Which key must be held down to flatten the terrain
         /// </summary>
@@ -78,19 +80,24 @@ namespace Eldemarkki.VoxelTerrain.Player
 
         private void Update()
         {
+            Ray ray = new Ray(playerCamera.position, playerCamera.forward);
+            if (!Physics.Raycast(ray, out RaycastHit hit, maxReachDistance))
+            {
+                if (hitIndicator) { hitIndicator.gameObject.SetActive(false); }
+                return;
+            }
+
+            if (hitIndicator)
+            {
+                hitIndicator.SetPositionAndRotation(hit.point, Quaternion.FromToRotation(hitIndicator.up, hit.normal) * hitIndicator.rotation);
+                hitIndicator.gameObject.SetActive(true);
+            }
+
             if (Input.GetKey(flatteningKey))
             {
                 if (Input.GetMouseButtonDown(0))
                 {
-                    Vector3 startP = playerCamera.position;
-                    Vector3 destP = startP + playerCamera.forward;
-                    Vector3 direction = destP - startP;
-
-                    Ray ray = new Ray(startP, direction);
-
-                    if (!Physics.Raycast(ray, out RaycastHit hit, maxReachDistance)) { return; }
                     _isFlattening = true;
-
                     _flatteningOrigin = hit.point;
                     _flatteningNormal = hit.normal;
                 }
@@ -113,31 +120,17 @@ namespace Eldemarkki.VoxelTerrain.Player
                 }
                 else
                 {
-                    RaycastToTerrain(leftClickAddsTerrain);
+                    EditTerrain(hit.point, leftClickAddsTerrain, deformSpeed, deformRange);
                 }
             }
             else if (Input.GetMouseButton(1))
             {
-                RaycastToTerrain(!leftClickAddsTerrain);
+                EditTerrain(hit.point, !leftClickAddsTerrain, deformSpeed, deformRange);
             }
             else if (Input.GetMouseButton(2))
             {
-                PaintColor();
+                PaintColor(hit.point);
             }
-        }
-
-        /// <summary>
-        /// Shoots a raycast to the terrain and deforms the terrain around the hit point
-        /// </summary>
-        /// <param name="addTerrain">Should terrain be added or removed</param>
-        private void RaycastToTerrain(bool addTerrain)
-        {
-            Ray ray = new Ray(playerCamera.position, playerCamera.forward);
-
-            if (!Physics.Raycast(ray, out RaycastHit hit, maxReachDistance)) { return; }
-            Vector3 hitPoint = hit.point;
-
-            EditTerrain(hitPoint, addTerrain, deformSpeed, deformRange);
         }
 
         /// <summary>
@@ -214,13 +207,8 @@ namespace Eldemarkki.VoxelTerrain.Player
         /// <summary>
         /// Shoots a ray towards the terrain and changes the material around the hitpoint to <see cref="paintColor"/>
         /// </summary>
-        private void PaintColor()
+        private void PaintColor(Vector3 point)
         {
-            Ray ray = new Ray(playerCamera.position, playerCamera.forward);
-
-            if (!Physics.Raycast(ray, out RaycastHit hit, maxReachDistance)) { return; }
-            Vector3 point = hit.point;
-
             int hitX = Mathf.RoundToInt(point.x);
             int hitY = Mathf.RoundToInt(point.y);
             int hitZ = Mathf.RoundToInt(point.z);
