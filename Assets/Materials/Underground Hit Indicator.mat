@@ -90,7 +90,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - InnerRadius: 0.4
+    - InnerRadius: 0.2
     - OuterRadius: 1
     - OuterThickness: 0.15
     - _AlphaClip: 0
