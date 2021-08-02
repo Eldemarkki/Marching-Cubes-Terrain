@@ -12,7 +12,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         /// <summary>
         /// Multiply a byte by this constant, to convert it to a float in the range [0, 1]
         /// </summary>
-        public const float ByteToFloat = 1f / 255f;
+        public const float ByteToFloat = 1f / byte.MaxValue;
 
         /// <summary>
         /// Calculates the cube index of a single voxel

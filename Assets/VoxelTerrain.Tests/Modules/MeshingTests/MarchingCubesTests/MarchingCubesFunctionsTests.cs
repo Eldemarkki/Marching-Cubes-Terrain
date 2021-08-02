@@ -25,17 +25,17 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes.Tests
         {
             float* densities = stackalloc float[8]
             {
-                c1 / 255f,
-                c2 / 255f,
-                c3 / 255f,
-                c4 / 255f,
-                c5 / 255f,
-                c6 / 255f,
-                c7 / 255f,
-                c8 / 255f
+                c1 / (float)byte.MaxValue,
+                c2 / (float)byte.MaxValue,
+                c3 / (float)byte.MaxValue,
+                c4 / (float)byte.MaxValue,
+                c5 / (float)byte.MaxValue,
+                c6 / (float)byte.MaxValue,
+                c7 / (float)byte.MaxValue,
+                c8 / (float)byte.MaxValue
             };
 
-            byte cubeIndex = MarchingCubesFunctions.CalculateCubeIndex(densities, isolevel / 255f);
+            byte cubeIndex = MarchingCubesFunctions.CalculateCubeIndex(densities, isolevel / (float)byte.MaxValue);
 
             Assert.AreEqual(expectedCubeIndex, cubeIndex);
         }

@@ -67,7 +67,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                         // Default is 1, because the default voxel data should be air
                         float voxelData = math.select(1, CalculateVoxelData(worldPositionX, worldPositionY, worldPositionZ), isInsideOfMap);
 
-                        OutputVoxelData.SetVoxelData((byte)(math.saturate(voxelData) * 255), x, y, z);
+                        OutputVoxelData.SetVoxelData((byte)(math.saturate(voxelData) * byte.MaxValue), x, y, z);
                     }
                 }
             }

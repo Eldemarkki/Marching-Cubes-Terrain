@@ -62,7 +62,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
                 }
 
                 byte cubeIndex = MarchingCubesFunctions.CalculateCubeIndex(densities, Isolevel);
-                if (cubeIndex == 0 || cubeIndex == 255)
+                if (cubeIndex == 0 || cubeIndex == byte.MaxValue)
                 {
                     continue;
                 }

@@ -42,7 +42,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                     for (int y = 0; y < OutputVoxelData.Height; y++)
                     {
                         float voxelData = (y + offset) * 0.5f;
-                        OutputVoxelData.SetVoxelData((byte)(math.saturate(voxelData) * 255), new int3(x, y, z));
+                        OutputVoxelData.SetVoxelData((byte)(math.saturate(voxelData) * byte.MaxValue), new int3(x, y, z));
                     }
                 }
             }

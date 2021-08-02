@@ -129,8 +129,8 @@ namespace Eldemarkki.VoxelTerrain.VoxelData.Tests
 
         private static bool AreVoxelDatasSame(float a, float b)
         {
-            byte aByte = (byte)RoundUpIfDecimal5(255f * a);
-            byte bByte = (byte)RoundUpIfDecimal5(255f * b);
+            byte aByte = (byte)RoundUpIfDecimal5(byte.MaxValue * a);
+            byte bByte = (byte)RoundUpIfDecimal5(byte.MaxValue * b);
 
             return aByte == bByte;
         }

@@ -164,9 +164,9 @@ namespace Eldemarkki.VoxelTerrain.Player
 
                 float distanceReciprocal = math.rsqrt(distanceSq);
                 float modificationAmount = deformSpeed * distanceReciprocal * buildModifier;
-                float oldVoxelData = voxelData / 255f;
+                float oldVoxelData = voxelData / (float)byte.MaxValue;
 
-                return (byte)(math.saturate(oldVoxelData - modificationAmount) * 255);
+                return (byte)(math.saturate(oldVoxelData - modificationAmount) * byte.MaxValue);
             });
         }
 
@@ -200,7 +200,7 @@ namespace Eldemarkki.VoxelTerrain.Player
                 }
 
                 float voxelDataChange = (math.dot(_flatteningNormal, voxelDataWorldPosition) - math.dot(_flatteningNormal, _flatteningOrigin)) / deformRange;
-                return (byte)(math.saturate((voxelDataChange * 0.5f + voxelData / 255f - flattenOffset) * 0.8f + flattenOffset) * 255);
+                return (byte)(math.saturate((voxelDataChange * 0.5f + voxelData / (float)byte.MaxValue - flattenOffset) * 0.8f + flattenOffset) * byte.MaxValue);
             });
         }
 
