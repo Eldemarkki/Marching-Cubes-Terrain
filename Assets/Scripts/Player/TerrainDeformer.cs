@@ -36,7 +36,7 @@ namespace Eldemarkki.VoxelTerrain.Player
         /// <summary>
         /// How far away points the player can deform
         /// </summary>
-        [SerializeField] private float maxReachDistance = Mathf.Infinity;
+        [SerializeField] private float maxReachDistance = math.INFINITY;
 
         [SerializeField] private Transform hitIndicator;
 
@@ -144,15 +144,9 @@ namespace Eldemarkki.VoxelTerrain.Player
         {
             int buildModifier = addTerrain ? 1 : -1;
 
-            int hitX = Mathf.RoundToInt(point.x);
-            int hitY = Mathf.RoundToInt(point.y);
-            int hitZ = Mathf.RoundToInt(point.z);
-            int3 hitPoint = new int3(hitX, hitY, hitZ);
-
-            int intRange = Mathf.CeilToInt(range);
-            int3 rangeInt3 = new int3(intRange, intRange, intRange);
-
-            BoundsInt queryBounds = new BoundsInt((hitPoint - rangeInt3).ToVectorInt(), new int3(intRange * 2).ToVectorInt());
+            int3 hitPoint = (int3)math.round(point);
+            int3 rangeInt3 = new int3(math.ceil(range));
+            BoundsInt queryBounds = new BoundsInt((hitPoint - rangeInt3).ToVectorInt(), (rangeInt3 * 2).ToVectorInt());
 
             voxelWorld.VoxelDataStore.SetVoxelDataCustom(queryBounds, (voxelDataWorldPosition, voxelData) =>
             {
@@ -186,10 +180,8 @@ namespace Eldemarkki.VoxelTerrain.Player
                 flattenOffset = marchingCubesMesher.Isolevel;
             }
 
-            int intRange = (int)math.ceil(deformRange);
-            int size = 2 * intRange + 1;
-            int3 queryPosition = (int3)(intersectionPoint - new int3(intRange));
-            BoundsInt worldSpaceQuery = new BoundsInt(queryPosition.ToVectorInt(), new Vector3Int(size, size, size));
+            int3 queryPosition = (int3)(intersectionPoint - math.ceil(deformRange));
+            BoundsInt worldSpaceQuery = new BoundsInt(queryPosition.ToVectorInt(), (2 * new int3(math.ceil(deformRange)) + 1).ToVectorInt());
 
             voxelWorld.VoxelDataStore.SetVoxelDataCustom(worldSpaceQuery, (voxelDataWorldPosition, voxelData) =>
             {
@@ -209,11 +201,8 @@ namespace Eldemarkki.VoxelTerrain.Player
         /// </summary>
         private void PaintColor(Vector3 point)
         {
-            int hitX = Mathf.RoundToInt(point.x);
-            int hitY = Mathf.RoundToInt(point.y);
-            int hitZ = Mathf.RoundToInt(point.z);
-            int3 hitPoint = new int3(hitX, hitY, hitZ);
-            int3 intRange = new int3(Mathf.CeilToInt(deformRange));
+            int3 hitPoint = (int3)math.round(point);
+            int3 intRange = new int3(math.ceil(deformRange));
 
             BoundsInt queryBounds = new BoundsInt((hitPoint - intRange).ToVectorInt(), (intRange * 2).ToVectorInt());
 
