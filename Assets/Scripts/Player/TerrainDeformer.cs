@@ -1,5 +1,5 @@
-﻿using Eldemarkki.VoxelTerrain.Meshing.MarchingCubes;
-using Eldemarkki.VoxelTerrain.Utilities;
+﻿using Eldemarkki.VoxelTerrain.Extensions;
+using Eldemarkki.VoxelTerrain.Meshing.MarchingCubes;
 using Eldemarkki.VoxelTerrain.Utilities.Intersection;
 using Eldemarkki.VoxelTerrain.World;
 using Unity.Mathematics;
@@ -141,19 +141,8 @@ namespace Eldemarkki.VoxelTerrain.Player
         /// <param name="addTerrain">Should terrain be added or removed</param>
         private void EditTerrain(Vector3 point, bool addTerrain)
         {
-            int3 hitPoint = (int3)math.round(point);
-            int3 rangeInt3 = new int3(math.ceil(deformRadius));
-            BoundsInt worldSpaceQuery = new BoundsInt();
-            worldSpaceQuery.SetMinMax((hitPoint - rangeInt3).ToVectorInt(), (hitPoint + rangeInt3).ToVectorInt());
-
-            voxelWorld.VoxelDataStore.SetVoxelDataCustom(worldSpaceQuery, (voxelDataWorldPosition, voxelData) =>
+            voxelWorld.VoxelDataStore.SetVoxelDataInSphere(point, deformRadius, (voxelDataWorldPosition, distance, voxelData) =>
             {
-                float distance = math.distance(voxelDataWorldPosition, point);
-                if (distance > deformRadius)
-                {
-                    return voxelData;
-                }
-
                 float oldVoxelData = voxelData / (float)byte.MaxValue;
                 float sphere = distance / deformRadius;
                 float targetDensity = addTerrain ?
@@ -180,40 +169,16 @@ namespace Eldemarkki.VoxelTerrain.Player
                 flattenOffset = marchingCubesMesher.Isolevel;
             }
 
-            int3 hitPoint = (int3)math.round(intersectionPoint);
-            int3 rangeInt3 = new int3(math.ceil(deformRadius));
-            BoundsInt worldSpaceQuery = new BoundsInt();
-            worldSpaceQuery.SetMinMax((hitPoint - rangeInt3).ToVectorInt(), (hitPoint + rangeInt3).ToVectorInt());
-
-            voxelWorld.VoxelDataStore.SetVoxelDataCustom(worldSpaceQuery, (voxelDataWorldPosition, voxelData) =>
+            voxelWorld.VoxelDataStore.SetVoxelDataInSphere(intersectionPoint, deformRadius, (voxelDataWorldPosition, distance, voxelData) =>
             {
-                float distanceSq = math.distancesq(voxelDataWorldPosition, intersectionPoint);
-                if (distanceSq > deformRadius * deformRadius)
-                {
-                    return voxelData;
-                }
-
                 float voxelDataChange = (math.dot(_flatteningNormal, voxelDataWorldPosition) - math.dot(_flatteningNormal, _flatteningOrigin)) / deformRadius;
                 return (byte)(math.saturate((voxelDataChange * 0.5f + voxelData / (float)byte.MaxValue - flattenOffset) * 0.8f + flattenOffset) * byte.MaxValue);
             });
         }
 
-        /// <summary>
-        /// Shoots a ray towards the terrain and changes the material around the hitpoint to <see cref="paintColor"/>
-        /// </summary>
         private void PaintColor(Vector3 point)
         {
-            int3 hitPoint = (int3)math.round(point);
-            int3 rangeInt3 = new int3(math.ceil(deformRadius));
-            BoundsInt worldSpaceQuery = new BoundsInt();
-            worldSpaceQuery.SetMinMax((hitPoint - rangeInt3).ToVectorInt(), (hitPoint + rangeInt3).ToVectorInt());
-
-            voxelWorld.VoxelColorStore.SetVoxelDataCustom(worldSpaceQuery, (voxelDataWorldPosition, voxelData) =>
-            {
-                float distanceSq = math.distancesq(voxelDataWorldPosition, point);
-                bool shouldBePainted = distanceSq <= deformRadius * deformRadius;
-                return shouldBePainted ? paintColor : voxelData;
-            });
+            voxelWorld.VoxelColorStore.SetVoxelDataInSphere(point, deformRadius, (voxelDataWorldPosition, distance, voxelData) => paintColor);
         }
     }
 }

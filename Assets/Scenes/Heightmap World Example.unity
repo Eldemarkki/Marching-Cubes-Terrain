@@ -325,7 +325,7 @@ MonoBehaviour:
   voxelWorld: {fileID: 1406068215}
   leftClickAddsTerrain: 1
   deformSpeed: 0.1
-  deformRange: 3
+  deformRadius: 5
   maxReachDistance: Infinity
   hitIndicator: {fileID: 1491570744}
   flatteningKey: 306

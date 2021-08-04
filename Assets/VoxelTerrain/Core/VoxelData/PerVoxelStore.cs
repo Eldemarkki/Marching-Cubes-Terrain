@@ -16,7 +16,7 @@ namespace Eldemarkki.VoxelTerrain.World
     /// A store that contains a single variable of type <typeparamref name="T"/> for each voxel data point in a chunk
     /// </summary>
     /// <typeparam name="T">The type of variable to associate with each voxel data point</typeparam>
-    public abstract class PerVoxelStore<T> : PerChunkStore<VoxelDataVolume<T>>, IDisposable where T : unmanaged
+    public abstract class PerVoxelStore<T> : PerChunkStore<VoxelDataVolume<T>>, IDisposable where T : struct
     {
         /// <summary>
         /// A dictionary of all the ongoing voxel data generation jobs. Key is the chunk's coordinate, and the value is the ongoing job for that chunk
