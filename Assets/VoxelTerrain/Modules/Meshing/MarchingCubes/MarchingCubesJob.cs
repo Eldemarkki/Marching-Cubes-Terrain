@@ -70,7 +70,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
                 // Index at the beginning of the row
                 int rowIndex = MarchingCubesLookupTables.TriangleTableAccessIndices[cubeIndex];
 
-                int voxelTriangleCount = MarchingCubesLookupTables.TriangleTableWithLengths[rowIndex]; ; // First item in the row
+                int voxelTriangleCount = MarchingCubesLookupTables.TriangleTableWithLengths[rowIndex]; // First item in the row
                 int rowStartIndex = rowIndex + 1; // Second index in the row;
 
                 for (int i = 0; i < voxelTriangleCount; i++)

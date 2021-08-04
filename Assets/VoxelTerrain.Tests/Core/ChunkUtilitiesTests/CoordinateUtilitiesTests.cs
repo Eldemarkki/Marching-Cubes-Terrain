@@ -128,7 +128,6 @@ namespace Eldemarkki.VoxelTerrain.Utilities.Tests
             Assert.That(coordinates, Is.EquivalentTo(expectedCoordinates));
         }
 
-        
         [Test]
         public void GetChunkCoordinatesContainingPoint_Test7()
         {
@@ -163,7 +162,6 @@ namespace Eldemarkki.VoxelTerrain.Utilities.Tests
             Assert.That(coordinates, Is.EquivalentTo(expectedCoordinates));
         }
 
-        
         [Test]
         public void GetChunkCoordinatesContainingPoint_Test9()
         {

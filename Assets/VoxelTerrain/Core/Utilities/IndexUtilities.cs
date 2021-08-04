@@ -33,7 +33,6 @@ namespace Eldemarkki.VoxelTerrain.Utilities
             return z * width * height + y * width + x;
         }
 
-
         /// <summary>
         /// Converts a 1D index to a 3D location
         /// </summary>

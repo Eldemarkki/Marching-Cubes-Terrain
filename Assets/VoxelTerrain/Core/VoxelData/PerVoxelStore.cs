@@ -258,7 +258,6 @@ namespace Eldemarkki.VoxelTerrain.World
             // Check that a chunk exists at 'from'
             if (TryGetDataChunk(from, out var existingData))
             {
-
                 JobHandle meshingJobHandle = default;
                 if (VoxelWorld.ChunkStore.TryGetDataChunk(from, out var chunk))
                 {
@@ -267,8 +266,8 @@ namespace Eldemarkki.VoxelTerrain.World
                         meshingJobHandle = chunk.MeshingJobHandle.JobHandle;
                     }
                 }
-                RemoveChunkUnchecked(from);
 
+                RemoveChunkUnchecked(from);
                 GenerateDataForChunkUnchecked(to, existingData, meshingJobHandle);
             }
         }

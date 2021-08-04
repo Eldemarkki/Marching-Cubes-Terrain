@@ -56,7 +56,6 @@ namespace Eldemarkki.VoxelTerrain.World
             }
         }
 
-
         /// <summary>
         /// Get's the current coordinate of <see cref="player"/>
         /// </summary>
