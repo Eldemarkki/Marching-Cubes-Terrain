@@ -29,7 +29,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities
 
         public T Dequeue()
         {
-            if(queue.Count > 0)
+            if (queue.Count > 0)
             {
                 var item = queue.Dequeue();
                 queueItems.Remove(item);

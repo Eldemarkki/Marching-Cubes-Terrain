@@ -1,5 +1,5 @@
-﻿using System.Runtime.CompilerServices;
-using Eldemarkki.VoxelTerrain.Settings;
+﻿using Eldemarkki.VoxelTerrain.Settings;
+using System.Runtime.CompilerServices;
 using Unity.Burst;
 using Unity.Mathematics;
 

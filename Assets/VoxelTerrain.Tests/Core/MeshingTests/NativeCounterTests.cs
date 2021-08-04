@@ -41,6 +41,6 @@ namespace Eldemarkki.VoxelTerrain.Meshing.Tests
             }
 
             Assert.AreEqual(value, counter.Count);
-        }        
+        }
     }
 }

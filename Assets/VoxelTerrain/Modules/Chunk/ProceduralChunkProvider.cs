@@ -56,7 +56,7 @@ namespace Eldemarkki.VoxelTerrain.Chunks
 
             for (int i = currentlyRunningJobs.Count - 1; i >= 0; i--)
             {
-                if(currentlyRunningJobs[i] == null)
+                if (currentlyRunningJobs[i] == null)
                 {
                     currentlyRunningJobs.RemoveAt(i);
                     continue;

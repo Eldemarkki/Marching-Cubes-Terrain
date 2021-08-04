@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using Eldemarkki.VoxelTerrain.Meshing;
+﻿using Eldemarkki.VoxelTerrain.Meshing;
 using Eldemarkki.VoxelTerrain.Meshing.Data;
 using Eldemarkki.VoxelTerrain.Utilities;
+using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -77,16 +77,16 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
         public JobHandleWithDataAndChunkProperties<IMesherJob> StartGeneratingMesh(ChunkProperties chunk, JobHandle jobHandle = default)
         {
             JobHandle previousMeshingJobHandle = default;
-            if(chunk.MeshingJobHandle != null)
+            if (chunk.MeshingJobHandle != null)
             {
                 previousMeshingJobHandle = chunk.MeshingJobHandle.JobHandle;
             }
 
             JobHandle combinedJobHandle = JobHandle.CombineDependencies(jobHandle, previousMeshingJobHandle);
             JobHandleWithDataAndChunkProperties<IMesherJob> meshingJobHandle = VoxelWorld.VoxelMesher.CreateMesh(
-                VoxelWorld.VoxelDataStore, 
-                VoxelWorld.VoxelColorStore, 
-                chunk, 
+                VoxelWorld.VoxelDataStore,
+                VoxelWorld.VoxelColorStore,
+                chunk,
                 combinedJobHandle);
             chunk.MeshingJobHandle = meshingJobHandle;
             return meshingJobHandle;

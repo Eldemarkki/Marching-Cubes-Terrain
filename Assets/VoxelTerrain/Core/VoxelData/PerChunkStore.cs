@@ -121,7 +121,7 @@ namespace Eldemarkki.VoxelTerrain.World
         /// <param name="chunkCoordinate">The coordinate to generate the data for</param>
         public JobHandle GenerateDataForChunk(int3 chunkCoordinate)
         {
-            if(TryGetDefaultOrJobHandle(chunkCoordinate, out var jobHandle))
+            if (TryGetDefaultOrJobHandle(chunkCoordinate, out var jobHandle))
             {
                 return jobHandle;
             }

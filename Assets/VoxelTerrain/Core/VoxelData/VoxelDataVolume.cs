@@ -1,5 +1,5 @@
-﻿using System;
-using Eldemarkki.VoxelTerrain.Utilities;
+﻿using Eldemarkki.VoxelTerrain.Utilities;
+using System;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Mathematics;
@@ -142,7 +142,6 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
             get => _voxelData[IndexUtilities.XyzToIndex(x, y, z, Width, Height)];
             set => _voxelData[IndexUtilities.XyzToIndex(x, y, z, Width, Height)] = value;
         }
-
 
         public T this[int3 localPosition]
         {

@@ -14,7 +14,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing
         /// The allocator for the counter
         /// </summary>
         private readonly Allocator _allocator;
-        
+
         /// <summary>
         /// The pointer to the value
         /// </summary>

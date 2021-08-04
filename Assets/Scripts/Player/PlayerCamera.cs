@@ -80,7 +80,7 @@ namespace Eldemarkki.VoxelTerrain.Player
             {
                 movement.y--;
             }
-            
+
             movement.z += Input.GetAxisRaw("Vertical");
 
             _cam.transform.Translate(movementSpeed * Time.deltaTime * movement.normalized, Space.Self);

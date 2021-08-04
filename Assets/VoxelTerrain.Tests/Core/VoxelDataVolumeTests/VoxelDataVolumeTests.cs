@@ -149,8 +149,8 @@ namespace Eldemarkki.VoxelTerrain.VoxelData.Tests
             }
 
             float decimals = x % 1;
-            return decimals < 0.5f ? 
-                (int)math.floor(x) : 
+            return decimals < 0.5f ?
+                (int)math.floor(x) :
                 (int)math.ceil(x);
         }
 

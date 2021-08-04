@@ -139,7 +139,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities
             int count = newChunks.CalculateVolume();
 
             BoundsInt intersection = IntersectionUtilities.GetIntersectionVolume(oldChunks, newChunks);
-            if(math.all(intersection.size.ToInt3() > 0))
+            if (math.all(intersection.size.ToInt3() > 0))
             {
                 count -= intersection.CalculateVolume();
             }

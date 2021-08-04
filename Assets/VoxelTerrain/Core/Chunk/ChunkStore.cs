@@ -11,7 +11,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
     {
         public void Dispose()
         {
-            foreach(var chunk in Chunks)
+            foreach (var chunk in Chunks)
             {
                 chunk.Dispose();
             }

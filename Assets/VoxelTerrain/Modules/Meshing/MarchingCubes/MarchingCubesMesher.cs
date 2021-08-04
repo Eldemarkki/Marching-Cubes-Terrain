@@ -1,5 +1,5 @@
-﻿using Eldemarkki.VoxelTerrain.VoxelData;
-using Eldemarkki.VoxelTerrain.Utilities;
+﻿using Eldemarkki.VoxelTerrain.Utilities;
+using Eldemarkki.VoxelTerrain.VoxelData;
 using Eldemarkki.VoxelTerrain.World.Chunks;
 using Unity.Jobs;
 using Unity.Mathematics;

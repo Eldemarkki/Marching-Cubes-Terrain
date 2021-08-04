@@ -1,8 +1,8 @@
 ﻿using Eldemarkki.VoxelTerrain.Meshing.Data;
+using Eldemarkki.VoxelTerrain.VoxelData;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
-using Eldemarkki.VoxelTerrain.VoxelData;
 
 namespace Eldemarkki.VoxelTerrain.Meshing
 {
