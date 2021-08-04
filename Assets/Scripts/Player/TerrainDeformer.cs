@@ -26,12 +26,13 @@ namespace Eldemarkki.VoxelTerrain.Player
         /// <summary>
         /// How fast the terrain is deformed
         /// </summary>
-        [SerializeField] private float deformSpeed = 0.1f;
+        [Range(0, 1)]
+        [SerializeField] private float deformSpeed = 0.05f;
 
         /// <summary>
-        /// How far the deformation can reach
+        /// The radius of the deformation sphere
         /// </summary>
-        [SerializeField] private float deformRange = 3f;
+        [SerializeField] private float deformRadius = 5f;
 
         /// <summary>
         /// How far away points the player can deform
@@ -120,12 +121,12 @@ namespace Eldemarkki.VoxelTerrain.Player
                 }
                 else
                 {
-                    EditTerrain(hit.point, leftClickAddsTerrain, deformSpeed, deformRange);
+                    EditTerrain(hit.point, leftClickAddsTerrain);
                 }
             }
             else if (Input.GetMouseButton(1))
             {
-                EditTerrain(hit.point, !leftClickAddsTerrain, deformSpeed, deformRange);
+                EditTerrain(hit.point, !leftClickAddsTerrain);
             }
             else if (Input.GetMouseButton(2))
             {
@@ -138,29 +139,28 @@ namespace Eldemarkki.VoxelTerrain.Player
         /// </summary>
         /// <param name="point">The point to modify the terrain around</param>
         /// <param name="addTerrain">Should terrain be added or removed</param>
-        /// <param name="deformSpeed">How fast the terrain should be deformed</param>
-        /// <param name="range">How far the deformation can reach</param>
-        private void EditTerrain(Vector3 point, bool addTerrain, float deformSpeed, float range)
+        private void EditTerrain(Vector3 point, bool addTerrain)
         {
-            int buildModifier = addTerrain ? 1 : -1;
-
             int3 hitPoint = (int3)math.round(point);
-            int3 rangeInt3 = new int3(math.ceil(range));
-            BoundsInt queryBounds = new BoundsInt((hitPoint - rangeInt3).ToVectorInt(), (rangeInt3 * 2).ToVectorInt());
+            int3 rangeInt3 = new int3(math.ceil(deformRadius));
+            BoundsInt worldSpaceQuery = new BoundsInt();
+            worldSpaceQuery.SetMinMax((hitPoint - rangeInt3).ToVectorInt(), (hitPoint + rangeInt3).ToVectorInt());
 
-            voxelWorld.VoxelDataStore.SetVoxelDataCustom(queryBounds, (voxelDataWorldPosition, voxelData) =>
+            voxelWorld.VoxelDataStore.SetVoxelDataCustom(worldSpaceQuery, (voxelDataWorldPosition, voxelData) =>
             {
-                float distanceSq = math.distancesq(voxelDataWorldPosition, point);
-                if (distanceSq > range * range)
+                float distance = math.distance(voxelDataWorldPosition, point);
+                if (distance > deformRadius)
                 {
                     return voxelData;
                 }
 
-                float distanceReciprocal = math.rsqrt(distanceSq);
-                float modificationAmount = deformSpeed * distanceReciprocal * buildModifier;
                 float oldVoxelData = voxelData / (float)byte.MaxValue;
+                float sphere = distance / deformRadius;
+                float targetDensity = addTerrain ?
+                    math.min(sphere, oldVoxelData) :
+                    math.max(1 - sphere, oldVoxelData);
 
-                return (byte)(math.saturate(oldVoxelData - modificationAmount) * byte.MaxValue);
+                return (byte)(math.lerp(oldVoxelData, targetDensity, deformSpeed) * byte.MaxValue);
             });
         }
 
@@ -180,18 +180,20 @@ namespace Eldemarkki.VoxelTerrain.Player
                 flattenOffset = marchingCubesMesher.Isolevel;
             }
 
-            int3 queryPosition = (int3)(intersectionPoint - math.ceil(deformRange));
-            BoundsInt worldSpaceQuery = new BoundsInt(queryPosition.ToVectorInt(), (2 * new int3(math.ceil(deformRange)) + 1).ToVectorInt());
+            int3 hitPoint = (int3)math.round(intersectionPoint);
+            int3 rangeInt3 = new int3(math.ceil(deformRadius));
+            BoundsInt worldSpaceQuery = new BoundsInt();
+            worldSpaceQuery.SetMinMax((hitPoint - rangeInt3).ToVectorInt(), (hitPoint + rangeInt3).ToVectorInt());
 
             voxelWorld.VoxelDataStore.SetVoxelDataCustom(worldSpaceQuery, (voxelDataWorldPosition, voxelData) =>
             {
                 float distanceSq = math.distancesq(voxelDataWorldPosition, intersectionPoint);
-                if (distanceSq > deformRange * deformRange)
+                if (distanceSq > deformRadius * deformRadius)
                 {
                     return voxelData;
                 }
 
-                float voxelDataChange = (math.dot(_flatteningNormal, voxelDataWorldPosition) - math.dot(_flatteningNormal, _flatteningOrigin)) / deformRange;
+                float voxelDataChange = (math.dot(_flatteningNormal, voxelDataWorldPosition) - math.dot(_flatteningNormal, _flatteningOrigin)) / deformRadius;
                 return (byte)(math.saturate((voxelDataChange * 0.5f + voxelData / (float)byte.MaxValue - flattenOffset) * 0.8f + flattenOffset) * byte.MaxValue);
             });
         }
@@ -202,14 +204,14 @@ namespace Eldemarkki.VoxelTerrain.Player
         private void PaintColor(Vector3 point)
         {
             int3 hitPoint = (int3)math.round(point);
-            int3 intRange = new int3(math.ceil(deformRange));
+            int3 rangeInt3 = new int3(math.ceil(deformRadius));
+            BoundsInt worldSpaceQuery = new BoundsInt();
+            worldSpaceQuery.SetMinMax((hitPoint - rangeInt3).ToVectorInt(), (hitPoint + rangeInt3).ToVectorInt());
 
-            BoundsInt queryBounds = new BoundsInt((hitPoint - intRange).ToVectorInt(), (intRange * 2).ToVectorInt());
-
-            voxelWorld.VoxelColorStore.SetVoxelDataCustom(queryBounds, (voxelDataWorldPosition, voxelData) =>
+            voxelWorld.VoxelColorStore.SetVoxelDataCustom(worldSpaceQuery, (voxelDataWorldPosition, voxelData) =>
             {
                 float distanceSq = math.distancesq(voxelDataWorldPosition, point);
-                bool shouldBePainted = distanceSq <= deformRange * deformRange;
+                bool shouldBePainted = distanceSq <= deformRadius * deformRadius;
                 return shouldBePainted ? paintColor : voxelData;
             });
         }
