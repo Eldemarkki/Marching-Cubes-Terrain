@@ -14,7 +14,6 @@ using UnityEngine.UI;
 
 namespace Eldemarkki.VoxelTerrain.Debugging
 {
-
     public class DebugView : MonoBehaviour
     {
         private static List<DebugProperty> DebugProperties { get; set; } = new List<DebugProperty>();
