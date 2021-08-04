@@ -86,7 +86,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData.Tests
             voxelDataVolume = new VoxelDataVolume<float>(5, Allocator.Temp);
             for (int i = 0; i < voxelDataVolume.Length; i++)
             {
-                Assert.AreEqual(0, voxelDataVolume.GetVoxelData(i));
+                Assert.AreEqual(0, voxelDataVolume[i]);
             }
         }
 
@@ -102,8 +102,8 @@ namespace Eldemarkki.VoxelTerrain.VoxelData.Tests
         {
             TestSetGetVoxelData(() =>
             {
-                voxelDataVolume.SetVoxelData(newVoxelData, index);
-                return voxelDataVolume.GetVoxelData(index);
+                voxelDataVolume[index] = newVoxelData;
+                return voxelDataVolume[index];
             }, newVoxelData);
         }
 
@@ -112,8 +112,8 @@ namespace Eldemarkki.VoxelTerrain.VoxelData.Tests
         {
             TestSetGetVoxelData(() =>
             {
-                voxelDataVolume.SetVoxelData(newVoxelData, x, y, z);
-                return voxelDataVolume.GetVoxelData(x, y, z);
+                voxelDataVolume[x, y, z] = newVoxelData;
+                return voxelDataVolume[x, y, z];
             }, newVoxelData);
         }
 
@@ -122,8 +122,8 @@ namespace Eldemarkki.VoxelTerrain.VoxelData.Tests
         {
             TestSetGetVoxelData(() =>
             {
-                voxelDataVolume.SetVoxelData(newVoxelData, new int3(x, y, z));
-                return voxelDataVolume.GetVoxelData(new int3(x, y, z));
+                voxelDataVolume[new int3(x, y, z)] = newVoxelData;
+                return voxelDataVolume[new int3(x, y, z)];
             }, newVoxelData);
         }
 
@@ -135,8 +135,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData.Tests
             return aByte == bByte;
         }
 
-        // This function is an "improvement" (not really...) of math.round()
-        // This rounds a number down if its decimal is less than 0.5, and otherwise up:
+        // This function rounds a number down if its decimal is less than 0.5, and otherwise up:
         // 0.5 => 1
         // 0.49999 => 0
         // 76.5 => 77
@@ -146,21 +145,13 @@ namespace Eldemarkki.VoxelTerrain.VoxelData.Tests
         {
             if (x < 0)
             {
-                throw new System.ArgumentException("This function only works with positive numbers!");
+                throw new ArgumentException("This function only works with positive numbers.");
             }
 
-            int result;
             float decimals = x % 1;
-            if (decimals < 0.5f)
-            {
-                result = (int)math.floor(x);
-            }
-            else
-            {
-                result = (int)math.ceil(x);
-            }
-
-            return result;
+            return decimals < 0.5f ? 
+                (int)math.floor(x) : 
+                (int)math.ceil(x);
         }
 
         [TearDown]

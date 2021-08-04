@@ -58,7 +58,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
                 for (int i = 0; i < 8; i++)
                 {
                     int3 voxelCorner = voxelLocalPosition + LookupTables.CubeCorners[i];
-                    densities[i] = _voxelData.GetVoxelData(voxelCorner) * MarchingCubesFunctions.ByteToFloat;
+                    densities[i] = _voxelData[voxelCorner] * MarchingCubesFunctions.ByteToFloat;
                 }
 
                 byte cubeIndex = MarchingCubesFunctions.CalculateCubeIndex(densities, Isolevel);
@@ -91,7 +91,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
 
                         // Take the position of the closest corner of the current voxel
                         int3 colorSamplePoint = (int3)math.round(triangleMiddlePoint);
-                        Color32 color = _voxelColors.GetVoxelData(colorSamplePoint);
+                        Color32 color = _voxelColors[colorSamplePoint];
 
                         MeshingVertexData* triangleVertices = stackalloc MeshingVertexData[3];
                         triangleVertices[0] = new MeshingVertexData(triangle.c0, normal, color);

@@ -45,7 +45,7 @@ namespace Eldemarkki.VoxelTerrain.World
                 {
                     int3 localPos = (dataWorldPosition - chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize).Mod(VoxelWorld.WorldSettings.ChunkSize + 1);
 
-                    chunkData.SetVoxelData(dataValue, localPos);
+                    chunkData[localPos] = dataValue;
 
                     if (VoxelWorld.ChunkStore.TryGetDataChunk(chunkCoordinate, out ChunkProperties chunkProperties))
                     {
@@ -238,7 +238,7 @@ namespace Eldemarkki.VoxelTerrain.World
 
                         int3 voxelDataLocalPosition = voxelDataWorldPosition - chunkWorldSpaceOrigin;
                         int voxelDataIndex = IndexUtilities.XyzToIndex(voxelDataLocalPosition, chunkBoundsSize.x + 1, chunkBoundsSize.y + 1);
-                        T voxelData = getOriginalVoxelData ? dataChunk.GetVoxelData(voxelDataIndex) : default;
+                        T voxelData = getOriginalVoxelData ? dataChunk[voxelDataIndex] : default;
 
                         function(voxelDataWorldPosition, voxelDataLocalPosition, voxelDataIndex, voxelData);
                     }
@@ -258,12 +258,9 @@ namespace Eldemarkki.VoxelTerrain.World
             if (TryGetDataChunk(from, out var existingData))
             {
                 JobHandle meshingJobHandle = default;
-                if (VoxelWorld.ChunkStore.TryGetDataChunk(from, out var chunk))
+                if (VoxelWorld.ChunkStore.TryGetDataChunk(from, out var chunk) && chunk.MeshingJobHandle != null)
                 {
-                    if (chunk.MeshingJobHandle != null)
-                    {
-                        meshingJobHandle = chunk.MeshingJobHandle.JobHandle;
-                    }
+                    meshingJobHandle = chunk.MeshingJobHandle.JobHandle;
                 }
 
                 RemoveChunkUnchecked(from);
@@ -306,7 +303,7 @@ namespace Eldemarkki.VoxelTerrain.World
             {
                 ForEachVoxelDataInQueryInChunk(worldSpaceQuery, chunkCoordinate, voxelDataChunk, (voxelDataWorldPosition, voxelDataLocalPosition, voxelDataIndex, voxelData) =>
                 {
-                    voxelDataArray.SetVoxelData(voxelData, voxelDataWorldPosition - worldSpaceQuery.min.ToInt3());
+                    voxelDataArray[voxelDataWorldPosition - worldSpaceQuery.min.ToInt3()] = voxelData;
                 });
             });
 
@@ -321,19 +318,7 @@ namespace Eldemarkki.VoxelTerrain.World
         public void SetVoxelDataCustom(VoxelDataVolume<T> voxelDataArray, int3 originPosition)
         {
             BoundsInt worldSpaceQuery = new BoundsInt(originPosition.ToVectorInt(), (voxelDataArray.Size - new int3(1, 1, 1)).ToVectorInt());
-
-            ForEachVoxelDataArrayInQuery(worldSpaceQuery, (chunkCoordinate, voxelDataChunk) =>
-            {
-                ForEachVoxelDataInQueryInChunk(worldSpaceQuery, chunkCoordinate, voxelDataChunk, (voxelDataWorldPosition, voxelDataLocalPosition, voxelDataIndex, voxelData) =>
-                {
-                    voxelDataChunk.SetVoxelData(voxelData, voxelDataWorldPosition - chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize);
-                }, false);
-
-                if (VoxelWorld.ChunkStore.TryGetDataChunk(chunkCoordinate, out ChunkProperties chunkProperties))
-                {
-                    VoxelWorld.ChunkUpdater.SetChunkDirty(chunkProperties);
-                }
-            });
+            SetVoxelDataCustom(worldSpaceQuery, (voxelDataWorldPosition, voxelData) => voxelDataArray[voxelDataWorldPosition - originPosition], false);
         }
 
         /// <summary>
@@ -349,19 +334,15 @@ namespace Eldemarkki.VoxelTerrain.World
                 ForEachVoxelDataInQueryInChunk(worldSpaceQuery, chunkCoordinate, voxelDataChunk, (voxelDataWorldPosition, voxelDataLocalPosition, voxelDataIndex, voxelData) =>
                 {
                     T newVoxelData = setVoxelDataFunction(voxelDataWorldPosition, voxelData);
-                    if (!newVoxelData.Equals(voxelData))
-                    {
-                        voxelDataChunk.SetVoxelData(newVoxelData, voxelDataIndex);
-                        anyChanged = true;
-                    }
+                    if (newVoxelData.Equals(voxelData)) { return; }
+
+                    voxelDataChunk[voxelDataIndex] = newVoxelData;
+                    anyChanged = true;
                 }, getOriginalData);
 
-                if (anyChanged)
+                if (anyChanged && VoxelWorld.ChunkStore.TryGetDataChunk(chunkCoordinate, out ChunkProperties chunkProperties))
                 {
-                    if (VoxelWorld.ChunkStore.TryGetDataChunk(chunkCoordinate, out ChunkProperties chunkProperties))
-                    {
-                        VoxelWorld.ChunkUpdater.SetChunkDirty(chunkProperties);
-                    }
+                    VoxelWorld.ChunkUpdater.SetChunkDirty(chunkProperties);
                 }
             });
         }

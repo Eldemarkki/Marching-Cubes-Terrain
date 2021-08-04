@@ -39,8 +39,10 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <inheritdoc/>
         public int3 WorldPositionOffset { get; set; }
 
+        private VoxelDataVolume<byte> _outputVoxelData;
+
         /// <inheritdoc/>
-        public VoxelDataVolume<byte> OutputVoxelData { get; set; }
+        public VoxelDataVolume<byte> OutputVoxelData { get => _outputVoxelData; set => _outputVoxelData = value; }
 
         /// <summary>
         /// The height data from the heightmap
@@ -67,7 +69,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                         // Default is 1, because the default voxel data should be air
                         float voxelData = math.select(1, CalculateVoxelData(worldPositionX, worldPositionY, worldPositionZ), isInsideOfMap);
 
-                        OutputVoxelData.SetVoxelData((byte)(math.saturate(voxelData) * byte.MaxValue), x, y, z);
+                        _outputVoxelData[x, y, z] = (byte)(math.saturate(voxelData) * byte.MaxValue);
                     }
                 }
             }

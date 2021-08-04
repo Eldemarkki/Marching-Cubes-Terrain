@@ -19,8 +19,10 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <inheritdoc/>
         public int3 WorldPositionOffset { get; set; }
 
+        private VoxelDataVolume<byte> _outputVoxelData;
+
         /// <inheritdoc/>
-        public VoxelDataVolume<byte> OutputVoxelData { get; set; }
+        public VoxelDataVolume<byte> OutputVoxelData { get => _outputVoxelData; set => _outputVoxelData = value; }
 
         /// <summary>
         /// The execute method required for Unity's IJobParallelFor job type
@@ -42,7 +44,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                     for (int y = 0; y < OutputVoxelData.Height; y++)
                     {
                         float voxelData = (y + offset) * 0.5f;
-                        OutputVoxelData.SetVoxelData((byte)(math.saturate(voxelData) * byte.MaxValue), new int3(x, y, z));
+                        _outputVoxelData[x, y, z] = (byte)(math.saturate(voxelData) * byte.MaxValue);
                     }
                 }
             }

@@ -131,114 +131,37 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
             _voxelData.Dispose();
         }
 
-        /// <summary>
-        /// Stores the <paramref name="voxelData"/> at <paramref name="localPosition"/>.
-        /// </summary>
-        /// <param name="voxelData">The new voxel data</param>
-        /// <param name="localPosition">The location of that voxel data</param>
-        public void SetVoxelData(T voxelData, int3 localPosition)
+        public T this[int index]
         {
-            int index = IndexUtilities.XyzToIndex(localPosition, Width, Height);
-            SetVoxelData(voxelData, index);
+            get => _voxelData[index];
+            set => _voxelData[index] = value;
         }
 
-        /// <summary>
-        /// Stores the <paramref name="voxelData"/> at <paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/>.
-        /// </summary>
-        /// <param name="voxelData">The new voxel data</param>
-        /// <param name="x">The x value of the voxel data location</param>
-        /// <param name="y">The y value of the voxel data location</param>
-        /// <param name="z">The z value of the voxel data location</param>
-        public void SetVoxelData(T voxelData, int x, int y, int z)
+        public T this[int x, int y, int z]
         {
-            int index = IndexUtilities.XyzToIndex(x, y, z, Width, Height);
-            SetVoxelData(voxelData, index);
+            get => _voxelData[IndexUtilities.XyzToIndex(x, y, z, Width, Height)];
+            set => _voxelData[IndexUtilities.XyzToIndex(x, y, z, Width, Height)] = value;
         }
 
-        /// <summary>
-        /// Stores the <paramref name="voxelData"/> at <paramref name="index"/>.
-        /// </summary>
-        /// <param name="voxelData">The new voxel data</param>
-        /// <param name="index">The index in the native array</param>
-        public void SetVoxelData(T voxelData, int index)
+
+        public T this[int3 localPosition]
         {
-            _voxelData[index] = voxelData;
+            get => _voxelData[IndexUtilities.XyzToIndex(localPosition, Width, Height)];
+            set => _voxelData[IndexUtilities.XyzToIndex(localPosition, Width, Height)] = value;
         }
 
-        /// <summary>
-        /// Tries to get the voxel data at <paramref name="localPosition"/>. If the data exists at <paramref name="localPosition"/>, true will be returned and <paramref name="voxelData"/> will be set to the value. If it doesn't exist, false will be returned and <paramref name="voxelData"/> will be set to default(T).
-        /// </summary>
-        /// <param name="localPosition">The local position of the voxel data to get</param>
-        /// <param name="voxelData">A voxel data at <paramref name="localPosition"/></param>
-        /// <returns>Does a voxel data point exist at <paramref name="localPosition"/></returns>
-        public bool TryGetVoxelData(int3 localPosition, out T voxelData)
-        {
-            return TryGetVoxelData(localPosition.x, localPosition.y, localPosition.z, out voxelData);
-        }
-
-        /// <summary>
-        /// Tries to get the voxel data at <paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/>. If the data exists at <paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/>, true will be returned and <paramref name="voxelData"/> will be set to the value. If it doesn't exist, false will be returned and <paramref name="voxelData"/> will be set to default(T).
-        /// </summary>
-        /// <param name="x">The x value of the voxel data location</param>
-        /// <param name="y">The y value of the voxel data location</param>
-        /// <param name="z">The z value of the voxel data location</param>
-        /// <param name="voxelData">A voxel data at <paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/></param>
-        /// <returns>Does a voxel data point exist at <paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/></returns>
-        public bool TryGetVoxelData(int x, int y, int z, out T voxelData)
-        {
-            int index = IndexUtilities.XyzToIndex(x, y, z, Width, Height);
-            return TryGetVoxelData(index, out voxelData);
-        }
-
-        /// <summary>
-        /// Gets the voxel data at <paramref name="index"/>. If the data exists at <paramref name="index"/>, true will be returned and <paramref name="voxelData"/> will be set to the value. If it doesn't exist, false will be returned and <paramref name="voxelData"/> will be set to default(T).
-        /// </summary>
-        /// <param name="index">The index in the native array</param>
-        /// <param name="voxelData">A voxel data at <paramref name="index"/></param>
-        /// <returns>Does a voxel data point exist at <paramref name="index"/></returns>
+        public bool TryGetVoxelData(int3 localPosition, out T voxelData) => TryGetVoxelData(localPosition.x, localPosition.y, localPosition.z, out voxelData);
+        public bool TryGetVoxelData(int x, int y, int z, out T voxelData) => TryGetVoxelData(IndexUtilities.XyzToIndex(x, y, z, Width, Height), out voxelData);
         public bool TryGetVoxelData(int index, out T voxelData)
         {
             if (index >= 0 && index < _voxelData.Length)
             {
-                voxelData = GetVoxelData(index);
+                voxelData = this[index];
                 return true;
             }
 
             voxelData = default;
             return false;
-        }
-
-        /// <summary>
-        /// Gets the voxel data at <paramref name="localPosition"/>. If the data doesn't exist at <paramref name="localPosition"/>, an <see cref="IndexOutOfRangeException"/> will be thrown
-        /// </summary>
-        /// <param name="localPosition">The local position of the voxel data to get</param>
-        /// <returns>The voxel data at <paramref name="localPosition"/></returns>
-        public T GetVoxelData(int3 localPosition)
-        {
-            return GetVoxelData(localPosition.x, localPosition.y, localPosition.z);
-        }
-
-        /// <summary>
-        /// Gets the voxel data at <paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/>. If the data doesn't exist at <paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/>, an <see cref="IndexOutOfRangeException"/> will be thrown
-        /// </summary>
-        /// <param name="x">The x value of the voxel data location</param>
-        /// <param name="y">The y value of the voxel data location</param>
-        /// <param name="z">The z value of the voxel data location</param>
-        /// <returns>The voxel data at <paramref name="x"/>, <paramref name="y"/>, <paramref name="z"/></returns>
-        public T GetVoxelData(int x, int y, int z)
-        {
-            int index = IndexUtilities.XyzToIndex(x, y, z, Width, Height);
-            return GetVoxelData(index);
-        }
-
-        /// <summary>
-        /// Gets the voxel data at <paramref name="index"/>. If the data doesn't exist at <paramref name="index"/>, an <see cref="IndexOutOfRangeException"/> will be thrown
-        /// </summary>
-        /// <param name="index">The index in the native array</param>
-        /// <returns>The voxel data at <paramref name="index"/></returns>
-        public T GetVoxelData(int index)
-        {
-            return _voxelData[index];
         }
 
         /// <summary>
@@ -255,16 +178,6 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
             {
                 throw new ArgumentException($"The chunks are not the same size! Width: {Width}/{sourceVolume.Width}, Height: {Height}/{sourceVolume.Height}, Depth: {Depth}/{sourceVolume.Depth}");
             }
-        }
-
-        /// <summary>
-        /// Gets the index for point <paramref name="voxelDataLocalPosition"/> for this container.
-        /// </summary>
-        /// <param name="voxelDataLocalPosition">The voxel data position inside of this container to get the index for</param>
-        /// <returns>The voxel data index for <paramref name="voxelDataLocalPosition"/></returns>
-        public int GetIndex(int3 voxelDataLocalPosition)
-        {
-            return IndexUtilities.XyzToIndex(voxelDataLocalPosition, Width, Height);
         }
 
         public unsafe void* GetUnsafePtr()
