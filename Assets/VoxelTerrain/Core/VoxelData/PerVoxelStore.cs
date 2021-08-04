@@ -98,7 +98,7 @@ namespace Eldemarkki.VoxelTerrain.World
         /// <returns>Does a chunk exists at that coordinate</returns>
         public bool TryGetDataChunkWithoutApplyingChangesIncludeQueue(int3 chunkCoordinate, out VoxelDataVolume<T> chunk)
         {
-            if (_chunks.TryGetValue(chunkCoordinate, out chunk))
+            if (TryGetDataChunkWithoutApplyingChanges(chunkCoordinate, out chunk))
             {
                 return true;
             }
@@ -217,7 +217,7 @@ namespace Eldemarkki.VoxelTerrain.World
         /// <param name="chunkCoordinate">The coordinate of <paramref name="dataChunk"/></param>
         /// <param name="dataChunk">The voxel datas of the chunk</param>
         /// <param name="function">The function that will be performed on each voxel data point. The arguments are as follows: 1) The world space position of the voxel data point, 2) The chunk space position of the voxel data point, 3) The index of the voxel data point inside of <paramref name="dataChunk"/>, 4) The value of the voxel data</param>
-        public void ForEachVoxelDataInQueryInChunk(BoundsInt worldSpaceQuery, int3 chunkCoordinate, VoxelDataVolume<T> dataChunk, Action<int3, int3, int, T> function)
+        public void ForEachVoxelDataInQueryInChunk(BoundsInt worldSpaceQuery, int3 chunkCoordinate, VoxelDataVolume<T> dataChunk, Action<int3, int3, int, T> function, bool getOriginalVoxelData = true)
         {
             int3 chunkBoundsSize = VoxelWorld.WorldSettings.ChunkSize;
             int3 chunkWorldSpaceOrigin = chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize;
@@ -238,10 +238,9 @@ namespace Eldemarkki.VoxelTerrain.World
 
                         int3 voxelDataLocalPosition = voxelDataWorldPosition - chunkWorldSpaceOrigin;
                         int voxelDataIndex = IndexUtilities.XyzToIndex(voxelDataLocalPosition, chunkBoundsSize.x + 1, chunkBoundsSize.y + 1);
-                        if (dataChunk.TryGetVoxelData(voxelDataIndex, out T voxelData))
-                        {
-                            function(voxelDataWorldPosition, voxelDataLocalPosition, voxelDataIndex, voxelData);
-                        }
+                        T voxelData = getOriginalVoxelData ? dataChunk.GetVoxelData(voxelDataIndex) : default;
+
+                        function(voxelDataWorldPosition, voxelDataLocalPosition, voxelDataIndex, voxelData);
                     }
                 }
             }
@@ -328,7 +327,7 @@ namespace Eldemarkki.VoxelTerrain.World
                 ForEachVoxelDataInQueryInChunk(worldSpaceQuery, chunkCoordinate, voxelDataChunk, (voxelDataWorldPosition, voxelDataLocalPosition, voxelDataIndex, voxelData) =>
                 {
                     voxelDataChunk.SetVoxelData(voxelData, voxelDataWorldPosition - chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize);
-                });
+                }, false);
 
                 if (VoxelWorld.ChunkStore.TryGetDataChunk(chunkCoordinate, out ChunkProperties chunkProperties))
                 {
@@ -342,7 +341,7 @@ namespace Eldemarkki.VoxelTerrain.World
         /// </summary>
         /// <param name="worldSpaceQuery">The volume where the voxel datas should be set to</param>
         /// <param name="setVoxelDataFunction">The function that calculates what the voxel data should be set to at the specific location. The first argument is the world space position of the voxel data, and the second argument is the current voxel data. The return value is what the new voxel data should be set to.</param>
-        public void SetVoxelDataCustom(BoundsInt worldSpaceQuery, Func<int3, T, T> setVoxelDataFunction)
+        public void SetVoxelDataCustom(BoundsInt worldSpaceQuery, Func<int3, T, T> setVoxelDataFunction, bool getOriginalData = true)
         {
             ForEachVoxelDataArrayInQuery(worldSpaceQuery, (chunkCoordinate, voxelDataChunk) =>
             {
@@ -355,7 +354,7 @@ namespace Eldemarkki.VoxelTerrain.World
                         voxelDataChunk.SetVoxelData(newVoxelData, voxelDataIndex);
                         anyChanged = true;
                     }
-                });
+                }, getOriginalData);
 
                 if (anyChanged)
                 {

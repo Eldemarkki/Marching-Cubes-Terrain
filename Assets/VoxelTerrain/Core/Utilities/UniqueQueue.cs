@@ -5,8 +5,8 @@ namespace Eldemarkki.VoxelTerrain.Utilities
 {
     public class UniqueQueue<T>
     {
-        private Queue<T> queue;
-        private HashSet<T> queueItems;
+        private readonly Queue<T> queue;
+        private readonly HashSet<T> queueItems;
 
         public int Count => queue.Count;
 

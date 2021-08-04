@@ -41,7 +41,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities.Tests
             TestXyzToIndex_Using_int_xyz(x, y, z, expectedIndex, 2, 5);
         }
 
-        static object[] Width_1_Height_5_Cases =
+        private static readonly object[] Width_1_Height_5_Cases =
         {
             new object[] { 0, 1, 0, 1 },
             new object[] { 0, 2, 0, 2 },
@@ -51,7 +51,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities.Tests
             new object[] { 0, 0, 1, 5 }
         };
 
-        static object[] Width_2_Height_5_Cases =
+        private static readonly object[] Width_2_Height_5_Cases =
         {
             new object[] { 1, 0, 0, 1  },
             new object[] { 0, 1, 0, 2  },

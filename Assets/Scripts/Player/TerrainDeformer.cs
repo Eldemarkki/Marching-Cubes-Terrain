@@ -173,12 +173,12 @@ namespace Eldemarkki.VoxelTerrain.Player
             {
                 float voxelDataChange = (math.dot(_flatteningNormal, voxelDataWorldPosition) - math.dot(_flatteningNormal, _flatteningOrigin)) / deformRadius;
                 return (byte)(math.saturate((voxelDataChange * 0.5f + voxelData / (float)byte.MaxValue - flattenOffset) * 0.8f + flattenOffset) * byte.MaxValue);
-            });
+            }, false);
         }
 
         private void PaintColor(Vector3 point)
         {
-            voxelWorld.VoxelColorStore.SetVoxelDataInSphere(point, deformRadius, (voxelDataWorldPosition, distance, voxelData) => paintColor);
+            voxelWorld.VoxelColorStore.SetVoxelDataInSphere(point, deformRadius, (voxelDataWorldPosition, distance, voxelData) => paintColor, false, false);
         }
     }
 }

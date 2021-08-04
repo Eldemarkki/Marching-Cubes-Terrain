@@ -8,7 +8,7 @@ namespace Eldemarkki.VoxelTerrain.Extensions
 {
     public static class PerVoxelStoreExtensions
     {
-        public static void SetVoxelDataInSphere<T>(this PerVoxelStore<T> store, float3 point, float radius, Func<int3, float, T, T> setVoxelDataFunction) where T : struct
+        public static void SetVoxelDataInSphere<T>(this PerVoxelStore<T> store, float3 point, float radius, Func<int3, float, T, T> setVoxelDataFunction, bool calculateDistance = true, bool getOriginalVoxelData = true) where T : struct
         {
             int3 hitPoint = (int3)math.round(point);
             int3 rangeInt3 = new int3(math.ceil(radius));
@@ -17,9 +17,9 @@ namespace Eldemarkki.VoxelTerrain.Extensions
 
             store.SetVoxelDataCustom(worldSpaceQuery, (voxelDataWorldPosition, voxelData) =>
             {
-                float distance = math.distance(point, voxelDataWorldPosition);
-                return distance <= radius ? setVoxelDataFunction(voxelDataWorldPosition, distance, voxelData) : voxelData;
-            });
+                float distancesq = math.distancesq(point, voxelDataWorldPosition);
+                return distancesq <= radius * radius ? setVoxelDataFunction(voxelDataWorldPosition, calculateDistance ? math.sqrt(distancesq) : 0, voxelData) : voxelData;
+            }, getOriginalVoxelData);
         }
     }
 }
