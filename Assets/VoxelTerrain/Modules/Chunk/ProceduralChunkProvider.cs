@@ -54,23 +54,29 @@ namespace Eldemarkki.VoxelTerrain.Chunks
                 JobHandle.ScheduleBatchedJobs();
             }
 
-            for (int i = currentlyRunningJobs.Count - 1; i >= 0; i--)
+            if (currentlyRunningJobs.Count > 0)
             {
-                if (currentlyRunningJobs[i] == null)
+                List<ChunkProperties> completedJobs = new List<ChunkProperties>();
+                for (int i = currentlyRunningJobs.Count - 1; i >= 0; i--)
                 {
-                    currentlyRunningJobs.RemoveAt(i);
-                    continue;
-                }
-
-                var job = currentlyRunningJobs[i].MeshingJobHandle;
-                if (job != null)
-                {
-                    if (job.JobHandle.IsCompleted)
+                    if (currentlyRunningJobs[i] == null)
                     {
-                        VoxelWorld.ChunkUpdater.FinalizeChunkJob(currentlyRunningJobs[i]);
                         currentlyRunningJobs.RemoveAt(i);
+                        continue;
+                    }
+
+                    var job = currentlyRunningJobs[i].MeshingJobHandle;
+                    if (job != null)
+                    {
+                        if (job.JobHandle.IsCompleted)
+                        {
+                            completedJobs.Add(currentlyRunningJobs[i]);
+                            currentlyRunningJobs.RemoveAt(i);
+                        }
                     }
                 }
+
+                VoxelWorld.ChunkUpdater.FinalizeMultipleChunkJobs(completedJobs);
             }
         }
 

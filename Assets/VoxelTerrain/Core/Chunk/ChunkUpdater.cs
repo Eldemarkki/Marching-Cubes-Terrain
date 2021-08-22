@@ -111,48 +111,12 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
 
         public void FinalizeChunkJob(ChunkProperties chunk)
         {
-            var chunkJob = chunk.MeshingJobHandle;
-            IMesherJob job = chunkJob.JobData;
-            ChunkProperties chunkProperties = chunkJob.ChunkProperties;
+            FinalizeMultipleChunkJobs(new[] { chunk }, 1);
+        }
 
-            Mesh.MeshDataArray meshDataArray = Mesh.AllocateWritableMeshData(1);
-            Mesh.MeshData meshData = meshDataArray[0];
-
-            chunkJob.JobHandle.Complete();
-
-            meshData.SetVertexBufferParams(job.OutputVertices.Length, MeshingVertexData.VertexBufferMemoryLayout);
-            meshData.SetIndexBufferParams(job.OutputTriangles.Length, IndexFormat.UInt16);
-
-            var meshDataVertices = meshData.GetVertexData<MeshingVertexData>();
-            var meshDataTriangles = meshData.GetIndexData<ushort>();
-
-            NativeArray<MeshingVertexData>.Copy(job.OutputVertices, meshDataVertices);
-            NativeArray<ushort>.Copy(job.OutputTriangles, meshDataTriangles);
-
-            MeshUpdateFlags flags = MeshUpdateFlags.DontRecalculateBounds | MeshUpdateFlags.DontValidateIndices;
-
-            Mesh mesh = new Mesh();
-            meshData.subMeshCount = 1;
-            meshData.SetSubMesh(0, new SubMeshDescriptor(0, job.OutputVertices.Length), flags);
-            Mesh.ApplyAndDisposeWritableMeshData(meshDataArray, mesh, flags);
-
-            int3 chunkSize = VoxelWorld.WorldSettings.ChunkSize;
-            mesh.bounds = new Bounds(((Vector3)chunkSize.ToVectorInt()) * 0.5f, chunkSize.ToVectorInt());
-
-            job.OutputVertices.Clear();
-            job.OutputTriangles.Clear();
-
-            chunkProperties.MeshFilter.sharedMesh = mesh;
-            chunkProperties.MeshCollider.sharedMesh = mesh;
-
-            chunkProperties.MeshCollider.enabled = true;
-            chunkProperties.MeshRenderer.enabled = true;
-
-            chunkProperties.IsMeshGenerated = true;
-
-            chunkProperties.MeshingJobHandle = null;
-
-            VoxelWorld.VoxelDataStore.ApplyChunkChanges(chunkProperties.ChunkCoordinate);
+        public void FinalizeMultipleChunkJobs(List<ChunkProperties> chunks)
+        {
+            FinalizeMultipleChunkJobs(chunks.ToArray(), chunks.Count);
         }
 
         public void FinalizeMultipleChunkJobs(ChunkProperties[] chunks)
@@ -162,10 +126,90 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
 
         public void FinalizeMultipleChunkJobs(ChunkProperties[] chunks, int count)
         {
+            if (chunks.Length < count)
+            {
+                Debug.LogWarning("Requested count was higher than available chunk count when finalizing chunk jobs");
+                count = chunks.Length;
+            }
+
+            Mesh.MeshDataArray meshDataArray = Mesh.AllocateWritableMeshData(count);
+            Mesh[] meshes = new Mesh[count];
+            MeshUpdateFlags flags = MeshUpdateFlags.DontRecalculateBounds | MeshUpdateFlags.DontValidateIndices;
+            NativeArray<int> ids = new NativeArray<int>(count, Allocator.TempJob);
+
+            // Copy vertices and triangles
             for (int i = 0; i < count; i++)
             {
-                FinalizeChunkJob(chunks[i]);
+                var chunk = chunks[i];
+                var chunkJob = chunk.MeshingJobHandle;
+                IMesherJob job = chunkJob.JobData;
+
+                Mesh.MeshData meshData = meshDataArray[i];
+
+                chunkJob.JobHandle.Complete();
+
+                meshData.SetVertexBufferParams(job.OutputVertices.Length, MeshingVertexData.VertexBufferMemoryLayout);
+                meshData.SetIndexBufferParams(job.OutputTriangles.Length, IndexFormat.UInt16);
+
+                var meshDataVertices = meshData.GetVertexData<MeshingVertexData>();
+                var meshDataTriangles = meshData.GetIndexData<ushort>();
+
+                NativeArray<MeshingVertexData>.Copy(job.OutputVertices, meshDataVertices);
+                NativeArray<ushort>.Copy(job.OutputTriangles, meshDataTriangles);
+
+                Mesh mesh = new Mesh();
+                meshes[i] = mesh;
+                ids[i] = mesh.GetInstanceID();
+
+                meshData.subMeshCount = 1;
+                meshData.SetSubMesh(0, new SubMeshDescriptor(0, job.OutputVertices.Length), flags);
             }
+
+            // Apply vertices and triangles to the meshes and start generating the collision mesh
+            Mesh.ApplyAndDisposeWritableMeshData(meshDataArray, meshes, flags);
+            JobHandle bakeMeshJobHandle = new BakeMeshJob(ids).Schedule(count, 1);
+
+            // Apply visible mesh
+            for (int i = 0; i < count; i++)
+            {
+                var chunk = chunks[i];
+                var chunkJob = chunk.MeshingJobHandle;
+                IMesherJob job = chunkJob.JobData;
+                ChunkProperties chunkProperties = chunkJob.ChunkProperties;
+
+                Mesh mesh = meshes[i];
+
+                int3 chunkSize = VoxelWorld.WorldSettings.ChunkSize;
+                mesh.bounds = new Bounds(((Vector3)chunkSize.ToVectorInt()) * 0.5f, chunkSize.ToVectorInt());
+
+                job.OutputVertices.Clear();
+                job.OutputTriangles.Clear();
+
+                chunkProperties.MeshFilter.sharedMesh = mesh;
+                chunkProperties.MeshRenderer.enabled = mesh.vertexCount > 0;
+                chunkProperties.IsMeshGenerated = true;
+            }
+
+            bakeMeshJobHandle.Complete();
+            ids.Dispose();
+
+            // Apply collision mesh
+            for (int i = 0; i < count; i++)
+            {
+                ChunkProperties chunkProperties = chunks[i].MeshingJobHandle.ChunkProperties;
+                Mesh mesh = meshes[i];
+                chunkProperties.MeshCollider.sharedMesh = mesh;
+                chunkProperties.MeshCollider.enabled = mesh.vertexCount > 0;
+                chunkProperties.MeshingJobHandle = null;
+                VoxelWorld.VoxelDataStore.ApplyChunkChanges(chunkProperties.ChunkCoordinate);
+            }
+        }
+
+        private struct BakeMeshJob : IJobParallelFor
+        {
+            private NativeArray<int> ids;
+            public BakeMeshJob(NativeArray<int> ids) => this.ids = ids;
+            public void Execute(int index) => Physics.BakeMesh(ids[index], false);
         }
     }
 }

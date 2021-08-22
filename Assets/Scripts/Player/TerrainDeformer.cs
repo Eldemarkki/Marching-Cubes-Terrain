@@ -178,7 +178,7 @@ namespace Eldemarkki.VoxelTerrain.Player
 
         private void PaintColor(Vector3 point)
         {
-            voxelWorld.VoxelColorStore.SetVoxelDataInSphere(point, deformRadius, (voxelDataWorldPosition, distance, voxelData) => paintColor, false, false);
+            voxelWorld.VoxelColorStore.SetVoxelDataInSphere(point, deformRadius, (voxelDataWorldPosition, distance, voxelData) => paintColor, false);
         }
     }
 }
