@@ -330,17 +330,12 @@ namespace Eldemarkki.VoxelTerrain.World
         {
             ForEachVoxelDataArrayInQuery(worldSpaceQuery, (chunkCoordinate, voxelDataChunk) =>
             {
-                bool anyChanged = false;
                 ForEachVoxelDataInQueryInChunk(worldSpaceQuery, chunkCoordinate, voxelDataChunk, (voxelDataWorldPosition, voxelDataLocalPosition, voxelDataIndex, voxelData) =>
                 {
-                    T newVoxelData = setVoxelDataFunction(voxelDataWorldPosition, voxelData);
-                    if (newVoxelData.Equals(voxelData)) { return; }
-
-                    voxelDataChunk[voxelDataIndex] = newVoxelData;
-                    anyChanged = true;
+                    voxelDataChunk[voxelDataIndex] = setVoxelDataFunction(voxelDataWorldPosition, voxelData);
                 }, getOriginalData);
 
-                if (anyChanged && VoxelWorld.ChunkStore.TryGetDataChunk(chunkCoordinate, out ChunkProperties chunkProperties))
+                if (VoxelWorld.ChunkStore.TryGetDataChunk(chunkCoordinate, out ChunkProperties chunkProperties))
                 {
                     VoxelWorld.ChunkUpdater.SetChunkDirty(chunkProperties);
                 }

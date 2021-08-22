@@ -145,10 +145,10 @@ namespace Eldemarkki.VoxelTerrain.Player
             {
                 float oldVoxelData = voxelData / (float)byte.MaxValue;
                 float sphere = distance / deformRadius;
-                float targetDensity = addTerrain ?
-                    math.min(sphere, oldVoxelData) :
-                    math.max(1 - sphere, oldVoxelData);
-
+                float targetDensity = math.select(
+                    math.min(sphere, oldVoxelData), 
+                    math.max(1 - sphere, oldVoxelData), 
+                    addTerrain);
                 return (byte)(math.lerp(oldVoxelData, targetDensity, deformSpeed) * byte.MaxValue);
             });
         }
