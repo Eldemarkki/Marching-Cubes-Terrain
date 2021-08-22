@@ -196,7 +196,13 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
             // Apply collision mesh
             for (int i = 0; i < count; i++)
             {
-                ChunkProperties chunkProperties = chunks[i].MeshingJobHandle.ChunkProperties;
+                var meshingJobHandle = chunks[i].MeshingJobHandle;
+                if (meshingJobHandle == null)
+                {
+                    continue;
+                }
+
+                ChunkProperties chunkProperties = meshingJobHandle.ChunkProperties;
                 Mesh mesh = meshes[i];
                 chunkProperties.MeshCollider.sharedMesh = mesh;
                 chunkProperties.MeshCollider.enabled = mesh.vertexCount > 0;
