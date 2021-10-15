@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028334, g: 0.2257134, b: 0.30692226, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028352, g: 0.22571376, b: 0.30692244, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -748,9 +748,9 @@ GameObject:
   - component: {fileID: 1406068209}
   - component: {fileID: 1406068212}
   - component: {fileID: 1406068211}
-  - component: {fileID: 1406068210}
   - component: {fileID: 1406068208}
   - component: {fileID: 1406068217}
+  - component: {fileID: 1406068210}
   m_Layer: 0
   m_Name: VoxelWorld
   m_TagString: Untagged
@@ -791,9 +791,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1406068207}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e72216e47af7e58408454b827e439157, type: 3}
+  m_Script: {fileID: 11500000, guid: cf2139c3087ce95439212cb2d0c8091a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  chunkGenerationRate: 10
 --- !u!114 &1406068211
 MonoBehaviour:
   m_ObjectHideFlags: 0

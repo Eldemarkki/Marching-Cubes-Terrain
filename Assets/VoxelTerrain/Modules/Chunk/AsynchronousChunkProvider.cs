@@ -8,9 +8,9 @@ using UnityEngine;
 namespace Eldemarkki.VoxelTerrain.Chunks
 {
     /// <summary>
-    /// Provider for procedurally generated chunks
+    /// Provider for asynchronically generated chunks
     /// </summary>
-    public class ProceduralChunkProvider : ChunkProvider
+    public class AsynchronousChunkProvider : ChunkProvider
     {
         /// <summary>
         /// The maximum amount of chunks that can be generated in one frame
@@ -84,13 +84,16 @@ namespace Eldemarkki.VoxelTerrain.Chunks
         /// Ensures that a chunk exists at a coordinate, if there is not, a new chunk is instantiated there, and its will eventually be generated
         /// </summary>
         /// <param name="chunkCoordinate">The chunk's coordinate</param>
-        public void EnsureChunkExistsAtCoordinate(int3 chunkCoordinate)
+        public override ChunkProperties EnsureChunkExistsAtCoordinate(int3 chunkCoordinate)
         {
-            if (!VoxelWorld.ChunkStore.DoesChunkExistAtCoordinate(chunkCoordinate))
+            if (VoxelWorld.ChunkStore.TryGetDataChunk(chunkCoordinate, out ChunkProperties chunk))
             {
-                CreateUnloadedChunkToCoordinate(chunkCoordinate);
-                AddChunkToGenerationQueue(chunkCoordinate);
+                return chunk;
             }
+
+            chunk = CreateUnloadedChunkToCoordinate(chunkCoordinate);
+            AddChunkToGenerationQueue(chunkCoordinate);
+            return chunk;
         }
 
         /// <summary>

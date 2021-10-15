@@ -21,7 +21,7 @@ namespace Eldemarkki.VoxelTerrain.World
         /// <summary>
         /// A chunk provider which provides chunks with procedurally generated data
         /// </summary>
-        [SerializeField] private ProceduralChunkProvider chunkProvider;
+        [SerializeField] private AsynchronousChunkProvider chunkProvider;
 
         /// <summary>
         /// The radius of the chunks the player sees

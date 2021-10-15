@@ -7,7 +7,7 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
     /// <summary>
     /// A class for providing chunks to the world
     /// </summary>
-    public class ChunkProvider : MonoBehaviour
+    public abstract class ChunkProvider : MonoBehaviour
     {
         /// <summary>
         /// The world for which to provide chunks for
@@ -36,16 +36,6 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
             return chunkProperties;
         }
 
-        /// <summary>
-        /// Instantiates a chunk to <paramref name="chunkCoordinate"/>, initializes it and generates its mesh
-        /// </summary>
-        /// <param name="chunkCoordinate">The coordinate of the chunk to create</param>
-        /// <returns>The new chunk</returns>
-        public ChunkProperties CreateLoadedChunkToCoordinateImmediate(int3 chunkCoordinate)
-        {
-            ChunkProperties chunkProperties = CreateUnloadedChunkToCoordinate(chunkCoordinate);
-            VoxelWorld.ChunkUpdater.GenerateChunkImmediate(chunkProperties);
-            return chunkProperties;
-        }
+        public abstract ChunkProperties EnsureChunkExistsAtCoordinate(int3 chunkCoordinate);
     }
 }

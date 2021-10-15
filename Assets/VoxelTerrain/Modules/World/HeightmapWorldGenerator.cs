@@ -54,7 +54,7 @@ namespace Eldemarkki.VoxelTerrain.World
                 {
                     for (int z = 0; z < chunkCountZ; z++)
                     {
-                        voxelWorld.ChunkProvider.CreateLoadedChunkToCoordinateImmediate(new int3(x, y, z));
+                        voxelWorld.ChunkProvider.EnsureChunkExistsAtCoordinate(new int3(x, y, z));
                     }
                 }
             }
