@@ -210,6 +210,16 @@ namespace Eldemarkki.VoxelTerrain.World
             return GenerateDataForChunkUnchecked(chunkCoordinate, data);
         }
 
+        /// <inheritdoc/>
+        public override JobHandle GenerateDataForChunkUnchecked(int3 chunkCoordinate, VoxelDataVolume<T> existingData, JobHandle dependency = default)
+        {
+            var jobHandleWithData = ScheduleGenerationJob(chunkCoordinate, existingData, dependency);
+            _generationJobHandles.Add(chunkCoordinate, jobHandleWithData);
+            return jobHandleWithData.JobHandle;
+        }
+
+        protected abstract JobHandleWithData<IVoxelDataGenerationJob<T>> ScheduleGenerationJob(int3 chunkCoordinate, VoxelDataVolume<T> existingData, JobHandle dependency = default);
+
         /// <summary>
         /// Loops through each voxel data point that is contained in <paramref name="dataChunk"/> AND in <paramref name="worldSpaceQuery"/>, and performs <paramref name="function"/> on it
         /// </summary>

@@ -18,26 +18,20 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// </summary>
         /// <param name="chunkCoordinate">The coordinate of the chunk which to generate the colors for</param>
         /// <param name="outputColors">The array that should be filled with the new colors</param>
-        public override unsafe JobHandle GenerateDataForChunkUnchecked(int3 chunkCoordinate, VoxelDataVolume<Color32> outputColors, JobHandle dependency)
+        protected override unsafe JobHandleWithData<IVoxelDataGenerationJob<Color32>> ScheduleGenerationJob(int3 chunkCoordinate, VoxelDataVolume<Color32> outputColors, JobHandle dependency)
         {
-            // Fill the array with the any color, with alpha=0 by default
-            Color32 fillColor = new Color32(0, 0, 0, 0);
-
             FillColorJob job = new FillColorJob
             {
-                FillColor = fillColor,
+                // Fill the array with the any color, with alpha=0 by default
+                FillColor = new Color32(0, 0, 0, 0),
                 OutputVoxelData = outputColors
             };
 
-            JobHandle jobHandle = job.Schedule(dependency);
-            JobHandleWithData<IVoxelDataGenerationJob<Color32>> jobHandleWithData = new JobHandleWithData<IVoxelDataGenerationJob<Color32>>
+            return new JobHandleWithData<IVoxelDataGenerationJob<Color32>>
             {
                 JobData = job,
-                JobHandle = jobHandle,
+                JobHandle = job.Schedule(dependency),
             };
-
-            _generationJobHandles.Add(chunkCoordinate, jobHandleWithData);
-            return jobHandle;
         }
 
         [BurstCompile]
@@ -53,11 +47,8 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
 
             public unsafe void Execute()
             {
-                var fillColorPtr = stackalloc Color32[1];
-                fillColorPtr[0] = _fillColor;
-
+                Color32* fillColorPtr = stackalloc Color32[1] { _fillColor };
                 UnsafeUtility.MemCpyReplicate(_outputVoxelData.GetUnsafePtr(), fillColorPtr, sizeof(Color32), _outputVoxelData.Length);
-                _outputVoxelData.GetUnsafePtr();
             }
         }
     }
