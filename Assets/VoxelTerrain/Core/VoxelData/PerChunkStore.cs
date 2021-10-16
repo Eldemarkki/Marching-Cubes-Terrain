@@ -92,17 +92,16 @@ namespace Eldemarkki.VoxelTerrain.World
             int3 newPos = to - new int3(range);
             BoundsInt newCoords = new BoundsInt(newPos.ToVectorInt(), renderSize.ToVectorInt());
 
-            var newlyFreedCoordinates = GetChunkCoordinatesOutsideOfRange(to, range);
+            List<int3> newlyFreedCoordinates = GetChunkCoordinatesOutsideOfRange(to, range);
 
             int3[] coordinatesThatNeedChunks = CoordinateUtilities.GetCoordinatesThatNeedChunks(oldCoords, newCoords);
 
-            int i = 0;
-            foreach (int3 source in newlyFreedCoordinates)
+            for (int i = 0; i < newlyFreedCoordinates.Count; i++)
             {
+                int3 source = newlyFreedCoordinates[i];
                 int3 target = coordinatesThatNeedChunks[i];
                 MoveChunk(source, target);
                 afterChunkMoved.Invoke(target);
-                i++;
             }
         }
 
@@ -190,17 +189,21 @@ namespace Eldemarkki.VoxelTerrain.World
         /// <param name="coordinate">Central coordinate</param>
         /// <param name="range">The maximum allowed Chebyshev distance</param>
         /// <returns>A collection of chunk coordinates outside of <paramref name="range"/> from <paramref name="coordinate"/></returns>
-        public virtual IEnumerable<int3> GetChunkCoordinatesOutsideOfRange(int3 coordinate, int range)
+        public virtual List<int3> GetChunkCoordinatesOutsideOfRange(int3 coordinate, int range)
         {
+            List<int3> result = new List<int3>(_chunks.Count);
+
             int3[] chunkCoordinates = _chunks.Keys.ToArray();
             for (int i = 0; i < chunkCoordinates.Length; i++)
             {
                 int3 chunkCoordinate = chunkCoordinates[i];
                 if (DistanceUtilities.ChebyshevDistanceGreaterThan(coordinate, chunkCoordinate, range))
                 {
-                    yield return chunkCoordinate;
+                    result.Add(chunkCoordinate);
                 }
             }
+
+            return result;
         }
 
         /// <summary>

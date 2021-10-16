@@ -118,12 +118,9 @@ namespace Eldemarkki.VoxelTerrain.World
         /// <param name="coordinate">The central coordinate where the distances should be measured from</param>
         /// <param name="range">The maximum allowed manhattan distance</param>
         /// <returns></returns>
-        public override IEnumerable<int3> GetChunkCoordinatesOutsideOfRange(int3 coordinate, int range)
+        public override List<int3> GetChunkCoordinatesOutsideOfRange(int3 coordinate, int range)
         {
-            foreach (var baseCoordinate in base.GetChunkCoordinatesOutsideOfRange(coordinate, range))
-            {
-                yield return baseCoordinate;
-            }
+            List<int3> result = base.GetChunkCoordinatesOutsideOfRange(coordinate, range);
 
             int3[] generationJobHandleArray = _generationJobHandles.Keys.ToArray();
             for (int i = 0; i < generationJobHandleArray.Length; i++)
@@ -131,9 +128,11 @@ namespace Eldemarkki.VoxelTerrain.World
                 int3 generationCoordinate = generationJobHandleArray[i];
                 if (DistanceUtilities.ChebyshevDistanceGreaterThan(coordinate, generationCoordinate, range))
                 {
-                    yield return generationCoordinate;
+                    result.Add(generationCoordinate);
                 }
             }
+
+            return result;
         }
 
         /// <summary>
@@ -265,7 +264,25 @@ namespace Eldemarkki.VoxelTerrain.World
             if (DoesChunkExistAtCoordinate(to)) { return; }
 
             // Check that a chunk exists at 'from'
-            if (TryGetDataChunk(from, out var existingData))
+            bool chunkExistsAtFrom = _chunks.TryGetValue(from, out var existingData);
+
+            if (_generationJobHandles.TryGetValue(from, out JobHandleWithData<IVoxelDataGenerationJob<T>> jobHandle))
+            {
+                jobHandle.JobHandle.Complete();
+                if (chunkExistsAtFrom)
+                {
+                    jobHandle.JobData.OutputVoxelData.Dispose();
+                }
+                else
+                {
+                    existingData = jobHandle.JobData.OutputVoxelData;
+                    chunkExistsAtFrom = true;
+                }
+
+                _generationJobHandles.Remove(from);
+            }
+
+            if (chunkExistsAtFrom)
             {
                 JobHandle meshingJobHandle = default;
                 if (VoxelWorld.ChunkStore.TryGetDataChunk(from, out var chunk) && chunk.MeshingJobHandle != null)
