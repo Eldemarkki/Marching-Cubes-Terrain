@@ -14,7 +14,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// Generates the colors for a chunk at <paramref name="chunkCoordinate"/>, where the output array is <paramref name="outputColors"/> to save memory by not needing to allocate a new array.
         /// </summary>
         /// <param name="outputColors">The array that should be filled with the new colors</param>
-        protected override unsafe JobHandleWithData<IVoxelDataGenerationJob<Color32>> ScheduleGenerationJob(int3 chunkCoordinate, VoxelDataVolume<Color32> outputColors, JobHandle dependency)
+        protected override JobHandleWithData<IVoxelDataGenerationJob<Color32>> ScheduleGenerationJob(int3 chunkCoordinate, VoxelDataVolume<Color32> outputColors, JobHandle dependency)
         {
             FillColorJob job = new FillColorJob
             {

@@ -20,7 +20,7 @@ namespace Eldemarkki.VoxelTerrain.World
         /// <summary>
         /// A dictionary of all the ongoing voxel data generation jobs. Key is the chunk's coordinate, and the value is the ongoing job for that chunk
         /// </summary>
-        public Dictionary<int3, JobHandleWithData<IVoxelDataGenerationJob<T>>> _generationJobHandles;
+        private Dictionary<int3, JobHandleWithData<IVoxelDataGenerationJob<T>>> _generationJobHandles;
 
         protected override void Awake()
         {
