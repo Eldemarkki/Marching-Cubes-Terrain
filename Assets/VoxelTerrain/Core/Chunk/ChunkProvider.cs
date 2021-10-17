@@ -4,20 +4,13 @@ using UnityEngine;
 
 namespace Eldemarkki.VoxelTerrain.World.Chunks
 {
-    /// <summary>
-    /// A class for providing chunks to the world
-    /// </summary>
     public abstract class ChunkProvider : MonoBehaviour
     {
-        /// <summary>
-        /// The world for which to provide chunks for
-        /// </summary>
         public VoxelWorld VoxelWorld { get; set; }
 
         /// <summary>
-        /// Instantiates a chunk to <paramref name="chunkCoordinate"/> and initializes it, but does not generate its mesh
+        /// Instantiates a chunk to <paramref name="chunkCoordinate"/> and initializes it, but does not generate its mesh yet.
         /// </summary>
-        /// <param name="chunkCoordinate">The chunk's coordinate</param>
         /// <returns>The new chunk</returns>
         protected ChunkProperties CreateUnloadedChunkToCoordinate(int3 chunkCoordinate)
         {

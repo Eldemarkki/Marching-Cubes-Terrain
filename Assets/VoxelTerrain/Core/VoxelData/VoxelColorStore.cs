@@ -8,15 +8,11 @@ using UnityEngine;
 
 namespace Eldemarkki.VoxelTerrain.VoxelData
 {
-    /// <summary>
-    /// A store which handles getting and setting the voxel colors for the world
-    /// </summary>
     public class VoxelColorStore : PerVoxelStore<Color32>
     {
         /// <summary>
-        /// Generates the colors for a chunk at <paramref name="chunkCoordinate"/>, where the output array is <paramref name="outputColors"/> to save memory by not needing to allocate a new array. This does not check if a color array already exists at <paramref name="chunkCoordinate"/>
+        /// Generates the colors for a chunk at <paramref name="chunkCoordinate"/>, where the output array is <paramref name="outputColors"/> to save memory by not needing to allocate a new array.
         /// </summary>
-        /// <param name="chunkCoordinate">The coordinate of the chunk which to generate the colors for</param>
         /// <param name="outputColors">The array that should be filled with the new colors</param>
         protected override unsafe JobHandleWithData<IVoxelDataGenerationJob<Color32>> ScheduleGenerationJob(int3 chunkCoordinate, VoxelDataVolume<Color32> outputColors, JobHandle dependency)
         {
@@ -27,11 +23,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                 OutputVoxelData = outputColors
             };
 
-            return new JobHandleWithData<IVoxelDataGenerationJob<Color32>>
-            {
-                JobData = job,
-                JobHandle = job.Schedule(dependency),
-            };
+            return new JobHandleWithData<IVoxelDataGenerationJob<Color32>>(job.Schedule(dependency), job);
         }
 
         [BurstCompile]

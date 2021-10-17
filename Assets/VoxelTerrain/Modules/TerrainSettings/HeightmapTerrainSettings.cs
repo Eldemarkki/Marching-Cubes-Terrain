@@ -4,9 +4,6 @@ using UnityEngine;
 
 namespace Eldemarkki.VoxelTerrain.Settings
 {
-    /// <summary>
-    /// A class that contains information about how the heightmap world should be generated
-    /// </summary>
     [CreateAssetMenu(fileName = "New Heightmap Terrain Settings", menuName = "Marching Cubes Terrain/Heightmap Terrain Settings")]
     public class HeightmapTerrainSettings : ScriptableObject, IDisposable
     {
@@ -20,56 +17,44 @@ namespace Eldemarkki.VoxelTerrain.Settings
         /// </summary>
         [SerializeField] private NativeArray<float> heightmapData;
 
-        /// <summary>
-        /// Height multiplier
-        /// </summary>
+        /// <inheritdoc cref="ProceduralTerrainSettings.Amplitude"/>
         [SerializeField] private float amplitude;
 
-        /// <summary>
-        /// Moves the sampling point up and down
-        /// </summary>
+        /// <inheritdoc cref="ProceduralTerrainSettings.HeightOffset"/>
         [SerializeField] private float heightOffset;
 
         /// <summary>
-        /// The width of the heightmap in pixels
+        /// How wide the heightmap is (in pixels). 1 pixel = 1 Unity unit
         /// </summary>
         public int Width { get; private set; }
 
         /// <summary>
-        /// The height of the heightmap in pixels
+        /// How high the heightmap is (in pixels). 1 pixel = 1 Unity unit
         /// </summary>
         public int Height { get; private set; }
 
-        /// <summary>
-        /// The black and white heightmap texture
-        /// </summary>
+        /// <inheritdoc cref="heightmap"/>
         public Texture2D Heightmap
         {
             get => heightmap;
             set => heightmap = value;
         }
 
-        /// <summary>
-        /// The generated height data from the the heightmap
-        /// </summary>
+        /// <inheritdoc cref="heightmapData"/>
         public NativeArray<float> HeightmapData
         {
             get => heightmapData;
             set => heightmapData = value;
         }
 
-        /// <summary>
-        /// Height multiplier
-        /// </summary>
+        /// <inheritdoc cref="amplitude"/>
         public float Amplitude
         {
             get => amplitude;
             set => amplitude = value;
         }
 
-        /// <summary>
-        /// Moves the sampling point up and down
-        /// </summary>
+        /// <inheritdoc cref="heightOffset"/>
         public float HeightOffset
         {
             get => heightOffset;
@@ -79,9 +64,9 @@ namespace Eldemarkki.VoxelTerrain.Settings
         /// <summary>
         /// Converts the parameters to a format the can be used by the Job System
         /// </summary>
-        /// <param name="heightmap">The black and white heightmap</param>
-        /// <param name="amplitude">Height multiplier</param>
-        /// <param name="heightOffset">Moves the sampling point up and down</param>
+        /// <param name="heightmap"><inheritdoc cref="heightmap" path="/summary"/></param>
+        /// <param name="amplitude"><inheritdoc cref="amplitude" path="/summary"/></param>
+        /// <param name="heightOffset"><inheritdoc cref="heightOffset" path="/summary"/></param>
         public void Initialize(Texture2D heightmap, float amplitude, float heightOffset)
         {
             this.amplitude = amplitude;
@@ -96,9 +81,9 @@ namespace Eldemarkki.VoxelTerrain.Settings
         }
 
         /// <summary>
-        /// Generates the HeightmapData from the heightmap
+        /// Generates <see cref="HeightmapData"/> from <paramref name="heightmap"/>
         /// </summary>
-        /// <param name="heightmap">The black and white heightmap</param>
+        /// <param name="heightmap"><inheritdoc cref="heightmap" path="/summary"/></param>
         private void SetHeightmap(Texture2D heightmap)
         {
             for (int x = 0; x < Width; x++)
@@ -110,9 +95,6 @@ namespace Eldemarkki.VoxelTerrain.Settings
             }
         }
 
-        /// <summary>
-        /// Disposes HeightmapData
-        /// </summary>
         public void Dispose()
         {
             heightmapData.Dispose();

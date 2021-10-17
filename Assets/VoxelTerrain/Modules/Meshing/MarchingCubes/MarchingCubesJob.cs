@@ -8,17 +8,14 @@ using UnityEngine;
 
 namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
 {
-    /// <summary>
-    /// A marching cubes mesh generation job
-    /// </summary>
     [BurstCompile]
     public struct MarchingCubesJob : IMesherJobChunk
     {
-        /// <inheritdoc cref="VoxelData"/>
         [ReadOnly] private VoxelDataVolume<byte> _voxelData;
+        public VoxelDataVolume<byte> VoxelData { get => _voxelData; set => _voxelData = value; }
 
-        /// <inheritdoc cref="VoxelColors"/>
         [ReadOnly] private VoxelDataVolume<Color32> _voxelColors;
+        public VoxelDataVolume<Color32> VoxelColors { get => _voxelColors; set => _voxelColors = value; }
 
         /// <summary>
         /// The density level where a surface will be created. Densities below this will be inside the surface (solid),
@@ -26,27 +23,12 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         /// </summary>
         public float Isolevel { get; set; }
 
-        /// <inheritdoc cref="OutputVertices"/>
         [NativeDisableParallelForRestriction] private NativeList<MeshingVertexData> _vertices;
-
-        /// <inheritdoc cref="OutputTriangles"/>
-        [NativeDisableParallelForRestriction] private NativeList<ushort> _triangles;
-
-        /// <inheritdoc/>
-        public VoxelDataVolume<byte> VoxelData { get => _voxelData; set => _voxelData = value; }
-
-        /// <inheritdoc/>
-        public VoxelDataVolume<Color32> VoxelColors { get => _voxelColors; set => _voxelColors = value; }
-
-        /// <inheritdoc/>
         public NativeList<MeshingVertexData> OutputVertices { get => _vertices; set => _vertices = value; }
 
-        /// <inheritdoc/>
+        [NativeDisableParallelForRestriction] private NativeList<ushort> _triangles;
         public NativeList<ushort> OutputTriangles { get => _triangles; set => _triangles = value; }
 
-        /// <summary>
-        /// The execute method required by the Unity Job System's IJob
-        /// </summary>
         public unsafe void Execute()
         {
             int voxelCount = (_voxelData.Width - 1) * (_voxelData.Height - 1) * (_voxelData.Depth - 1);

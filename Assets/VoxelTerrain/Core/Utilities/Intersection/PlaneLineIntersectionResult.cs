@@ -1,8 +1,5 @@
 ﻿namespace Eldemarkki.VoxelTerrain.Utilities.Intersection
 {
-    /// <summary>
-    /// A plane-line intersection result
-    /// </summary>
     public enum PlaneLineIntersectionResult
     {
         /// <summary>

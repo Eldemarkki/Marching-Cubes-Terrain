@@ -5,9 +5,6 @@ using Unity.Mathematics;
 
 namespace Eldemarkki.VoxelTerrain.VoxelData
 {
-    /// <summary>
-    /// A store which handles getting and setting the voxel data for the world
-    /// </summary>
     public class VoxelDataStore : PerVoxelStore<byte>
     {
         protected override JobHandleWithData<IVoxelDataGenerationJob<byte>> ScheduleGenerationJob(int3 chunkCoordinate, VoxelDataVolume<byte> existingData, JobHandle dependency = default)

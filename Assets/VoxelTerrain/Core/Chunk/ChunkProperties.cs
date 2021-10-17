@@ -8,16 +8,10 @@ using UnityEngine;
 
 namespace Eldemarkki.VoxelTerrain.World.Chunks
 {
-    /// <summary>
-    /// A class that contains properties for a chunk
-    /// </summary>
     public class ChunkProperties : IDisposable
     {
         private GameObject _chunkGameObject;
 
-        /// <summary>
-        /// The game object that corresponds to these properties
-        /// </summary>
         public GameObject ChunkGameObject
         {
             get => _chunkGameObject;

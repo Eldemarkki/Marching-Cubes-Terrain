@@ -2,56 +2,37 @@
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
+using Eldemarkki.VoxelTerrain.Settings;
 
 namespace Eldemarkki.VoxelTerrain.VoxelData
 {
-    /// <summary>
-    /// A heightmap terrain voxel data calculation job
-    /// </summary>
     [BurstCompile]
     public struct HeightmapTerrainVoxelDataCalculationJob : IVoxelDataGenerationJob<byte>
     {
-        /// <summary>
-        /// The height data from the heightmap
-        /// </summary>
+        /// <inheritdoc cref="HeightmapTerrainSettings.HeightmapData"/>
         [ReadOnly] private NativeArray<float> _heightmapData;
 
-        /// <summary>
-        /// How wide the heightmap is (in pixels). 1 pixel = 1 Unity unit
-        /// </summary>
+        /// <inheritdoc cref="_heightmapData"/>
+        public NativeArray<float> HeightmapData { get => _heightmapData; set => _heightmapData = value; }
+
+        /// <inheritdoc cref="HeightmapTerrainSettings.Width"/>
         public int HeightmapWidth { get; set; }
 
-        /// <summary>
-        /// How high the heightmap is (in pixels). 1 pixel = 1 Unity unit
-        /// </summary>
+        /// <inheritdoc cref="HeightmapTerrainSettings.Height"/>
         public int HeightmapHeight { get; set; }
 
-        /// <summary>
-        /// The value to multiply the height with
-        /// </summary>
+        /// <inheritdoc cref="HeightmapTerrainSettings.Amplitude"/>
         public float Amplitude { get; set; }
 
-        /// <summary>
-        /// The offset to move the sampling point up and down
-        /// </summary>
+        /// <inheritdoc cref="HeightmapTerrainSettings.HeightOffset"/>
         public float HeightOffset { get; set; }
 
         /// <inheritdoc/>
         public int3 WorldPositionOffset { get; set; }
 
         private VoxelDataVolume<byte> _outputVoxelData;
-
-        /// <inheritdoc/>
         public VoxelDataVolume<byte> OutputVoxelData { get => _outputVoxelData; set => _outputVoxelData = value; }
 
-        /// <summary>
-        /// The height data from the heightmap
-        /// </summary>
-        public NativeArray<float> HeightmapData { get => _heightmapData; set => _heightmapData = value; }
-
-        /// <summary>
-        /// The execute method required for Unity's IJob job type
-        /// </summary>
         public void Execute()
         {
             for (int z = 0; z < OutputVoxelData.Depth; z++)
@@ -78,10 +59,6 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// <summary>
         /// Calculates the voxel data at the world-space position
         /// </summary>
-        /// <param name="worldPositionX">Sampling point's world-space x position</param>
-        /// <param name="worldPositionY">Sampling point's world-space y position</param>
-        /// <param name="worldPositionZ">Sampling point's world-space z position</param>
-        /// <returns>The voxel data sampled from the world-space position</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public float CalculateVoxelData(int worldPositionX, int worldPositionY, int worldPositionZ)
         {

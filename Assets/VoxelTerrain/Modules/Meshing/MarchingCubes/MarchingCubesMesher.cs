@@ -7,18 +7,12 @@ using UnityEngine;
 
 namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
 {
-    /// <summary>
-    /// A mesher for the marching cubes algorithm
-    /// </summary>
     public class MarchingCubesMesher : VoxelMesher
     {
         /// <inheritdoc cref="Isolevel"/>
         [SerializeField, Range(0, 1)] private float isolevel = 0.5f;
 
-        /// <summary>
-        /// The density level where a surface will be created. Densities below this will be inside the surface (solid),
-        /// and densities above this will be outside the surface (air)
-        /// </summary>
+        /// <inheritdoc cref="MarchingCubesJob.Isolevel"/>
         public float Isolevel => isolevel;
 
         /// <inheritdoc/>
@@ -38,16 +32,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
                 OutputTriangles = chunkProperties.OutputTriangles
             };
 
-            JobHandle jobHandle = marchingCubesJob.Schedule(dependency);
-
-            JobHandleWithDataAndChunkProperties<IMesherJob> jobHandleWithData = new JobHandleWithDataAndChunkProperties<IMesherJob>
-            {
-                JobHandle = jobHandle,
-                JobData = marchingCubesJob,
-                ChunkProperties = chunkProperties
-            };
-
-            return jobHandleWithData;
+            return new JobHandleWithDataAndChunkProperties<IMesherJob>(marchingCubesJob.Schedule(dependency), marchingCubesJob, chunkProperties);
         }
     }
 }

@@ -4,13 +4,10 @@ using UnityEngine;
 
 namespace Eldemarkki.VoxelTerrain.Utilities
 {
-    /// <summary>
-    /// A collection of utilities that operate on vectors (int3/float3)
-    /// </summary>
     public static class VectorUtilities
     {
         /// <summary>
-        /// Floors the value to a multiple of x
+        /// Floors the <paramref name="n"/> to a multiple of <paramref name="x"/>
         /// </summary>
         /// <param name="n">The value to floor</param>
         /// <param name="x">The multiple to floor to</param>
@@ -36,9 +33,6 @@ namespace Eldemarkki.VoxelTerrain.Utilities
         /// <summary>
         /// Converts a world position to a chunk coordinate
         /// </summary>
-        /// <param name="worldPosition">The world-position that should be converted</param>
-        /// <param name="chunkSize">The size of a chunk in the world</param>
-        /// <returns>The chunk coordinate</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int3 WorldPositionToCoordinate(float3 worldPosition, int3 chunkSize) => worldPosition.FloorToMultipleOfX(chunkSize) / chunkSize;
 

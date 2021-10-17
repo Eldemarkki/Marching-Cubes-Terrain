@@ -6,13 +6,10 @@ using UnityEngine;
 
 namespace Eldemarkki.VoxelTerrain.VoxelData
 {
-    /// <summary>
-    /// A base class for all voxel data generators
-    /// </summary>
     public abstract class VoxelDataGenerator : MonoBehaviour
     {
         /// <summary>
-        /// Starts generating the voxel data for a specified volume with a persistent allocator
+        /// Starts generating the voxel data for the specified volume with <see cref="Allocator.Persistent"/>
         /// </summary>
         /// <param name="bounds">The world-space volume to generate the voxel data for</param>
         /// <returns>The job handle and the voxel data generation job</returns>
@@ -22,9 +19,9 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         }
 
         /// <summary>
-        /// Starts generating the voxel data for a specified volume
+        /// Starts generating the voxel data for the specified volume
         /// </summary>
-        /// <param name="bounds">The world-space volume to generate the voxel data for</param>
+        /// <inheritdoc cref="GenerateVoxelData(BoundsInt)" path="/param[@name='bounds']"/>
         /// <param name="allocator">The allocator for the new voxel data array</param>
         /// <returns>The job handle and the voxel data generation job</returns>
         public JobHandleWithData<IVoxelDataGenerationJob<byte>> GenerateVoxelData(BoundsInt bounds, Allocator allocator)

@@ -6,14 +6,8 @@ using UnityEngine;
 
 namespace Eldemarkki.VoxelTerrain.VoxelData
 {
-    /// <summary>
-    /// A generator that creates voxel data from a heightmap
-    /// </summary>
     public class HeightmapVoxelDataGenerator : VoxelDataGenerator
     {
-        /// <summary>
-        /// The heightmap world generator which gives this class the HeightmapTerrainSettings
-        /// </summary>
         [SerializeField] private HeightmapWorldGenerator heightmapWorldGenerator;
 
         /// <inheritdoc/>
@@ -30,15 +24,7 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
                 HeightOffset = heightmapWorldGenerator.HeightmapTerrainSettings.HeightOffset
             };
 
-            JobHandle jobHandle = job.Schedule(dependency);
-
-            JobHandleWithData<IVoxelDataGenerationJob<byte>> jobHandleWithData = new JobHandleWithData<IVoxelDataGenerationJob<byte>>
-            {
-                JobHandle = jobHandle,
-                JobData = job
-            };
-
-            return jobHandleWithData;
+            return new JobHandleWithData<IVoxelDataGenerationJob<byte>>(job.Schedule(dependency), job);
         }
     }
 }

@@ -10,29 +10,15 @@ namespace Eldemarkki.VoxelTerrain.Meshing
     /// </summary>
     public unsafe struct NativeCounter : IDisposable
     {
-        /// <summary>
-        /// The allocator for the counter
-        /// </summary>
         private readonly Allocator _allocator;
-
-        /// <summary>
-        /// The pointer to the value
-        /// </summary>
         [NativeDisableUnsafePtrRestriction] private readonly int* _counter;
 
-        /// <summary>
-        /// The counter's value
-        /// </summary>
         public int Count
         {
             get => *_counter;
-            set => (*_counter) = value;
+            set => *_counter = value;
         }
 
-        /// <summary>
-        /// The constructor
-        /// </summary>
-        /// <param name="allocator">What type of allocator to use</param>
         public NativeCounter(Allocator allocator)
         {
             _allocator = allocator;
@@ -59,9 +45,6 @@ namespace Eldemarkki.VoxelTerrain.Meshing
             return Interlocked.Add(ref *_counter, increase) - increase;
         }
 
-        /// <summary>
-        /// Disposes the counter
-        /// </summary>
         public void Dispose()
         {
             UnsafeUtility.Free(_counter, _allocator);

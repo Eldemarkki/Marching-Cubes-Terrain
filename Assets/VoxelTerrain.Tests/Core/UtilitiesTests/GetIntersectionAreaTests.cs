@@ -13,10 +13,10 @@ namespace Eldemarkki.VoxelTerrain.Utilities.Intersection.Tests
 
             string message = $"Test failed with objects {a} and {b}. Expected {expected}";
 
-            BoundsInt intersection = IntersectionUtilities.GetIntersectionVolume(a, b);
+            BoundsInt intersection = IntersectionUtilities.CalculateIntersectionVolume(a, b);
             Assert.AreEqual(expected, intersection, "Regular: " + message);
 
-            BoundsInt intersectionSwapped = IntersectionUtilities.GetIntersectionVolume(b, a);
+            BoundsInt intersectionSwapped = IntersectionUtilities.CalculateIntersectionVolume(b, a);
             Assert.AreEqual(expected, intersectionSwapped, "Swapped: " + message);
         }
 

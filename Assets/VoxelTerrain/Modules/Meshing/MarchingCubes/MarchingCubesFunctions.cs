@@ -4,22 +4,17 @@ using Unity.Mathematics;
 
 namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
 {
-    /// <summary>
-    /// A collection of Marching Cubes -related functions
-    /// </summary>
     public static class MarchingCubesFunctions
     {
         /// <summary>
-        /// Multiply a byte by this constant, to convert it to a float in the range [0, 1]
+        /// Multiply a byte by this constant to convert it to a float in the range [0, 1]
         /// </summary>
         public const float ByteToFloat = 1f / byte.MaxValue;
 
         /// <summary>
         /// Calculates the cube index of a single voxel
         /// </summary>
-        /// <param name="voxelDensities">The densities of the voxel</param>
-        /// <param name="isolevel">The density level where a surface will be created. Densities below this will be inside the surface (solid),
-        /// and densities above this will be outside the surface (air)</param>
+        /// <param name="isolevel"><inheritdoc cref="MarchingCubesJob.Isolevel" path="/summary"/></param>
         /// <returns>The calculated cube index</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe byte CalculateCubeIndex(float* voxelDensities, float isolevel)
@@ -34,12 +29,10 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         }
 
         /// <summary>
-        /// Gets a single interpolated triangle in a voxel
+        /// Calculates a single interpolated triangle in a voxel
         /// </summary>
         /// <param name="indexInTriangleTable">The index of the triangle in <see cref="MarchingCubesLookupTables.TriangleTableWithLengths"/></param>
-        /// <param name="voxelLocalPosition">The position of the voxel</param>
-        /// <param name="isolevel">The density level where a surface will be created. Densities below this will be inside the surface (solid), and densities above this will be outside the surface (air)</param>
-        /// <param name="densities">The densities of the voxel</param>
+        /// <param name="isolevel"><inheritdoc cref="MarchingCubesJob.Isolevel" path="/summary"/></param>
         /// <returns>The points of the triangle</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static unsafe float3x3 GetTriangle(int indexInTriangleTable, int3 voxelLocalPosition, float isolevel, float* densities)
@@ -96,8 +89,7 @@ namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
         /// <param name="p2">The end corners of the 3 edges</param>
         /// <param name="v1">The densities on the start corners</param>
         /// <param name="v2">The densities on the end corners</param>
-        /// <param name="isolevel">The density level where a surface will be created. Densities below this will be inside the surface (solid),
-        /// and densities above this will be outside the surface (air)</param>
+        /// <param name="isolevel"><inheritdoc cref="MarchingCubesJob.Isolevel" path="/summary"/></param>
         /// <returns>The interpolated points of the new triangle</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float3x3 VertexInterpolateTriangle(int3x3 p1, int3x3 p2, float3 v1, float3 v2, float isolevel)

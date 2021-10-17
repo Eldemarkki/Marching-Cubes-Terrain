@@ -11,24 +11,10 @@ namespace Eldemarkki.VoxelTerrain.Meshing
     /// </summary>
     public interface IMesherJob
     {
-        /// <summary>
-        /// The voxel data to generate the mesh from
-        /// </summary>
         VoxelDataVolume<byte> VoxelData { get; set; }
-
-        /// <summary>
-        /// The voxel colors used to color the triangles
-        /// </summary>
         VoxelDataVolume<Color32> VoxelColors { get; set; }
 
-        /// <summary>
-        /// The generated vertices
-        /// </summary>
         NativeList<MeshingVertexData> OutputVertices { get; set; }
-
-        /// <summary>
-        /// The generated triangles
-        /// </summary>
         NativeList<ushort> OutputTriangles { get; set; }
     }
 

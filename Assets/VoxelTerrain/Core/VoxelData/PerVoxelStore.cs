@@ -15,7 +15,6 @@ namespace Eldemarkki.VoxelTerrain.World
     /// <summary>
     /// A store that contains a single variable of type <typeparamref name="T"/> for each voxel data point in a chunk
     /// </summary>
-    /// <typeparam name="T">The type of variable to associate with each voxel data point</typeparam>
     public abstract class PerVoxelStore<T> : PerChunkStore<VoxelDataVolume<T>>, IDisposable where T : struct
     {
         /// <summary>
@@ -32,11 +31,9 @@ namespace Eldemarkki.VoxelTerrain.World
         /// <summary>
         /// Set's the data value of the voxel data point at <paramref name="dataWorldPosition"/> to <paramref name="dataValue"/>
         /// </summary>
-        /// <param name="dataWorldPosition">The world position of the data point</param>
-        /// <param name="dataValue">The new data value of the data point</param>
         public void SetData(int3 dataWorldPosition, T dataValue)
         {
-            int3[] affectedChunkCoordinates = CoordinateUtilities.GetChunkCoordinatesContainingPoint(dataWorldPosition, VoxelWorld.WorldSettings.ChunkSize);
+            int3[] affectedChunkCoordinates = CoordinateUtilities.CalculateChunkCoordinatesContainingPoint(dataWorldPosition, VoxelWorld.WorldSettings.ChunkSize);
 
             for (int i = 0; i < affectedChunkCoordinates.Length; i++)
             {
@@ -56,11 +53,9 @@ namespace Eldemarkki.VoxelTerrain.World
         }
 
         /// <summary>
-        /// Tries to get the voxel data array for one chunk with a persistent allocator. If a chunk doesn't exist there, false will be returned and <paramref name="chunk"/> will be set to null. If a chunk exists there, true will be returned and <paramref name="chunk"/> will be set to the chunk. If the data for that chunk is currently being calculated, the job will complete and the new data will be set to <paramref name="chunk"/>
+        /// Tries to get the voxel data array for one chunk. If a chunk doesn't exist there, false will be returned and <paramref name="chunk"/> will be set to null. If a chunk exists there, true will be returned and <paramref name="chunk"/> will be set to the chunk. If the data for that chunk is currently being calculated, the job will complete and the new data will be set to <paramref name="chunk"/>
         /// </summary>
-        /// <param name="chunkCoordinate">The coordinate of the chunk whose voxel data should be gotten</param>
-        /// <param name="chunk">The voxel data of a chunk at the coordinate</param>
-        /// <returns>Does a chunk exists at that coordinate</returns>
+        /// <returns>Does a chunk exist at that coordinate</returns>
         public override bool TryGetDataChunk(int3 chunkCoordinate, out VoxelDataVolume<T> chunk)
         {
             ApplyChunkChanges(chunkCoordinate);
@@ -70,7 +65,6 @@ namespace Eldemarkki.VoxelTerrain.World
         /// <summary>
         /// If the chunk coordinate has an ongoing voxel data generation job, it will get completed and it's result will be applied to the chunk
         /// </summary>
-        /// <param name="chunkCoordinate">The coordinate of the chunk to apply changes for</param>
         public void ApplyChunkChanges(int3 chunkCoordinate)
         {
             if (_generationJobHandles.TryGetValue(chunkCoordinate, out JobHandleWithData<IVoxelDataGenerationJob<T>> jobHandle))
@@ -82,20 +76,17 @@ namespace Eldemarkki.VoxelTerrain.World
         }
 
         /// <summary>
-        /// Tries to get the voxel data array for one chunk with a persistent allocator. If a chunk doesn't exist there, false will be returned and <paramref name="chunk"/> will be set to null. If a chunk exists there, true will be returned and <paramref name="chunk"/> will be set to the chunk. If the data for that chunk is currently being calculated, the job will NOT be completed.
-        /// <param name="chunkCoordinate">The coordinate of the chunk whose voxel data should be gotten</param>
-        /// <param name="chunk">The voxel data of a chunk at the coordinate</param>
-        /// <returns>Does a chunk exists at that coordinate</returns>
+        /// Tries to get the voxel data array for one chunk. If a chunk doesn't exist there, false will be returned and <paramref name="chunk"/> will be set to null. If a chunk exists there, true will be returned and <paramref name="chunk"/> will be set to the chunk. If the data for that chunk is currently being calculated, the job will NOT be completed.
+        /// </summary>
+        /// <returns>Does a chunk exist at that coordinate</returns>
         public bool TryGetDataChunkWithoutApplyingChanges(int3 chunkCoordinate, out VoxelDataVolume<T> chunk)
         {
             return _chunks.TryGetValue(chunkCoordinate, out chunk);
         }
 
         /// <summary>
-        /// Tries to get the voxel data array for one chunk with a persistent allocator. If a chunk doesn't exist there, false will be returned and <paramref name="chunk"/> will be set to null. If a chunk exists there, true will be returned and <paramref name="chunk"/> will be set to the chunk. This also checks the chunk generation queue, so a chunk that is currently being generated may also be returned.
-        /// <param name="chunkCoordinate">The coordinate of the chunk whose voxel data should be gotten</param>
-        /// <param name="chunk">The voxel data of a chunk at the coordinate</param>
-        /// <returns>Does a chunk exists at that coordinate</returns>
+        /// Tries to get the voxel data array for one chunk. If a chunk doesn't exist there, false will be returned and <paramref name="chunk"/> will be set to null. If a chunk exists there, true will be returned and <paramref name="chunk"/> will be set to the chunk. This also checks the chunk generation queue, so a chunk that is currently being generated may also be returned.
+        /// <returns>Does a chunk exist at that coordinate</returns>
         public bool TryGetDataChunkWithoutApplyingChangesIncludeQueue(int3 chunkCoordinate, out VoxelDataVolume<T> chunk)
         {
             if (TryGetDataChunkWithoutApplyingChanges(chunkCoordinate, out chunk))
@@ -116,8 +107,7 @@ namespace Eldemarkki.VoxelTerrain.World
         /// Gets all the coordinates of the chunks that already exist or are currently being generated, where the Chebyshev distance from <paramref name="coordinate"/> to the chunk's coordinate is more than <paramref name="range"/>
         /// </summary>
         /// <param name="coordinate">The central coordinate where the distances should be measured from</param>
-        /// <param name="range">The maximum allowed manhattan distance</param>
-        /// <returns></returns>
+        /// <param name="range">The maximum allowed Chebyshev distance</param>
         public override List<int3> GetChunkCoordinatesOutsideOfRange(int3 coordinate, int range)
         {
             List<int3> result = base.GetChunkCoordinatesOutsideOfRange(coordinate, range);
@@ -136,9 +126,8 @@ namespace Eldemarkki.VoxelTerrain.World
         }
 
         /// <summary>
-        /// Checks if a chunk exists or is currently being generated at the coordinate <paramref name="chunkCoordinate"/>
+        /// Checks if a chunk exists or is currently being generated at <paramref name="chunkCoordinate"/>
         /// </summary>
-        /// <param name="chunkCoordinate">The coordinate to check for</param>
         /// <returns>Returns true if a chunk exists or is currently being generated at <paramref name="chunkCoordinate"/>, otherwise returns false</returns>
         public override bool DoesChunkExistAtCoordinate(int3 chunkCoordinate)
         {
@@ -181,8 +170,6 @@ namespace Eldemarkki.VoxelTerrain.World
         /// <summary>
         /// Sets the chunk data of the chunk at <paramref name="chunkCoordinate"/> without checking if data already exists at <paramref name="chunkCoordinate"/>
         /// </summary>
-        /// <param name="chunkCoordinate">The coordinate of the chunk</param>
-        /// <param name="newData">The data to set the chunk's data to</param>
         /// <param name="dataExistsAtCoordinate">Does data already exist at <paramref name="chunkCoordinate"/></param>
         public virtual void SetDataChunkUnchecked(int3 chunkCoordinate, VoxelDataVolume<T> newData, bool dataExistsAtCoordinate)
         {
@@ -225,15 +212,21 @@ namespace Eldemarkki.VoxelTerrain.World
         /// <param name="worldSpaceQuery">The query that determines whether or not a voxel data point is contained.</param>
         /// <param name="chunkCoordinate">The coordinate of <paramref name="dataChunk"/></param>
         /// <param name="dataChunk">The voxel datas of the chunk</param>
-        /// <param name="function">The function that will be performed on each voxel data point. The arguments are as follows: 1) The world space position of the voxel data point, 2) The chunk space position of the voxel data point, 3) The index of the voxel data point inside of <paramref name="dataChunk"/>, 4) The value of the voxel data</param>
+        /// <param name="function">The function that will be performed on each voxel data point. The arguments are as follows: 1) The world space position of the voxel data point, 2) The chunk space (local) position of the voxel data point, 3) The index of the voxel data point inside of <paramref name="dataChunk"/>, 4) The value of the voxel data</param>
+        /// <param name="getOriginalVoxelData">Should the original voxel datas be retrieved? i.e. Do you need them inside <paramref name="function"/>? If this is set to false, then the fourth parameter in <paramref name="function"/> will be set to <c>default(T)</c></param>
         public void ForEachVoxelDataInQueryInChunk(BoundsInt worldSpaceQuery, int3 chunkCoordinate, VoxelDataVolume<T> dataChunk, Action<int3, int3, int, T> function, bool getOriginalVoxelData = true)
         {
+            if (_generationJobHandles.ContainsKey(chunkCoordinate))
+            {
+                return;
+            }
+
             int3 chunkBoundsSize = VoxelWorld.WorldSettings.ChunkSize;
             int3 chunkWorldSpaceOrigin = chunkCoordinate * VoxelWorld.WorldSettings.ChunkSize;
 
             BoundsInt chunkWorldSpaceBounds = new BoundsInt(chunkWorldSpaceOrigin.ToVectorInt(), chunkBoundsSize.ToVectorInt());
 
-            BoundsInt intersectionVolume = IntersectionUtilities.GetIntersectionVolume(worldSpaceQuery, chunkWorldSpaceBounds);
+            BoundsInt intersectionVolume = IntersectionUtilities.CalculateIntersectionVolume(worldSpaceQuery, chunkWorldSpaceBounds);
             int3 intersectionVolumeMin = intersectionVolume.min.ToInt3();
             int3 intersectionVolumeMax = intersectionVolume.max.ToInt3();
 
@@ -296,10 +289,8 @@ namespace Eldemarkki.VoxelTerrain.World
         }
 
         /// <summary>
-        /// Tries to get the voxel data from <paramref name="worldPosition"/>. If the position is not loaded, false will be returned and <paramref name="voxelData"/> will be set to default(T) (Note that default(T) doesn't directly mean that the position is not loaded). If it is loaded, true will be returned and <paramref name="voxelData"/> will be set to the value at <paramref name="worldPosition"/>.
+        /// Tries to get the voxel data at <paramref name="worldPosition"/>. If the position is not loaded, false will be returned and <paramref name="voxelData"/> will be set to <c>default(T)</c> (Note that <c>default(T)</c> doesn't always mean that the position is not loaded). If it is loaded, true will be returned and <paramref name="voxelData"/> will be set to the value at <paramref name="worldPosition"/>.
         /// </summary>
-        /// <param name="worldPosition">The world position to get the voxel data from</param>
-        /// <param name="voxelData">The voxel data value at the world position</param>
         /// <returns>Does a voxel data point exist at that position</returns>
         public bool TryGetVoxelData(int3 worldPosition, out T voxelData)
         {
@@ -324,7 +315,7 @@ namespace Eldemarkki.VoxelTerrain.World
         /// <returns>The voxel data array inside the bounds</returns>
         public VoxelDataVolume<T> GetVoxelDataCustom(BoundsInt worldSpaceQuery, Allocator allocator)
         {
-            VoxelDataVolume<T> voxelDataArray = new VoxelDataVolume<T>(worldSpaceQuery.CalculateVolume(), allocator);
+            VoxelDataVolume<T> voxelDataArray = new VoxelDataVolume<T>(worldSpaceQuery.CalculateBoundsVolume(), allocator);
 
             ForEachVoxelDataArrayInQuery(worldSpaceQuery, (chunkCoordinate, voxelDataChunk) =>
             {
@@ -344,7 +335,7 @@ namespace Eldemarkki.VoxelTerrain.World
         /// <param name="originPosition">The world position of the origin where the voxel data should be set</param>
         public void SetVoxelDataCustom(VoxelDataVolume<T> voxelDataArray, int3 originPosition)
         {
-            BoundsInt worldSpaceQuery = new BoundsInt(originPosition.ToVectorInt(), (voxelDataArray.Size - new int3(1, 1, 1)).ToVectorInt());
+            BoundsInt worldSpaceQuery = new BoundsInt(originPosition.ToVectorInt(), (voxelDataArray.Size - 1).ToVectorInt());
             SetVoxelDataCustom(worldSpaceQuery, (voxelDataWorldPosition, voxelData) => voxelDataArray[voxelDataWorldPosition - originPosition], false);
         }
 
@@ -353,14 +344,15 @@ namespace Eldemarkki.VoxelTerrain.World
         /// </summary>
         /// <param name="worldSpaceQuery">The volume where the voxel datas should be set to</param>
         /// <param name="setVoxelDataFunction">The function that calculates what the voxel data should be set to at the specific location. The first argument is the world space position of the voxel data, and the second argument is the current voxel data. The return value is what the new voxel data should be set to.</param>
-        public void SetVoxelDataCustom(BoundsInt worldSpaceQuery, Func<int3, T, T> setVoxelDataFunction, bool getOriginalData = true)
+        /// <param name="getOriginalVoxelData">Should the original voxel datas be retrieved? i.e. Do you need them inside <paramref name="setVoxelDataFunction"/>? If this is set to false, then the second parameter of <paramref name="setVoxelDataFunction"/> will be set to <c>default(T)</c></param>
+        public void SetVoxelDataCustom(BoundsInt worldSpaceQuery, Func<int3, T, T> setVoxelDataFunction, bool getOriginalVoxelData = true)
         {
             ForEachVoxelDataArrayInQuery(worldSpaceQuery, (chunkCoordinate, voxelDataChunk) =>
             {
                 ForEachVoxelDataInQueryInChunk(worldSpaceQuery, chunkCoordinate, voxelDataChunk, (voxelDataWorldPosition, voxelDataLocalPosition, voxelDataIndex, voxelData) =>
                 {
                     voxelDataChunk[voxelDataIndex] = setVoxelDataFunction(voxelDataWorldPosition, voxelData);
-                }, getOriginalData);
+                }, getOriginalVoxelData);
 
                 if (VoxelWorld.ChunkStore.TryGetDataChunk(chunkCoordinate, out ChunkProperties chunkProperties))
                 {

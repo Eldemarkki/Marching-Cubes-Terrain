@@ -12,12 +12,9 @@ namespace Eldemarkki.VoxelTerrain.World.Chunks
 {
     public class ChunkUpdater : MonoBehaviour
     {
-        private readonly HashSet<ChunkProperties> chunksNeedingUpdate = new HashSet<ChunkProperties>();
-
-        /// <summary>
-        /// The world for which to provide chunks for
-        /// </summary>
         public VoxelWorld VoxelWorld { get; set; }
+
+        private readonly HashSet<ChunkProperties> chunksNeedingUpdate = new HashSet<ChunkProperties>();
 
         private void Update()
         {

@@ -7,12 +7,10 @@ namespace Eldemarkki.VoxelTerrain.Utilities
     public static class CoordinateUtilities
     {
         /// <summary>
-        /// Gets a collection of chunks that contain a world position. For a chunk to contain a position, the position has to be inside of the chunk or on the chunk's edge
+        /// Calculates a list of chunk coordinates that contain <paramref name="worldPosition"/>. For a chunk to contain <paramref name="worldPosition"/>, the position has to be inside of the chunk or on the chunk's edge
         /// </summary>
-        /// <param name="worldPosition">The world position to check</param>
-        /// <param name="chunkSize">The size of the chunks</param>
-        /// <returns>A collection of chunk coordinates that contain the world position</returns>
-        public static int3[] GetChunkCoordinatesContainingPoint(int3 worldPosition, int3 chunkSize)
+        /// <returns>An array of chunk coordinates that contain <paramref name="worldPosition"/></returns>
+        public static int3[] CalculateChunkCoordinatesContainingPoint(int3 worldPosition, int3 chunkSize)
         {
             int3 localPosition = VectorUtilities.Mod(worldPosition, chunkSize);
 
@@ -42,58 +40,11 @@ namespace Eldemarkki.VoxelTerrain.Utilities
         }
 
         /// <summary>
-        /// Gets the coordinates of the chunks whose voxel data should be generated. The coordinates are in a cubical shape, with the inside of the cube being empty; generates the coordinates of the outer part of the cube
-        /// </summary>
-        /// <param name="centerCoordinate">The central coordinate</param>
-        /// <param name="innerSize">The size of the inner cube</param>
-        /// <param name="outerSize">The thickness between the outer cube and the inner cube; Think of this as the thickness of the imaginary outline</param>
-        /// <returns>The coordinates for the outer parts of the cube</returns>
-        public static int3[] GetPreloadCoordinates(int3 centerCoordinate, int innerSize, int outerSize)
-        {
-            int3 min = -new int3(innerSize + outerSize);
-            int3 max = new int3(innerSize + outerSize);
-
-            int3 innerMin = -new int3(innerSize);
-            int3 innerMax = new int3(innerSize);
-
-            int3 fullSize = max - min + 1;
-            int fullVolume = fullSize.x * fullSize.y * fullSize.z;
-
-            int3 innerDimensions = innerMax - innerMin + 1;
-            int innerVolume = innerDimensions.x * innerDimensions.y * innerDimensions.z;
-
-            int3[] result = new int3[fullVolume - innerVolume];
-
-            int index = 0;
-            for (int x = min.x; x <= max.x; x++)
-            {
-                for (int y = min.y; y <= max.y; y++)
-                {
-                    for (int z = min.z; z <= max.z; z++)
-                    {
-                        if (innerMin.x <= x && x <= innerMax.x &&
-                            innerMin.y <= y && y <= innerMax.y &&
-                            innerMin.z <= z && z <= innerMax.z)
-                        {
-                            continue;
-                        }
-
-                        result[index] = new int3(x, y, z) + centerCoordinate;
-                        index++;
-                    }
-                }
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Calculates the chunk coordinates that should be present when the viewer is in <paramref name="centerChunkCoordinate"/>.
+        /// Calculates the chunk coordinates that should be visible when the viewer is in <paramref name="centerChunkCoordinate"/>.
         /// </summary>
         /// <param name="centerChunkCoordinate">The chunk coordinate to generate the coordinates around</param>
         /// <param name="renderDistance">The radius the chunks the player sees</param>
-        /// <returns>A collection of coordinates that should be generated</returns>
-        public static int3[] GetChunkGenerationCoordinates(int3 centerChunkCoordinate, int renderDistance)
+        public static int3[] CalculateChunkGenerationCoordinates(int3 centerChunkCoordinate, int renderDistance)
         {
             int3[] coordinates = new int3[(int)math.pow(renderDistance * 2 + 1, 3)];
             int i = 0;
@@ -114,12 +65,12 @@ namespace Eldemarkki.VoxelTerrain.Utilities
         }
 
         /// <summary>
-        /// Gets the list of new coordinates that should be generated when the player moved from <paramref name="oldChunks"/> to <paramref name="newChunks"/>; Every coordinate in <paramref name="newChunks"/> that is not in <paramref name="oldChunks"/>
+        /// Calculates the list of new coordinates that should be generated when the player moved from <paramref name="oldChunks"/> to <paramref name="newChunks"/>, i.e. every coordinate in <paramref name="newChunks"/> that is not in <paramref name="oldChunks"/>
         /// </summary>
         /// <param name="oldChunks">The old rendering bounds of the chunks the player saw</param>
         /// <param name="newChunks">The new rendering bounds of the chunks the player sees</param>
         /// <returns>Returns the new coordinates that need chunks</returns>
-        public static int3[] GetCoordinatesThatNeedChunks(BoundsInt oldChunks, BoundsInt newChunks)
+        public static int3[] CalculateCoordinatesThatNeedChunks(BoundsInt oldChunks, BoundsInt newChunks)
         {
             // Cache the min/max values because accessing them repeatedly in a loop is surprisingly costly
             int newChunksMinX = newChunks.xMin;
@@ -136,12 +87,12 @@ namespace Eldemarkki.VoxelTerrain.Utilities
             int oldChunksMinZ = oldChunks.zMin;
             int oldChunksMaxZ = oldChunks.zMax;
 
-            int count = newChunks.CalculateVolume();
+            int count = newChunks.CalculateBoundsVolume();
 
-            BoundsInt intersection = IntersectionUtilities.GetIntersectionVolume(oldChunks, newChunks);
+            BoundsInt intersection = IntersectionUtilities.CalculateIntersectionVolume(oldChunks, newChunks);
             if (math.all(intersection.size.ToInt3() > 0))
             {
-                count -= intersection.CalculateVolume();
+                count -= intersection.CalculateBoundsVolume();
             }
 
             int3[] coordinates = new int3[count];
@@ -169,12 +120,15 @@ namespace Eldemarkki.VoxelTerrain.Utilities
             return coordinates;
         }
 
-        public static int3[] GetChunkCoordinatesInsideWorldSpaceBounds(BoundsInt worldSpaceBounds, int3 chunkSize)
+        /// <summary>
+        /// Calculates the coordinates of all chunks which touch <paramref name="worldSpaceBounds"/>
+        /// </summary>
+        public static int3[] CalculateChunkCoordinatesInsideWorldSpaceBounds(BoundsInt worldSpaceBounds, int3 chunkSize)
         {
             int3 minCoordinate = VectorUtilities.WorldPositionToCoordinate(worldSpaceBounds.min - Vector3Int.one, chunkSize);
             int3 maxCoordinate = VectorUtilities.WorldPositionToCoordinate(worldSpaceBounds.max, chunkSize);
 
-            int chunkCount = ChunkCountInsideCoordinates(minCoordinate, maxCoordinate);
+            int chunkCount = CalculateChunkCountInsideCoordinates(minCoordinate, maxCoordinate);
             int3[] chunkCoordinates = new int3[chunkCount];
 
             int i = 0;
@@ -193,7 +147,10 @@ namespace Eldemarkki.VoxelTerrain.Utilities
             return chunkCoordinates;
         }
 
-        public static int ChunkCountInsideCoordinates(int3 a, int3 b)
+        /// <summary>
+        /// Calculates how many points there would be in the bounds between a and b, where a and b are the min/max positions of the imaginary bounds
+        /// </summary>
+        public static int CalculateChunkCountInsideCoordinates(int3 a, int3 b)
         {
             int3 diff = b - a + 1;
             return diff.x * diff.y * diff.z;

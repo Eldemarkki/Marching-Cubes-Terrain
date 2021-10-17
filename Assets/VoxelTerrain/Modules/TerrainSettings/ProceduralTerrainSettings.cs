@@ -3,9 +3,6 @@ using UnityEngine;
 
 namespace Eldemarkki.VoxelTerrain.Settings
 {
-    /// <summary>
-    /// The procedural terrain generation settings
-    /// </summary>
     [Serializable]
     public struct ProceduralTerrainSettings
     {
@@ -49,14 +46,11 @@ namespace Eldemarkki.VoxelTerrain.Settings
         /// </summary>
         public int NoiseSeed { get => noiseSeed; set => noiseSeed = value; }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="noiseFrequency">The frequency of the noise</param>
-        /// <param name="noiseOctaveCount">How many octaves the noise will have</param>
-        /// <param name="amplitude">The height multiplier</param>
-        /// <param name="heightOffset">Moves the height up and down</param>
-        /// <param name="noiseSeed">The seed that the noise function will be initialized with</param>
+        /// <param name="noiseFrequency"><inheritdoc cref="noiseFrequency" path="/summary"/></param>
+        /// <param name="noiseOctaveCount"><inheritdoc cref="noiseOctaveCount" path="/summary"/></param>
+        /// <param name="amplitude"><inheritdoc cref="amplitude" path="/summary"/></param>
+        /// <param name="heightOffset"><inheritdoc cref="heightOffset" path="/summary"/></param>
+        /// <param name="noiseSeed"><inheritdoc cref="noiseSeed" path="/summary"/></param>
         public ProceduralTerrainSettings(float noiseFrequency, int noiseOctaveCount, float amplitude, float heightOffset, int noiseSeed)
         {
             this.noiseFrequency = noiseFrequency;

@@ -8,19 +8,9 @@ using UnityEngine;
 
 namespace Eldemarkki.VoxelTerrain.World
 {
-    /// <summary>
-    /// A procedurally generated world
-    /// </summary>
     public class ProceduralWorldGenerator : MonoBehaviour
     {
-        /// <summary>
-        /// The voxel world that "owns" this world generator
-        /// </summary>
         [SerializeField] private VoxelWorld voxelWorld;
-
-        /// <summary>
-        /// A chunk provider which provides chunks with procedurally generated data
-        /// </summary>
         [SerializeField] private AsynchronousChunkProvider chunkProvider;
 
         /// <summary>
@@ -28,9 +18,6 @@ namespace Eldemarkki.VoxelTerrain.World
         /// </summary>
         [SerializeField] private int renderDistance = 5;
 
-        /// <summary>
-        /// The coordinate of the chunk where terrain was last generated around
-        /// </summary>
         private int3 _lastGenerationCoordinate;
 
         private void Start()
@@ -56,10 +43,6 @@ namespace Eldemarkki.VoxelTerrain.World
             }
         }
 
-        /// <summary>
-        /// Get's the current coordinate of <see cref="player"/>
-        /// </summary>
-        /// <returns>The coordinate of <see cref="player"/></returns>
         private int3 GetPlayerCoordinate()
         {
             return VectorUtilities.WorldPositionToCoordinate(voxelWorld.Player.position, voxelWorld.WorldSettings.ChunkSize);
@@ -72,7 +55,7 @@ namespace Eldemarkki.VoxelTerrain.World
         private void GenerateTerrainAroundCoordinate(int3 coordinate)
         {
             // Generate chunks with radius 'renderDistance'
-            int3[] chunkGenerationCoordinates = CoordinateUtilities.GetChunkGenerationCoordinates(coordinate, renderDistance);
+            int3[] chunkGenerationCoordinates = CoordinateUtilities.CalculateChunkGenerationCoordinates(coordinate, renderDistance);
             for (int i = 0; i < chunkGenerationCoordinates.Length; i++)
             {
                 int3 generationCoordinate = chunkGenerationCoordinates[i];

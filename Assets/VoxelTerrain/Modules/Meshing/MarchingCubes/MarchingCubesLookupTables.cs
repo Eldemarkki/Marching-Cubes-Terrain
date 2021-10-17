@@ -1,8 +1,5 @@
 ﻿namespace Eldemarkki.VoxelTerrain.Meshing.MarchingCubes
 {
-    /// <summary>
-    /// A collection of lookup tables needed for the marching cubes algorithm
-    /// </summary>
     public static class MarchingCubesLookupTables
     {
         /// <summary>

@@ -7,9 +7,6 @@ using UnityEngine;
 
 namespace Eldemarkki.VoxelTerrain.Chunks
 {
-    /// <summary>
-    /// Provider for asynchronically generated chunks
-    /// </summary>
     public class AsynchronousChunkProvider : ChunkProvider
     {
         /// <summary>
@@ -81,9 +78,8 @@ namespace Eldemarkki.VoxelTerrain.Chunks
         }
 
         /// <summary>
-        /// Ensures that a chunk exists at a coordinate, if there is not, a new chunk is instantiated there, and its will eventually be generated
+        /// Ensures that a chunk exists at a coordinate, if there is not, a new chunk is instantiated there, and it is added to the generation queue
         /// </summary>
-        /// <param name="chunkCoordinate">The chunk's coordinate</param>
         public override ChunkProperties EnsureChunkExistsAtCoordinate(int3 chunkCoordinate)
         {
             if (VoxelWorld.ChunkStore.TryGetDataChunk(chunkCoordinate, out ChunkProperties chunk))
@@ -99,7 +95,6 @@ namespace Eldemarkki.VoxelTerrain.Chunks
         /// <summary>
         /// Adds the coordinate <paramref name="chunkCoordinate"/> to the list of chunks that will eventually have to be generated
         /// </summary>
-        /// <param name="chunkCoordinate"></param>
         public void AddChunkToGenerationQueue(int3 chunkCoordinate)
         {
             _generationQueue.Enqueue(chunkCoordinate);

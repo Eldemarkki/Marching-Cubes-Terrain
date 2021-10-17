@@ -7,71 +7,34 @@ using UnityEngine;
 
 namespace Eldemarkki.VoxelTerrain.Player
 {
-    /// <summary>
-    /// The terrain deformer which modifies the terrain
-    /// </summary>
     public class TerrainDeformer : MonoBehaviour
     {
-        /// <summary>
-        /// The voxel data store that will be deformed
-        /// </summary>
         [Header("Terrain Deforming Settings")]
         [SerializeField] private VoxelWorld voxelWorld;
 
-        /// <summary>
-        /// Does the left mouse button add or remove terrain
-        /// </summary>
         [SerializeField] private bool leftClickAddsTerrain = true;
 
-        /// <summary>
-        /// How fast the terrain is deformed
-        /// </summary>
         [Range(0, 1)]
         [SerializeField] private float deformSpeed = 0.05f;
 
-        /// <summary>
-        /// The radius of the deformation sphere
-        /// </summary>
         [SerializeField] private float deformRadius = 5f;
 
-        /// <summary>
-        /// How far away points the player can deform
-        /// </summary>
         [SerializeField] private float maxReachDistance = math.INFINITY;
 
         [SerializeField] private Transform hitIndicator;
 
-        /// <summary>
-        /// Which key must be held down to flatten the terrain
-        /// </summary>
         [Header("Flattening")]
         [SerializeField] private KeyCode flatteningKey = KeyCode.LeftControl;
 
-        /// <summary>
-        /// The color that the terrain will be painted with
-        /// </summary>
         [Header("Material Painting")]
         [SerializeField] private Color32 paintColor;
 
-        /// <summary>
-        /// The game object that the deformation raycast will be cast from
-        /// </summary>
         [Header("Player Settings")]
         [SerializeField] private Transform playerCamera;
 
-        /// <summary>
-        /// Is the terrain currently being flattened
-        /// </summary>
         private bool _isFlattening;
 
-        /// <summary>
-        /// The point where the flattening started
-        /// </summary>
         private float3 _flatteningOrigin;
-
-        /// <summary>
-        /// The normal of the flattening plane
-        /// </summary>
         private float3 _flatteningNormal;
 
         private void Awake()
@@ -135,7 +98,7 @@ namespace Eldemarkki.VoxelTerrain.Player
         }
 
         /// <summary>
-        /// Deforms the terrain in a spherical region around the point
+        /// Deforms the terrain in a spherical region around <paramref name="point"/>
         /// </summary>
         /// <param name="point">The point to modify the terrain around</param>
         /// <param name="addTerrain">Should terrain be added or removed</param>

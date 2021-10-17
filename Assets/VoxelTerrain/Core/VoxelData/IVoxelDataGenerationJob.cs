@@ -3,9 +3,6 @@ using Unity.Mathematics;
 
 namespace Eldemarkki.VoxelTerrain.VoxelData
 {
-    /// <summary>
-    /// An interface for voxel data generation jobs
-    /// </summary>
     public interface IVoxelDataGenerationJob<T> : IJob where T : struct
     {
         /// <summary>
@@ -13,9 +10,6 @@ namespace Eldemarkki.VoxelTerrain.VoxelData
         /// </summary>
         int3 WorldPositionOffset { get; set; }
 
-        /// <summary>
-        /// The generated voxel data
-        /// </summary>
         VoxelDataVolume<T> OutputVoxelData { get; set; }
     }
 }

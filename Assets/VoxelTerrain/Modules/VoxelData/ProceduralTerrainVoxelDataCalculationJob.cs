@@ -5,28 +5,17 @@ using Unity.Mathematics;
 
 namespace Eldemarkki.VoxelTerrain.VoxelData
 {
-    /// <summary>
-    /// A procedural terrain voxel data calculation job
-    /// </summary>
     [BurstCompile]
     public struct ProceduralTerrainVoxelDataCalculationJob : IVoxelDataGenerationJob<byte>
     {
-        /// <summary>
-        /// The procedural terrain generation settings
-        /// </summary>
         public ProceduralTerrainSettings ProceduralTerrainSettings { get; set; }
 
         /// <inheritdoc/>
         public int3 WorldPositionOffset { get; set; }
 
         private VoxelDataVolume<byte> _outputVoxelData;
-
-        /// <inheritdoc/>
         public VoxelDataVolume<byte> OutputVoxelData { get => _outputVoxelData; set => _outputVoxelData = value; }
 
-        /// <summary>
-        /// The execute method required for Unity's IJobParallelFor job type
-        /// </summary>
         public void Execute()
         {
             float actualHeightOffset = WorldPositionOffset.y - ProceduralTerrainSettings.HeightOffset;

@@ -12,7 +12,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities.Tests
             int3 worldPosition = new int3(0, 0, 0);
             int chunkSize = 16;
 
-            IEnumerable<int3> coordinates = CoordinateUtilities.GetChunkCoordinatesContainingPoint(worldPosition, chunkSize);
+            IEnumerable<int3> coordinates = CoordinateUtilities.CalculateChunkCoordinatesContainingPoint(worldPosition, chunkSize);
 
             IEnumerable<int3> expectedCoordinates = new List<int3>
             {
@@ -35,7 +35,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities.Tests
             int3 worldPosition = new int3(16, 0, 16);
             int chunkSize = 16;
 
-            IEnumerable<int3> coordinates = CoordinateUtilities.GetChunkCoordinatesContainingPoint(worldPosition, chunkSize);
+            IEnumerable<int3> coordinates = CoordinateUtilities.CalculateChunkCoordinatesContainingPoint(worldPosition, chunkSize);
 
             IEnumerable<int3> expectedCoordinates = new List<int3>
             {
@@ -58,7 +58,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities.Tests
             int3 worldPosition = new int3(16, 1, 16);
             int chunkSize = 16;
 
-            IEnumerable<int3> coordinates = CoordinateUtilities.GetChunkCoordinatesContainingPoint(worldPosition, chunkSize);
+            IEnumerable<int3> coordinates = CoordinateUtilities.CalculateChunkCoordinatesContainingPoint(worldPosition, chunkSize);
 
             IEnumerable<int3> expectedCoordinates = new List<int3>
             {
@@ -77,7 +77,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities.Tests
             int3 worldPosition = new int3(5, 3, 16);
             int chunkSize = 16;
 
-            IEnumerable<int3> coordinates = CoordinateUtilities.GetChunkCoordinatesContainingPoint(worldPosition, chunkSize);
+            IEnumerable<int3> coordinates = CoordinateUtilities.CalculateChunkCoordinatesContainingPoint(worldPosition, chunkSize);
 
             IEnumerable<int3> expectedCoordinates = new List<int3>
             {
@@ -94,7 +94,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities.Tests
             int3 worldPosition = new int3(-48, -32, -16);
             int chunkSize = 16;
 
-            IEnumerable<int3> coordinates = CoordinateUtilities.GetChunkCoordinatesContainingPoint(worldPosition, chunkSize);
+            IEnumerable<int3> coordinates = CoordinateUtilities.CalculateChunkCoordinatesContainingPoint(worldPosition, chunkSize);
 
             IEnumerable<int3> expectedCoordinates = new List<int3>
             {
@@ -117,7 +117,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities.Tests
             int3 worldPosition = new int3(0, 5, 5);
             int chunkSize = 16;
 
-            IEnumerable<int3> coordinates = CoordinateUtilities.GetChunkCoordinatesContainingPoint(worldPosition, chunkSize);
+            IEnumerable<int3> coordinates = CoordinateUtilities.CalculateChunkCoordinatesContainingPoint(worldPosition, chunkSize);
 
             IEnumerable<int3> expectedCoordinates = new List<int3>
             {
@@ -134,7 +134,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities.Tests
             int3 worldPosition = new int3(5, 0, 5);
             int chunkSize = 16;
 
-            IEnumerable<int3> coordinates = CoordinateUtilities.GetChunkCoordinatesContainingPoint(worldPosition, chunkSize);
+            IEnumerable<int3> coordinates = CoordinateUtilities.CalculateChunkCoordinatesContainingPoint(worldPosition, chunkSize);
 
             IEnumerable<int3> expectedCoordinates = new List<int3>
             {
@@ -151,7 +151,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities.Tests
             int3 worldPosition = new int3(5, 5, 0);
             int chunkSize = 16;
 
-            IEnumerable<int3> coordinates = CoordinateUtilities.GetChunkCoordinatesContainingPoint(worldPosition, chunkSize);
+            IEnumerable<int3> coordinates = CoordinateUtilities.CalculateChunkCoordinatesContainingPoint(worldPosition, chunkSize);
 
             IEnumerable<int3> expectedCoordinates = new List<int3>
             {
@@ -168,7 +168,7 @@ namespace Eldemarkki.VoxelTerrain.Utilities.Tests
             int3 worldPosition = new int3(7, 7, 7);
             int chunkSize = 7;
 
-            IEnumerable<int3> coordinates = CoordinateUtilities.GetChunkCoordinatesContainingPoint(worldPosition, chunkSize);
+            IEnumerable<int3> coordinates = CoordinateUtilities.CalculateChunkCoordinatesContainingPoint(worldPosition, chunkSize);
 
             IEnumerable<int3> expectedCoordinates = new List<int3>
             {
