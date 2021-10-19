@@ -112,10 +112,8 @@ namespace Eldemarkki.VoxelTerrain.World
         {
             List<int3> result = base.GetChunkCoordinatesOutsideOfRange(coordinate, range);
 
-            int3[] generationJobHandleArray = _generationJobHandles.Keys.ToArray();
-            for (int i = 0; i < generationJobHandleArray.Length; i++)
+            foreach (int3 generationCoordinate in _generationJobHandles.Keys)
             {
-                int3 generationCoordinate = generationJobHandleArray[i];
                 if (DistanceUtilities.ChebyshevDistanceGreaterThan(coordinate, generationCoordinate, range))
                 {
                     result.Add(generationCoordinate);
