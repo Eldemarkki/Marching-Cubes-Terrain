@@ -1,9 +1,11 @@
 # Marching-Cubes-Terrain
+
+> [!IMPORTANT]  
+> This project is not developed anymore.
+
+https://github.com/user-attachments/assets/a9207fb3-568e-4f06-a31d-9454483f147d
+
 This is my implementation of the Marching Cubes algorithm using Unity.
-
-Demo video: https://www.youtube.com/watch?v=7GrKaSCoyvs
-
-Discord Server: https://discord.gg/tKhNq7sCYu
 
 ## Features
   - Unity Job System with the Burst Compiler
